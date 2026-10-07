@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calm Land — Atelier d'écriture</title>
+<style>
+:root{--bg:#14161d;--bg2:#1c1f29;--bg3:#262a37;--tx:#e6e2d8;--mut:#8c91a1;--acc:#7fa3b8;--warn:#d9a441;--bad:#d2605a;--ok:#78a58a;--line:#303546}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+h1,h2{font-family:Georgia,"Iowan Old Style",serif;font-weight:400;margin:0}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line)}
+header h1{font-size:22px}
+#saved{color:var(--mut);font-size:13px;margin-left:auto}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:10px 20px;border-bottom:1px solid var(--line)}
+nav button{background:none;border:0;color:var(--mut);padding:7px 12px;border-radius:6px;cursor:pointer;font:inherit}
+nav button.on{background:var(--bg3);color:var(--tx)}
+nav .badge{background:var(--bad);color:#fff;border-radius:9px;padding:0 6px;font-size:12px;margin-left:4px}
+main{padding:18px 20px;max-width:1200px}
+button,select,input,textarea{font:inherit;color:var(--tx);background:var(--bg3);border:1px solid var(--line);border-radius:6px;padding:6px 9px}
+button{cursor:pointer}button.pri{background:var(--acc);color:#10141a;border-color:var(--acc)}button.del{color:var(--bad)}
+textarea{width:100%;min-height:80px;resize:vertical}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center}
+table{width:100%;border-collapse:collapse}
+td,th{padding:8px 8px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+th{color:var(--mut);font-weight:400;font-size:13px}
+tr.row{cursor:pointer}tr.row:hover{background:var(--bg2)}
+.part td{background:var(--bg2);font-family:Georgia,serif;font-size:17px;padding:12px 8px}
+.chip{display:inline-block;border-radius:5px;padding:1px 7px;font-size:12px;margin:1px 3px 1px 0;background:var(--bg3);color:var(--mut)}
+.chip.g{color:var(--ok)}.chip.r{color:var(--acc)}.chip.f{color:var(--warn)}
+.who{font-weight:600}
+.cf{color:var(--bad);font-weight:700}
+.txt{max-width:480px}
+.kind{color:var(--mut);font-size:12px}
+.tl-row{display:grid;grid-template-columns:110px 1fr;gap:8px;margin-bottom:6px}
+.tl-name{padding-top:4px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl-track{position:relative;background:linear-gradient(90deg,#1a1d27 25%,#1e222d 25% 50%,#1a1d27 50% 75%,#1e222d 75%);border-radius:6px}
+.tl-bar{position:absolute;height:22px;border-radius:4px;font-size:11px;line-height:22px;padding:0 5px;overflow:hidden;white-space:nowrap;cursor:pointer;color:#10141a}
+.tl-bar.cf{outline:2px solid var(--bad)}
+.tl-head{display:grid;grid-template-columns:110px 1fr;gap:8px;margin-bottom:6px;color:var(--mut);font-size:13px}
+.tl-head div+div{display:grid;grid-template-columns:repeat(4,1fr)}
+.list-item{display:grid;grid-template-columns:1fr 2fr auto;gap:8px;margin-bottom:8px;align-items:start}
+.list-item.k{grid-template-columns:1fr auto}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:12px}
+.cflt{border-left:3px solid var(--bad);padding:6px 10px;margin-bottom:8px;background:var(--bg2)}
+.cflt.w{border-color:var(--warn)}
+dialog{background:var(--bg2);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:18px;width:min(720px,96vw);max-height:92vh;overflow:auto}
+dialog::backdrop{background:#000a}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+label{display:block;color:var(--mut);font-size:13px;margin:8px 0 3px}
+select[multiple]{width:100%;height:96px}
+#live{margin-top:10px}
+.vcrow{display:grid;grid-template-columns:1fr 70px 1fr auto;gap:6px;margin-bottom:6px}
+pre{background:var(--bg);border:1px solid var(--line);padding:10px;border-radius:6px;overflow:auto;max-height:260px;font-size:12px}
+.muted{color:var(--mut)}
+@media(max-width:640px){.g2,.g3,.list-item{grid-template-columns:1fr}.tl-row,.tl-head{grid-template-columns:70px 1fr}}
+:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+</style>
+</head>
+<body>
+<header><h1>Calm Land — Atelier d'écriture</h1><span id="saved"></span></header>
+<nav id="nav"></nav>
+<main id="main"></main>
+<dialog id="dlg"></dialog>
+
+<script>
+const KEY='calmland-writer-v1';
+const $=s=>document.querySelector(s);
+const uid=()=>Math.random().toString(36).slice(2,8);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pt=t=>{t=String(t).trim().replace(',','.');if(t.includes(':')){const[a,b]=t.split(':');return (+a)+(+b||0)/60}return +t||0};
+const ft=m=>{const s=Math.round(m*60);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+
+/* ---------- Données d'origine (Bible du jeu, 5 oct 2026) ---------- */
+function seed(){
+ const chars=[
+  ['aaron','Aaron','#7fa3b8','Le père, aimé de tout le village'],
+  ['loulou','Loulou','#d9a4b8','Sa fille (aussi appelée Aicha dans tes notes — prénom à trancher)'],
+  ['benjamin','Benjamin','#d9a441','Le kidnappeur, père de Noa (morte d\'un cancer)'],
+  ['thomas','Thomas','#c98f6a','Boulanger'],
+  ['michael','Michael','#78a58a','Jardinier, homme à tout faire'],
+  ['homer','Homer','#a79bd1','Concierge de l\'école'],
+  ['lilya','Lilya','#e08f8f','Pharmacienne'],
+  ['medecin','Le médecin','#9ec3c9','Hôpital'],
+  ['vieille','La vieille dame','#c9c39a','Couloir de l\'hôpital'],
+  ['techs','Les techniciens','#a0a4b0','Réparent le courant']
+ ].map(([id,name,color,note])=>({id,name,color,note}));
+ const locs=[['hopital','Hôpital'],['maison_aaron','Maison d\'Aaron'],['maison_benjamin','Maison de Benjamin'],['maison_michael','Maison de Michael'],['jardin_michael','Jardin et cabane de Michael'],['ecole','École'],['pharmacie','Pharmacie'],['boulangerie','Boulangerie'],['commissariat','Commissariat']].map(([id,name])=>({id,name}));
+ const know=[
+  ['k_diabetique','Le médecin dit que quelqu\'un au village est devenu diabétique'],
+  ['k_chiens','Les chiens de Michael aboient vers le bout de la rue, la nuit'],
+  ['k_cle','Benjamin a perdu une petite clé devant la pharmacie'],
+  ['k_soupirail','Le soupirail de la cave de Benjamin est bouché'],
+  ['k_thomas_michael','Thomas soupçonne Michael. Sa cabane est interdite'],
+  ['k_pain_homer','Benjamin apporte souvent du pain à Homer'],
+  ['k_35kg','Le nouveau diabétique demande des doses pour quelqu\'un de 35 kilos'],
+  ['k_vol_pain','Thomas accuse Michael de lui voler du pain'],
+  ['k_invendus','Benjamin distribue les invendus de Thomas, pas toujours frais'],
+  ['k_homer_malade','Homer était malade le jour de la disparition'],
+  ['k_insuline','Il y a de l\'insuline dans le frigo de Benjamin'],
+  ['k_pharma_orage','Benjamin quitte sa maison après l\'orage pour aller à la pharmacie'],
+  ['k_boue','Quelqu\'un passe devant l\'école après l\'orage'],
+  ['k_cadenas','Michael a posé un cadenas sur la cave de Benjamin']
+ ].map(([id,label])=>({id,label}));
+ const vars=[
+  ['boucle','number','1','Numéro de la boucle en cours'],
+  ['benjamin_visite_vue','boolean','false','Aaron a déjà vu Benjamin cette boucle'],
+  ['cle_ramassee','boolean','false','Aaron a ramassé la clé tombée devant la pharmacie'],
+  ['cle_rendue','boolean','false','Aaron a rendu la clé à Benjamin'],
+  ['entre_apres_benjamin','boolean','false','Aaron entre à la pharmacie juste après Benjamin']
+ ].map(([id,type,def,note])=>({id,type,def,note}));
+ const D=(kind,char,loc,place,s,e,text,o={})=>({id:uid(),kind,char,loc,place,s:pt(s),e:pt(e),text,req:o.req||[],forb:o.forb||[],give:o.give||[],vc:o.vc||[],lmin:o.lmin||'',lmax:o.lmax||'',prio:o.prio||0,note:o.note||''});
+ const dlg=[
+  D('dialogue','medecin','hopital','chambre','0:00','0:30','Bon, Aaron. On a vos analyses de sang… Vous êtes diabétique ? Ah non. Décidément, tout le monde devient diabétique ici ! Vous pouvez sortir.',{give:['k_diabetique']}),
+  D('dialogue','vieille','hopital','couloir','0:30','1:00','Vous avez une mine de fantôme, mon petit. Rentrez vite chez vous.',{lmax:1}),
+  D('dialogue','vieille','hopital','couloir','0:30','1:00','Aaron : « J\'ai déjà vécu ça… » — Ça arrive, vous savez. Quand un enfant aime très fort, son amour peut casser le temps pour retrouver celui qu\'il aime.',{lmin:2}),
+  D('dialogue','michael','maison_michael','devant chez lui','1:00','4:00','Ils aboient vers le bout de la rue toutes les nuits depuis une semaine. Ils sont pas idiots, mes chiens.',{give:['k_chiens']}),
+  D('dialogue','benjamin','maison_benjamin','','0:00','5:00','Aaron… Entre. J\'ai perdu ma fille, moi aussi. Noa. Je sais ce que tu vis. Si t\'as besoin de parler, je suis là.',{vc:[{v:'benjamin_visite_vue',op:'=',val:'false'}],note:'Première visite'}),
+  D('dialogue','benjamin','maison_benjamin','','0:00','5:00','Il est tard. Va dormir un peu, tu tiens plus debout.',{vc:[{v:'benjamin_visite_vue',op:'=',val:'true'}],note:'Visites suivantes'}),
+  D('event','benjamin','pharmacie','','6:00','6:15','Ouverture de la pharmacie : Benjamin entre le premier.'),
+  D('event','benjamin','pharmacie','devant','6:15','6:30','Benjamin sort et fait tomber une petite clé. Le vent l\'emporte au bout de quelques secondes.',{give:['k_cle'],note:'Carnet seulement si la clé est ramassée'}),
+  D('dialogue','lilya','pharmacie','','6:15','7:00','Vous êtes le deuxième aujourd\'hui ! Il y en a qui viennent vraiment tôt. Ah, et Benjamin a perdu une petite clé devant chez moi. Si vous la trouvez, rapportez-la-lui.',{vc:[{v:'entre_apres_benjamin',op:'=',val:'true'}]}),
+  D('dialogue','lilya','pharmacie','','7:00','8:00','Vous êtes le troisième.',{note:'Après Michael (7:00)'}),
+  D('dialogue','lilya','pharmacie','','8:00','9:00','Le quatrième.',{note:'Après Thomas (8:00)'}),
+  D('dialogue','lilya','pharmacie','','9:00','10:00','Le cinquième. Grosse matinée !',{note:'Après Homer (9:00)'}),
+  D('dialogue','benjamin','maison_benjamin','','7:00','10:00','Merci… tu me sauves la vie. T\'es un vrai ami.',{vc:[{v:'cle_rendue',op:'=',val:'true'}]}),
+  D('dialogue','benjamin','maison_benjamin','','7:00','10:00','T\'aurais pas vu une petite clé, par hasard ?',{vc:[{v:'cle_rendue',op:'=',val:'false'}],note:'Si Aaron l\'a gardée'}),
+  D('dialogue','michael','jardin_michael','','7:30','9:00','Ce village, je le connais par cœur. Chaque serrure, chaque ampoule. Tiens, chez Benjamin, le soupirail de la cave est bouché avec des planches. Bizarre.',{give:['k_soupirail'],note:'Il y a du vent'}),
+  D('dialogue','thomas','pharmacie','','8:00','8:30','Mon petit a de la fièvre, je file chercher un sirop.'),
+  D('dialogue','thomas','boulangerie','','8:30','10:00','Si tu veux mon avis, regarde du côté de Michael. Il me vole du pain, et personne a le droit d\'approcher de sa cabane.',{give:['k_thomas_michael']}),
+  D('dialogue','homer','ecole','devant l\'école','9:00','10:00','Benjamin, c\'est un mec en or. Il passe souvent me déposer du pain le matin, comme ça, pour rien.',{give:['k_pain_homer']}),
+  D('dialogue','lilya','pharmacie','','10:00','15:00','Mon nouveau diabétique m\'inquiète. Un grand gaillard comme lui, et il me demande des doses pour quelqu\'un de 35 kilos. Enfin, il doit se tromper.',{give:['k_35kg']}),
+  D('dialogue','thomas','maison_michael','devant chez Michael','10:30','12:00','Rends-moi mes pains, Michael. Je sais que c\'est toi.',{give:['k_vol_pain'],note:'Dispute'}),
+  D('dialogue','michael','maison_michael','devant chez lui','10:30','12:00','J\'ai rien pris. Dégage de chez moi.',{note:'Dispute'}),
+  D('dialogue','michael','maison_michael','','12:00','15:00','Il croit que je le vole. Ici, tout le monde croit des trucs sur moi.'),
+  D('dialogue','thomas','boulangerie','','12:00','15:00','Benjamin me prend souvent mes invendus, il les distribue aux voisins. Bon, des fois ils sont plus tout frais…',{give:['k_invendus']}),
+  D('dialogue','homer','ecole','loge','10:00','13:00','Si seulement j\'avais vu qui a pris votre fille… J\'étais malade comme un chien ce jour-là.',{give:['k_homer_malade']}),
+  D('dialogue','homer','ecole','loge','13:00','15:00','Ça s\'annonce pas bon. Il y a des orages qui arrivent ce soir.'),
+  D('dialogue','benjamin','maison_benjamin','cuisine','10:00','15:00','Reste au sec, je te fais un café. Moi, par ce temps, je mets pas un pied dehors.',{note:'Il s\'assoit dans son fauteuil, le frigo juste devant lui'}),
+  D('event','','maison_benjamin','','15:00','15:30','L\'orage : la foudre coupe le courant chez Benjamin.'),
+  D('dialogue','benjamin','maison_benjamin','dehors','15:30','17:00','Ça va prendre combien de temps ? J\'ai des choses au frais.',{note:'Dehors avec les techniciens'}),
+  D('event','','maison_benjamin','cuisine vide','15:30','17:00','Le frigo dégèle, l\'eau coule. Dedans : de la viande et de l\'insuline.',{give:['k_insuline']}),
+  D('dialogue','techs','maison_benjamin','sur le poteau','16:00','17:30','Le monsieur nous demande toutes les deux minutes quand le courant revient. Il tient à son frigo, lui.'),
+  D('event','','maison_benjamin','maison vide','17:30','19:00','Benjamin court à la pharmacie. Seule fenêtre pour pousser le frigo et ouvrir la trappe avec la clé (1 min 30).'),
+  D('dialogue','lilya','pharmacie','','17:45','19:00','Encore Benjamin, tout essoufflé. Il voulait de l\'insuline neuve, il dit que la sienne a chauffé.',{give:['k_pharma_orage']}),
+  D('dialogue','homer','ecole','devant l\'école','18:00','20:00','Tiens, quelqu\'un est passé devant l\'école tout à l\'heure. Il a laissé de la boue.',{give:['k_boue']}),
+  D('dialogue','michael','maison_michael','','18:00','20:00','Benjamin m\'a fait poser un cadenas sur sa cave. Soi-disant pour son vin.',{give:['k_cadenas']}),
+  D('dialogue','thomas','boulangerie','','18:00','20:00','Encore deux pains qui ont disparu. Je te le dis, c\'est Michael.'),
+  D('dialogue','benjamin','maison_benjamin','','19:00','20:00','Rentre chez toi, Aaron. Repose-toi. On cherchera demain.'),
+  ...['Faut que je la retrouve. C\'est ma faute.','J\'aurais dû être là.','Tiens bon, Loulou. J\'arrive.','Pourquoi personne a rien vu ?'].map(t=>D('monologue','aaron','','','0:00','20:00',t,{note:'Tout seul en marchant, n\'importe quand'})),
+  D('voix','loulou','','','20:00','20:00','Papa, papa, continue.',{note:'À chaque mort, toujours la même voix'})
+ ];
+ return {v:1,chars,locs,know,vars,dlg,loopLen:20,parts:[['Soir et nuit',0,5],['Matin, beau temps',5,10],['Pluie',10,15],['Soir et orage',15,20]].map(([name,s,e])=>({name,s,e}))};
+}
+
+/* ---------- État + sauvegarde auto ---------- */
+let S=null,tab='dlg',F={char:'',loc:'',part:'',q:'',cfonly:false};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));$('#saved').textContent='Enregistré à '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}catch(e){$('#saved').textContent='⚠ Sauvegarde navigateur impossible : exporte le JSON'}}
+async function init(){
+ try{const r=localStorage.getItem(KEY);if(r)S=JSON.parse(r)}catch(e){}
+ if(!S){try{const r=await fetch('calmland-data.json');if(r.ok)S=await r.json()}catch(e){}}
+ if(!S)S=seed();
+ save();render();
+}
+
+/* ---------- Conflits ---------- */
+const ov=(a,b)=>a.s<Math.max(b.e,b.s+.01)&&b.s<Math.max(a.e,a.s+.01);
+const cast=v=>v==='true'?true:v==='false'?false:(v!==''&&!isNaN(v)?+v:v);
+const test=(x,op,v)=>op==='='?x===v:op==='≠'?x!==v:op==='≥'?x>=v:op==='≤'?x<=v:op==='>'?x>v:x<v;
+function compat(a,b){
+ if(Math.max(+a.lmin||1,+b.lmin||1)>Math.min(+a.lmax||999,+b.lmax||999))return false;
+ if(a.req.some(x=>b.forb.includes(x))||b.req.some(x=>a.forb.includes(x)))return false;
+ const all=[...a.vc,...b.vc],vs=[...new Set(all.map(c=>c.v))];
+ return vs.every(v=>{const cs=all.filter(c=>c.v===v);const cand=new Set(['§autre',true,false]);cs.forEach(c=>{const x=cast(c.val);cand.add(x);if(typeof x==='number'){cand.add(x+1);cand.add(x-1)}});return [...cand].some(x=>cs.every(c=>test(x,c.op,cast(c.val))))});
+}
+function pair(a,b){
+ if(a.id===b.id||!a.char||a.char!==b.char||!a.loc||!b.loc||!ov(a,b)||!compat(a,b))return null;
+ if(a.loc===b.loc)return a.prio===b.prio?'Même personnage, même lieu, même moment, mêmes conditions et même priorité : deux répliques possibles en même temps.':null;
+ return 'Le personnage serait à deux endroits en même temps.';
+}
+function conflictsOf(o,list){return list.map(b=>({b,m:pair(o,b)})).filter(x=>x.m)}
+function allIssues(){
+ const out=[],seen=new Set();
+ S.dlg.forEach(a=>S.dlg.forEach(b=>{const k=[a.id,b.id].sort().join();if(seen.has(k))return;const m=pair(a,b);if(m){seen.add(k);out.push({t:'c',a,b,m})}}));
+ const given=new Set(S.dlg.flatMap(d=>d.give));
+ S.dlg.forEach(d=>{d.req.filter(r=>!given.has(r)).forEach(r=>out.push({t:'w',a:d,m:'Exige « '+kn(r)+' » mais aucun dialogue ne la donne.'}));if(d.e<d.s)out.push({t:'w',a:d,m:'L\'heure de fin est avant le début.'})});
+ return out;
+}
+const ch=id=>S.chars.find(c=>c.id===id),lc=id=>S.locs.find(l=>l.id===id),kn=id=>S.know.find(k=>k.id===id)?.label||id;
+const cn=id=>ch(id)?.name||'—',ln=id=>lc(id)?.name||'—';
+const partOf=m=>S.parts.find(p=>m>=p.s&&m<p.e)||S.parts[S.parts.length-1];
+const short=d=>`${ft(d.s)}–${ft(d.e)} ${cn(d.char)} : ${d.text.slice(0,50)}…`;
+
+/* ---------- Rendu ---------- */
+function render(){
+ const iss=allIssues(),nc=iss.filter(i=>i.t==='c').length;
+ const tabs=[['dlg','Dialogues'],['tl','Timeline'],['cf','Conflits'],['ch','Personnages'],['lc','Lieux'],['kn','Connaissances'],['vr','Variables'],['ex','Export / Sauvegarde']];
+ $('#nav').innerHTML=tabs.map(([k,l])=>`<button class="${tab===k?'on':''}" data-t="${k}">${l}${k==='cf'&&iss.length?`<span class="badge">${iss.length}</span>`:''}</button>`).join('');
+ $('#nav').onclick=e=>{const t=e.target.closest('button')?.dataset.t;if(t){tab=t;render()}};
+ ({dlg:vDlg,tl:vTl,cf:vCf,ch:()=>vList('chars'),lc:()=>vList('locs'),kn:()=>vList('know'),vr:()=>vList('vars'),ex:vEx})[tab](iss);
+}
+const opts=(list,sel,ph)=>(ph!==undefined?`<option value="">${ph}</option>`:'')+list.map(x=>`<option value="${x.id}" ${x.id===sel?'selected':''}>${esc(x.name||x.label||x.id)}</option>`).join('');
+
+function vDlg(iss){
+ const bad=new Set(iss.filter(i=>i.t==='c').flatMap(i=>[i.a.id,i.b.id]));
+ let L=[...S.dlg].sort((a,b)=>a.s-b.s||a.e-b.e);
+ const q=F.q.toLowerCase();
+ L=L.filter(d=>(!F.char||d.char===F.char)&&(!F.loc||d.loc===F.loc)&&(!F.part||partOf(d.s).name===F.part)&&(!F.cfonly||bad.has(d.id))&&(!q||(d.text+d.note+d.place).toLowerCase().includes(q)));
+ let last='',rows='';
+ L.forEach(d=>{const p=partOf(d.s).name;if(p!==last){last=p;rows+=`<tr class="part"><td colspan="5">${esc(p)}</td></tr>`}
+  rows+=`<tr class="row" data-id="${d.id}"><td>${ft(d.s)}–${ft(d.e)}${bad.has(d.id)?' <span class="cf" title="Conflit">⚠</span>':''}</td>
+  <td><span class="who" style="color:${ch(d.char)?.color||'inherit'}">${esc(cn(d.char))}</span><div class="kind">${d.kind}</div></td>
+  <td>${esc(ln(d.loc))}<div class="kind">${esc(d.place)}</div></td>
+  <td class="txt">${esc(d.text)}${d.note?`<div class="kind">${esc(d.note)}</div>`:''}</td>
+  <td>${d.req.map(r=>`<span class="chip r" title="Exige">🔑 ${esc(kn(r))}</span>`).join('')}${d.forb.map(r=>`<span class="chip f" title="Interdit si connu">⛔ ${esc(kn(r))}</span>`).join('')}${d.vc.map(c=>`<span class="chip f">${esc(c.v)} ${c.op} ${esc(c.val)}</span>`).join('')}${d.lmin||d.lmax?`<span class="chip f">boucle ${d.lmin||1}–${d.lmax||'∞'}</span>`:''}${d.prio?`<span class="chip">prio ${d.prio}</span>`:''}${d.give.map(r=>`<span class="chip g" title="Carnet">📓 ${esc(kn(r))}</span>`).join('')}</td></tr>`});
+ $('#main').innerHTML=`<div class="bar"><button class="pri" id="new">+ Nouveau dialogue</button>
+ <select id="fc">${opts(S.chars,F.char,'Tous les personnages')}</select><select id="fl">${opts(S.locs,F.loc,'Tous les lieux')}</select>
+ <select id="fp"><option value="">Toutes les parties</option>${S.parts.map(p=>`<option ${p.name===F.part?'selected':''}>${esc(p.name)}</option>`).join('')}</select>
+ <input id="fq" placeholder="Rechercher…" value="${esc(F.q)}"><label style="margin:0"><input type="checkbox" id="fcf" ${F.cfonly?'checked':''}> conflits seulement</label>
+ <span class="muted">${L.length}/${S.dlg.length}</span></div>
+ <table><thead><tr><th>Heure</th><th>Qui</th><th>Où</th><th>Texte</th><th>Conditions / carnet</th></tr></thead><tbody>${rows||'<tr><td colspan="5" class="muted">Aucun dialogue.</td></tr>'}</tbody></table>`;
+ $('#new').onclick=()=>edit(null);
+ $('#fc').onchange=e=>{F.char=e.target.value;render()};$('#fl').onchange=e=>{F.loc=e.target.value;render()};$('#fp').onchange=e=>{F.part=e.target.value;render()};
+ $('#fcf').onchange=e=>{F.cfonly=e.target.checked;render()};
+ $('#fq').oninput=e=>{F.q=e.target.value;const p=e.target.selectionStart;render();const i=$('#fq');i.focus();i.setSelectionRange(p,p)};
+ document.querySelectorAll('tr.row').forEach(r=>r.onclick=()=>edit(r.dataset.id));
+}
+
+function vTl(iss){
+ const bad=new Set(iss.filter(i=>i.t==='c').flatMap(i=>[i.a.id,i.b.id])),T=S.loopLen||20;
+ let h=`<div class="tl-head"><div></div><div>${S.parts.map(p=>`<span>${esc(p.name)}</span>`).join('')}</div></div>`;
+ S.chars.forEach(c=>{
+  const ds=S.dlg.filter(d=>d.char===c.id).sort((a,b)=>a.s-b.s);if(!ds.length)return;
+  const lanes=[];const pos=ds.map(d=>{let i=lanes.findIndex(e=>e<=d.s);if(i<0){i=lanes.length;lanes.push(0)}lanes[i]=Math.max(d.e,d.s+.6);return i});
+  h+=`<div class="tl-row"><div class="tl-name" style="color:${c.color}">${esc(c.name)}</div><div class="tl-track" style="height:${lanes.length*26+4}px">${ds.map((d,i)=>`<div class="tl-bar ${bad.has(d.id)?'cf':''}" data-id="${d.id}" title="${esc(ft(d.s)+'–'+ft(d.e)+' · '+ln(d.loc)+' · '+d.text)}" style="left:${d.s/T*100}%;width:${Math.max((d.e-d.s)/T*100,.8)}%;top:${pos[i]*26+2}px;background:${c.color}">${esc(ln(d.loc))}</div>`).join('')}</div></div>`});
+ $('#main').innerHTML=`<p class="muted">Une ligne par personnage. Barre = où il est et quand (contour rouge = conflit). Clique une barre pour l'éditer.</p>`+h;
+ document.querySelectorAll('.tl-bar').forEach(b=>b.onclick=()=>edit(b.dataset.id));
+}
+
+function vCf(iss){
+ $('#main').innerHTML=iss.length?iss.map(i=>`<div class="cflt ${i.t==='w'?'w':''}"><b>${i.t==='c'?'Conflit':'Attention'}</b> — ${esc(i.m)}<br><a href="#" data-id="${i.a.id}">${esc(short(i.a))}</a>${i.b?`<br><a href="#" data-id="${i.b.id}">${esc(short(i.b))}</a>`:''}</div>`).join(''):'<p style="color:var(--ok)">Aucun conflit. Tout est cohérent.</p>';
+ document.querySelectorAll('#main a').forEach(a=>a.onclick=e=>{e.preventDefault();edit(a.dataset.id)});
+}
+
+function vList(kind){
+ const conf={chars:['Personnages','name','note','Nom','Note (rôle, secret…)'],locs:['Lieux','name',null,'Nom du lieu'],know:['Connaissances du joueur (ce qui entre dans le carnet)','label',null,'Ce que le joueur sait'],vars:['Variables','id','note','nom_variable','À quoi ça sert']}[kind];
+ const L=S[kind];
+ $('#main').innerHTML=`<h2 style="margin-bottom:12px">${conf[0]}</h2>`+L.map((x,i)=>{
+  if(kind==='know'||kind==='locs')return `<div class="list-item k"><input data-i="${i}" data-f="${conf[1]}" value="${esc(x[conf[1]])}" placeholder="${conf[3]}"><button class="del" data-del="${i}">Supprimer</button></div>`;
+  if(kind==='chars')return `<div class="list-item"><div style="display:flex;gap:6px"><input type="color" data-i="${i}" data-f="color" value="${x.color}" style="width:44px;padding:2px"><input data-i="${i}" data-f="name" value="${esc(x.name)}" placeholder="Nom"></div><input data-i="${i}" data-f="note" value="${esc(x.note)}" placeholder="${conf[4]}"><button class="del" data-del="${i}">Supprimer</button></div>`;
+  return `<div class="list-item"><div style="display:flex;gap:6px"><input data-i="${i}" data-f="id" value="${esc(x.id)}" placeholder="nom_variable"><select data-i="${i}" data-f="type">${['boolean','number','string'].map(t=>`<option ${t===x.type?'selected':''}>${t}</option>`).join('')}</select></div><div style="display:flex;gap:6px"><input data-i="${i}" data-f="def" value="${esc(x.def)}" placeholder="valeur de départ" style="width:130px"><input data-i="${i}" data-f="note" value="${esc(x.note)}" placeholder="${conf[4]}" style="flex:1"></div><button class="del" data-del="${i}">Supprimer</button></div>`}).join('')+`<button class="pri" id="add">+ Ajouter</button>`;
+ document.querySelectorAll('#main [data-f]').forEach(el=>el.onchange=()=>{S[kind][+el.dataset.i][el.dataset.f]=el.value;save();if(kind!=='vars'||el.dataset.f==='id')render()});
+ document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const x=L[+b.dataset.del];
+  const used=kind==='chars'?S.dlg.some(d=>d.char===x.id):kind==='locs'?S.dlg.some(d=>d.loc===x.id):kind==='know'?S.dlg.some(d=>[...d.req,...d.forb,...d.give].includes(x.id)):S.dlg.some(d=>d.vc.some(c=>c.v===x.id));
+  if(used){alert('Impossible : utilisé par des dialogues. Change-les d\'abord.');return}L.splice(+b.dataset.del,1);save();render()});
+ $('#add').onclick=()=>{const id=uid();L.push(kind==='chars'?{id,name:'Nouveau personnage',color:'#b0b4c0',note:''}:kind==='locs'?{id,name:'Nouveau lieu'}:kind==='know'?{id:'k_'+id,label:''}:{id:'variable_'+id,type:'boolean',def:'false',note:''});save();render()};
+}
+
+/* ---------- Éditeur ---------- */
+function multi(name,sel){return `<select multiple name="${name}">${S.know.map(k=>`<option value="${k.id}" ${sel.includes(k.id)?'selected':''}>${esc(k.label)}</option>`).join('')}</select>`}
+function vcRow(c){return `<div class="vcrow"><select class="v">${S.vars.map(v=>`<option ${v.id===c.v?'selected':''}>${esc(v.id)}</option>`).join('')}</select><select class="op">${['=','≠','≥','≤','>','<'].map(o=>`<option ${o===c.op?'selected':''}>${o}</option>`).join('')}</select><input class="val" value="${esc(c.val)}"><button type="button" class="del">✕</button></div>`}
+function edit(id){
+ const d=id?S.dlg.find(x=>x.id===id):{id:null,kind:'dialogue',char:F.char||'',loc:F.loc||'',place:'',s:0,e:1,text:'',req:[],forb:[],give:[],vc:[],lmin:'',lmax:'',prio:0,note:''};
+ const dg=$('#dlg');
+ dg.innerHTML=`<form method="dialog" id="f"><h2 style="margin-bottom:8px">${id?'Modifier':'Nouveau'} dialogue</h2>
+ <div class="g3"><div><label>Type</label><select name="kind">${[['dialogue','Dialogue'],['monologue','Monologue'],['voix','Voix off'],['event','Évènement']].map(([v,l])=>`<option value="${v}" ${v===d.kind?'selected':''}>${l}</option>`).join('')}</select></div>
+ <div><label>Personnage</label><select name="char">${opts(S.chars,d.char,'— aucun —')}</select></div>
+ <div><label>Lieu</label><select name="loc">${opts(S.locs,d.loc,'— partout —')}</select></div></div>
+ <div class="g3"><div><label>Précision du lieu</label><input name="place" value="${esc(d.place)}" placeholder="cuisine, loge…"></div>
+ <div><label>Début (min:sec)</label><input name="s" value="${ft(d.s)}"></div><div><label>Fin (min:sec)</label><input name="e" value="${ft(d.e)}"></div></div>
+ <label>Texte</label><textarea name="text">${esc(d.text)}</textarea>
+ <div class="g2"><div><label>Exige que le joueur sache (Ctrl/Cmd pour plusieurs)</label>${multi('req',d.req)}</div><div><label>Interdit si le joueur sait</label>${multi('forb',d.forb)}</div></div>
+ <label>Écrit dans le carnet</label>${multi('give',d.give)}
+ <label>Conditions sur variables</label><div id="vcs">${d.vc.map(vcRow).join('')}</div><button type="button" id="addvc">+ condition</button>
+ <div class="g3"><div><label>Boucle min</label><input name="lmin" type="number" min="1" value="${d.lmin}"></div><div><label>Boucle max</label><input name="lmax" type="number" min="1" value="${d.lmax}"></div><div><label>Priorité (la plus haute gagne)</label><input name="prio" type="number" value="${d.prio}"></div></div>
+ <label>Note</label><input name="note" value="${esc(d.note)}" style="width:100%">
+ <div id="live"></div>
+ <div class="bar" style="margin-top:14px"><button class="pri" value="ok" id="ok">Enregistrer</button><button value="x" formnovalidate>Annuler</button>${id?'<button type="button" id="dup">Dupliquer</button><button type="button" class="del" id="rm">Supprimer</button>':''}</div></form>`;
+ const f=$('#f');
+ const read=()=>{const g=n=>f.elements[n].value,m=n=>[...f.elements[n].selectedOptions].map(o=>o.value);
+  return {id:d.id||'tmp',kind:g('kind'),char:g('char'),loc:g('loc'),place:g('place').trim(),s:pt(g('s')),e:pt(g('e')),text:g('text').trim(),req:m('req'),forb:m('forb'),give:m('give'),lmin:g('lmin'),lmax:g('lmax'),prio:+g('prio')||0,note:g('note').trim(),
+   vc:[...f.querySelectorAll('.vcrow')].map(r=>({v:r.querySelector('.v').value,op:r.querySelector('.op').value,val:r.querySelector('.val').value.trim()}))}};
+ const live=()=>{const o=read(),cs=conflictsOf(o,S.dlg.filter(x=>x.id!==d.id));
+  $('#live').innerHTML=cs.length?cs.map(c=>`<div class="cflt"><b>⚠ Conflit</b> — ${esc(c.m)}<br><span class="muted">${esc(short(c.b))}</span></div>`).join(''):(o.char&&o.loc?'<div class="muted" style="color:var(--ok)">✓ Aucun conflit dans cette situation.</div>':'')+(o.e<o.s?'<div class="cflt w">La fin est avant le début.</div>':'')};
+ f.oninput=live;f.onchange=live;live();
+ $('#addvc').onclick=()=>{if(!S.vars.length)return alert('Crée d\'abord une variable.');const w=document.createElement('div');w.innerHTML=vcRow({v:S.vars[0].id,op:'=',val:'true'});$('#vcs').append(w.firstChild);live()};
+ f.addEventListener('click',e=>{if(e.target.matches('.vcrow .del')){e.target.closest('.vcrow').remove();live()}});
+ f.onsubmit=e=>{if(e.submitter?.value!=='ok')return;const o=read();if(!o.text){e.preventDefault();return}
+  const cs=conflictsOf(o,S.dlg.filter(x=>x.id!==d.id));o.id=d.id||uid();
+  if(d.id)S.dlg[S.dlg.findIndex(x=>x.id===d.id)]=o;else S.dlg.push(o);
+  save();render();if(cs.length)setTimeout(()=>alert('Enregistré, mais '+cs.length+' conflit(s) : voir l\'onglet Conflits.'),50)};
+ if(id){$('#rm').onclick=()=>{if(confirm('Supprimer ce dialogue ?')){S.dlg=S.dlg.filter(x=>x.id!==d.id);save();dg.close();render()}};
+  $('#dup').onclick=()=>{const o={...read(),id:uid()};S.dlg.push(o);save();dg.close();render();edit(o.id)}}
+ dg.showModal();
+}
+
+/* ---------- Export ---------- */
+function expr(d){const p=[];if(d.lmin)p.push(`boucle >= ${d.lmin}`);if(d.lmax)p.push(`boucle <= ${d.lmax}`);d.vc.forEach(c=>p.push(`${c.v} ${c.op==='≠'?'!=':c.op==='='?'==':c.op==='≥'?'>=':c.op==='≤'?'<=':c.op} ${c.val}`));return p.join(' && ')}
+function flat(){return [...S.dlg].sort((a,b)=>b.prio-a.prio||a.s-b.s).map(d=>({id:d.id,type:d.kind,character:cn(d.char)==='—'?'':cn(d.char),characterId:d.char,location:d.loc,place:d.place,startSec:Math.round(d.s*60),endSec:Math.round(d.e*60),text:d.text,requires:d.req,forbids:d.forb,gives:d.give,condition:expr(d),loopMin:+d.lmin||1,loopMax:+d.lmax||0,priority:d.prio}))}
+function gdVar(){
+ const s=(n,v)=>({name:n,type:'string',value:String(v)}),n=(k,v)=>({name:k,type:'number',value:+v});
+ const arr=(k,a)=>({name:k,type:'array',children:a.map(v=>({type:'string',value:v}))});
+ return {name:'Dialogues',type:'array',children:flat().map(d=>({type:'structure',children:[s('id',d.id),s('type',d.type),s('character',d.characterId),s('location',d.location),s('place',d.place),n('start',d.startSec),n('end',d.endSec),s('text',d.text),arr('requires',d.requires),arr('forbids',d.forbids),arr('gives',d.gives),s('condition',d.condition),n('loopMin',d.loopMin),n('loopMax',d.loopMax),n('priority',d.priority)]}))}
+}
+function csv(){const q=v=>'"'+String(v).replace(/"/g,'""')+'"';const h=['id','type','personnage','lieu','precision','debut_s','fin_s','texte','exige','interdit','carnet','condition','boucle_min','boucle_max','priorite'];return [h.join(';'),...flat().map(d=>[d.id,d.type,d.character,d.location,d.place,d.startSec,d.endSec,d.text,d.requires.join('|'),d.forbids.join('|'),d.gives.join('|'),d.condition,d.loopMin,d.loopMax,d.priority].map(q).join(';'))].join('\n')}
+function dl(name,txt,mime){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:mime||'application/json'}));a.download=name;a.click()}
+function vEx(){
+ $('#main').innerHTML=`<div class="card"><h2>Sauvegarde</h2><p class="muted">Tout est enregistré automatiquement dans ce navigateur. Pour travailler sur un autre appareil ou sur GitHub, exporte le fichier et mets-le dans le dépôt sous le nom <b>calmland-data.json</b> (à côté de index.html) : il sera chargé automatiquement si le navigateur est vide.</p>
+ <div class="bar"><button class="pri" id="e1">Télécharger calmland-data.json</button><button id="e2">Importer un JSON…</button><input type="file" id="fi" accept=".json" hidden><button class="del" id="e3">Revenir aux données d'origine</button></div></div>
+ <div class="card"><h2>Pour GDevelop</h2><p class="muted">Dialogues triés par priorité puis heure, avec conditions déjà écrites (<code>boucle >= 2 && cle_rendue == true</code>). Les heures sont en secondes.</p>
+ <div class="bar"><button class="pri" id="g1">Dialogues (JSON)</button><button id="g2">Variable GDevelop (JSON)</button><button id="g3">Tableur (CSV)</button></div>
+ <p class="muted">Aperçu :</p><pre id="pv">${esc(JSON.stringify(flat().slice(0,2),null,1))}</pre></div>`;
+ $('#e1').onclick=()=>dl('calmland-data.json',JSON.stringify(S,null,1));
+ $('#e2').onclick=()=>$('#fi').click();
+ $('#fi').onchange=e=>{const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x.dlg||!x.chars)throw 0;if(confirm('Remplacer tout le travail actuel ?')){S=x;save();render()}}catch(_){alert('Fichier invalide.')}};r.readAsText(e.target.files[0])};
+ $('#e3').onclick=()=>{if(confirm('Effacer ton travail et recharger les données d\'origine ?')){S=seed();save();render()}};
+ $('#g1').onclick=()=>dl('calmland-dialogues.json',JSON.stringify(flat(),null,1));
+ $('#g2').onclick=()=>dl('calmland-variable-gdevelop.json',JSON.stringify(gdVar(),null,1));
+ $('#g3').onclick=()=>dl('calmland-dialogues.csv','\ufeff'+csv(),'text/csv');
+}
+init();
+</script>
+</body>
+</html>
