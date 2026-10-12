@@ -216,3 +216,52 @@ function PBASE_Y(y){return y;}
  L.planReinit();L.planImporter(JSON.stringify({m:{chambre:[[1,2,'x',4],[100,100,64,48]],inconnue:[[1,1,32,32]]}}));ok(W.chambre.length===1&&!W.inconnue,'murs invalides ignorés');
  const u=L.creerPiece('M',10,8,1,1,'salon');W[u].push([60,100,64,48]);ok(L.solids(u).some(r=>r[0]===60),'mur dans une pièce créée');L.supprimerPiece(u);ok(!W[u],'pièce supprimée : ses murs aussi');L.planReinit();G.player.scene='village';G.player.x=L.PORTES_V[0].x;G.player.y=L.PORTES_V[0].y+30;}
 console.log('dialogues joués :',new Set(G.log).size);
+// ---- Village agrandi, routes et murs étirés au pixel près
+{
+ L.planReinit();L.nouvellePartie(false);vider();
+ const a0=[L.BATM.Maison_Aaron[1],L.BATM.Maison_Aaron[2]],pv=L.PORTES_V[0].x;
+ ok(L.SC.village.w===3600&&L.SC.village.h===2700&&L.VOFF[0]===0,'village : taille d\'origine');
+ ok(L.agrandirVillage('droite',10)&&L.SC.village.w===3920&&L.BATM.Maison_Aaron[1]===a0[0]&&L.VOFF[0]===0,'agrandir à droite : rien ne bouge');
+ L.changerScene('village',500,900,3);L.G.trail=[{scene:'village',x:490,y:900}];
+ ok(L.agrandirVillage('gauche',10)&&L.SC.village.w===4240&&L.VOFF[0]===320,'agrandir à gauche : la carte grandit');
+ ok(L.BATM.Maison_Aaron[1]===a0[0]+320&&L.PORTES_V[0].x===pv+320,'les maisons et leurs portes suivent le décalage');
+ ok(L.ROUTES[0][0]===320&&L.ROUTES[2][0]===1560+320,'les routes suivent le décalage');
+ ok(L.G.player.x===820&&L.G.trail[0].x===810,'le joueur et sa trace restent au même endroit dans le décor');
+ ok(L.trajets().RECHERCHE[0].x===1850+320,'les trajets des personnages suivent');
+ const sy=L.ROUTES[0][1];
+ ok(L.agrandirVillage('haut',10)&&L.SC.village.h===3020&&L.ROUTES[0][1]===sy+320&&L.G.player.y===1220,'agrandir en haut');
+ ok(L.agrandirVillage('bas',5)&&L.SC.village.h===3180,'agrandir en bas');
+ ok(!L.agrandirVillage('bas',60)&&L.SC.village.h===3180,'trop grand : refusé, rien ne change');
+ ok(!L.agrandirVillage('milieu',5),'côté inconnu refusé');
+ const t=L.planExporter();ok(JSON.parse(t).v.w===4240,'le plan contient la taille du village');
+ L.planReinit();ok(L.SC.village.w===3600&&L.SC.village.h===2700&&L.VOFF[0]===0&&L.BATM.Maison_Aaron[1]===a0[0]&&L.PORTES_V[0].x===pv,'plan d\'origine : village remis tel quel');
+ L.planImporter(t);ok(L.SC.village.w===4240&&L.SC.village.h===3180&&L.VOFF[0]===320&&L.VOFF[1]===320&&L.BATM.Maison_Aaron[1]===a0[0]+320,'le plan copié restitue le village agrandi');
+ L.planImporter(JSON.stringify({b:{}}));ok(L.SC.village.w===3600&&L.VOFF[0]===0,'ancien plan sans village : taille d\'origine');
+ L.planImporter(JSON.stringify({v:{w:99999,h:99999,o:[-5,'x']}}));ok(L.SC.village.w===3600&&L.VOFF[0]===0,'village invalide ignoré');
+ L.planReinit();
+ // routes au pixel près
+ const r=L.ROUTES[2],h0=r[3],y0=r[1];
+ ok(L.etirerRoute(r,'fin',16)&&r[3]===h0+16&&r[1]===y0,'route : allonger la fin de 16 px');
+ ok(L.etirerRoute(r,'debut',8)&&r[1]===y0-8&&r[3]===h0+24,'route : allonger le début de 8 px (elle part vers le haut)');
+ ok(L.etirerRoute(r,'debut',-8)&&r[1]===y0&&r[3]===h0+16,'route : raccourcir le début de 8 px');
+ ok(L.etirerRoute(r,'fin',-1)&&r[3]===h0+15,'route : 1 px près');
+ ok(!L.etirerRoute(r,'fin',-5000)&&r[3]===h0+15,'route : trop courte refusée');
+ ok(!L.etirerRoute(r,'fin',99999),'route : plus grande que le village refusée');
+ ok(!L.etirerRoute([0,0,64,64,'p'],'fin',16),'route inconnue refusée');
+ const rh=L.ROUTES[0],w0=rh[2],x0=rh[0];
+ ok(!L.etirerRoute(rh,'fin',1),'route horizontale déjà au bord droit : refusée');
+ ok(L.etirerRoute(rh,'fin',-96)&&rh[2]===w0-96,'route horizontale : raccourcir la fin');
+ L.planReinit();
+ ok(L.trajets().ROUTE_Y===L.ROUTES[0][1]+L.ROUTES[0][3]/2,'les trajets restent calculables');
+ // murs au pixel près
+ L.MURS.chambre.push([100,100,128,48]);const m=L.MURS.chambre[L.MURS.chambre.length-1];
+ ok(L.etirerMur('chambre',m,'fin',16)&&m[2]===144&&m[0]===100,'mur : allonger la fin');
+ ok(L.etirerMur('chambre',m,'debut',16)&&m[0]===84&&m[2]===160,'mur : allonger le début (il part vers la gauche)');
+ ok(L.etirerMur('chambre',m,'debut',-4)&&m[0]===88&&m[2]===156,'mur : raccourcir le début de 4 px');
+ ok(!L.etirerMur('chambre',m,'debut',500),'mur : sortir de la pièce refusé');
+ ok(!L.etirerMur('chambre',m,'fin',-500),'mur : trop court refusé');
+ L.MURS.chambre.push([300,40,16,128]);const mv=L.MURS.chambre[L.MURS.chambre.length-1];
+ ok(L.etirerMur('chambre',mv,'fin',16)&&mv[3]===144&&L.etirerMur('chambre',mv,'debut',16)&&mv[1]===24&&mv[3]===160,'mur vertical : allonger fin et début');
+ ok(!L.etirerMur('village',m,'fin',16),'les murs n\'existent pas dans le village');
+ L.planReinit();
+}

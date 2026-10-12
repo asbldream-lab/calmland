@@ -96,6 +96,7 @@ const BAT=[['Maison_Aaron',80,184,288,416],['Maison_Benjamin',420,184,384,480],[
 const ROUTES=[[0,870,3600,96,'p'],[0,2090,3600,96,'p'],[1560,966,64,1124,'p']];
 const ROUTES_BASE=ROUTES.map(r=>[...r]);
 let ROUTE_Y=918,RECHERCHE=[],BALADE_PAUL=[],MODE_PUBLIC=false;
+const VOFF=[0,0],VBASE={w:3600,h:2700},VMAX={w:6400,h:4800,aire:20000000};
 function pub(t){return MODE_PUBLIC?t.replace(' (K = +5 min, J = +1 min)','').replace("Fais passer le temps jusqu'à","Attends jusqu'à").replace("explore, teste des dialogues, ou fais passer le temps (K) jusqu'à 20 min pour recommencer","attends la fin des 20 minutes pour recommencer"):t;}
 const CHEMINS=[[194,600,32,50],[534,600,32,50],[874,600,32,50],[1222,600,32,50],[1512,600,32,50],[1796,600,32,50],[332,1516,32,14],[828,1516,32,14],[1848,1516,32,14],[1278,1516,32,14]];
 const BUISSONS=[[20,140,'buisson'],[20,2660,'buisson2'],[120,140,'buisson'],[120,2660,'buisson2'],[220,140,'buisson'],[220,2660,'buisson2'],[320,140,'buisson'],[320,2660,'buisson2'],[420,140,'buisson'],[420,2660,'buisson2'],[520,140,'buisson'],[520,2660,'buisson2'],[620,140,'buisson'],[620,2660,'buisson2'],[720,140,'buisson'],[720,2660,'buisson2'],[820,140,'buisson'],[820,2660,'buisson2'],[920,140,'buisson'],[920,2660,'buisson2'],[1020,140,'buisson'],[1020,2660,'buisson2'],[1120,2660,'buisson'],[1220,2660,'buisson2'],[1320,2660,'buisson'],[1420,2660,'buisson2'],[1520,2660,'buisson'],[1620,2660,'buisson2'],[1720,140,'buisson'],[1720,2660,'buisson2'],[1820,140,'buisson'],[1820,2660,'buisson2'],[1920,140,'buisson'],[1920,2660,'buisson2'],[2020,140,'buisson'],[2020,2660,'buisson2'],[2120,140,'buisson'],[2120,2660,'buisson2'],[2220,140,'buisson'],[2220,2660,'buisson2'],[2320,140,'buisson'],[2320,2660,'buisson2'],[2420,140,'buisson'],[2420,2660,'buisson2'],[2520,140,'buisson'],[2520,2660,'buisson2'],[2620,140,'buisson'],[2620,2660,'buisson2'],[2720,140,'buisson'],[2720,2660,'buisson2'],[2820,140,'buisson'],[2820,2660,'buisson2'],[2920,140,'buisson'],[2920,2660,'buisson2'],[3020,140,'buisson'],[3020,2660,'buisson2'],[3120,140,'buisson'],[3120,2660,'buisson2'],[3220,140,'buisson'],[3220,2660,'buisson2'],[3320,140,'buisson'],[3320,2660,'buisson2'],[3420,140,'buisson'],[3420,2660,'buisson2'],[10,240,'buisson'],[3510,240,'buisson2'],[10,340,'buisson'],[3510,340,'buisson2'],[10,440,'buisson'],[3510,440,'buisson2'],[10,540,'buisson'],[3510,540,'buisson2'],[10,640,'buisson'],[3510,640,'buisson2'],[10,740,'buisson'],[3510,740,'buisson2'],[10,840,'buisson'],[3510,840,'buisson2'],[10,1140,'buisson'],[3510,1140,'buisson2'],[10,1240,'buisson'],[3510,1240,'buisson2'],[10,1340,'buisson'],[3510,1340,'buisson2'],[10,1440,'buisson'],[3510,1440,'buisson2'],[10,1540,'buisson'],[3510,1540,'buisson2'],[10,1640,'buisson'],[3510,1640,'buisson2'],[10,1740,'buisson'],[3510,1740,'buisson2'],[10,1840,'buisson'],[3510,1840,'buisson2'],[10,1940,'buisson'],[3510,1940,'buisson2'],[10,2040,'buisson'],[3510,2040,'buisson2'],[10,2340,'buisson'],[3510,2340,'buisson2'],[10,2440,'buisson'],[3510,2440,'buisson2'],[10,2540,'buisson'],[3510,2540,'buisson2'],[260,236,'buisson'],[580,236,'buisson2'],[900,236,'buisson'],[1860,236,'buisson2'],[2180,236,'buisson'],[2500,236,'buisson2'],[2820,236,'buisson'],[3140,236,'buisson2'],[100,1130,'buisson'],[260,1130,'buisson2'],[420,1130,'buisson'],[580,1130,'buisson2'],[740,1130,'buisson'],[900,1130,'buisson2'],[1060,1130,'buisson'],[1220,1130,'buisson2'],[1380,1130,'buisson'],[1700,1130,'buisson2'],[1850,1130,'buisson'],[2000,1130,'buisson2'],[2150,1130,'buisson'],[2300,1130,'buisson2'],[2450,1130,'buisson'],[1460,1060,'buisson2'],[1650,1060,'buisson'],[1460,1230,'buisson2'],[1650,1230,'buisson'],[1460,1400,'buisson2'],[1650,1400,'buisson'],[1460,1570,'buisson2'],[1650,1570,'buisson'],[1460,1740,'buisson2'],[1650,1740,'buisson'],[1460,1910,'buisson2'],[1650,1910,'buisson'],[100,2400,'buisson2'],[520,2400,'buisson'],[940,2400,'buisson2'],[1360,2400,'buisson'],[1780,2400,'buisson2'],[2200,2400,'buisson'],[2620,2400,'buisson2'],[3040,2400,'buisson']];
@@ -212,25 +213,47 @@ for(const e of LIENS){const o=GEOM_OLD[e[1]],h=BATM[e[1]][4];e[2]=e[2]-o[0]+DOOR
 function majCollisions(){const v=[];for(const b of BAT){if(b.off)continue;const o=BOX[b[0]];v.push([b[1]+o[0],b[2]+o[1],o[2],o[3]]);}
  for(const u of BUISSONS){const sp=SPR[u[2]];if(sp&&sp.sol)v.push([u[0]+sp.sol[0],u[1]-sp.h+sp.sol[1],sp.sol[2],sp.sol[3]]);}COLL.village=v;}
 function majTrajets(){const n=ROUTES[0],sr=ROUTES[1],v=ROUTES[2],ny=n[1]+n[3]/2,sy=sr[1]+sr[3]/2,vx=v[0]+v[2]/2,my=(ny+sy)/2;ROUTE_Y=ny;
- RECHERCHE=[{x:1850,y:ny},{x:350,y:ny},{x:vx,y:ny},{x:vx,y:sy},{x:2600,y:sy},{x:vx,y:sy},{x:vx,y:ny},{x:3000,y:ny}];
- BALADE_PAUL=[{x:1400,y:ny},{x:2300,y:ny},{x:3200,y:ny},{x:vx,y:ny},{x:vx,y:my},{x:vx,y:ny}];}
+ const ox=VOFF[0];RECHERCHE=[{x:1850+ox,y:ny},{x:350+ox,y:ny},{x:vx,y:ny},{x:vx,y:sy},{x:2600+ox,y:sy},{x:vx,y:sy},{x:vx,y:ny},{x:3000+ox,y:ny}];
+ BALADE_PAUL=[{x:1400+ox,y:ny},{x:2300+ox,y:ny},{x:3200+ox,y:ny},{x:vx,y:ny},{x:vx,y:my},{x:vx,y:ny}];}
 function routesImport(a){if(!Array.isArray(a)||a.length<3)return;const ok=Number.isFinite,out=[];
- for(const v of a){if(!Array.isArray(v)||!v.slice(0,4).every(ok))continue;const r=[Math.round(v[0]),Math.round(v[1]),Math.max(32,Math.min(3600,Math.round(v[2]))),Math.max(32,Math.min(2700,Math.round(v[3]))),v[4]==='t'?'t':'p'];if(v[5])r.off=true;out.push(r);}
+ for(const v of a){if(!Array.isArray(v)||!v.slice(0,4).every(ok))continue;const r=[Math.round(v[0]),Math.round(v[1]),Math.max(32,Math.min(SC.village.w,Math.round(v[2]))),Math.max(32,Math.min(SC.village.h,Math.round(v[3]))),v[4]==='t'?'t':'p'];if(v[5])r.off=true;out.push(r);}
  if(out.length<3)return;ROUTES.length=0;for(const r of out)ROUTES.push(r);}
 function mursImport(m){if(!m||typeof m!=='object')return;for(const sc of Object.keys(MURS)){const a=Array.isArray(m[sc])?m[sc]:[],R=SC[sc];
  MURS[sc]=a.filter(v=>Array.isArray(v)&&v.slice(0,4).every(Number.isFinite)).slice(0,200).map(v=>[Math.round(v[0]),Math.round(v[1]),Math.max(16,Math.min(R.w,Math.round(v[2]))),Math.max(16,Math.min(R.h,Math.round(v[3])))]);}}
 function mursReinit(){for(const sc of Object.keys(MURS))MURS[sc]=[];}
 function redimMur(sc,r,n){if(!MURS[sc]||MURS[sc].indexOf(r)<0)return false;const e=n*32,R=SC[sc];if(r[2]>=r[3]){const w=r[2]+e;if(w<32||r[0]+w>R.w-12)return false;r[2]=w;}else{const h=r[3]+e;if(h<32||r[1]+h>R.h-12)return false;r[3]=h;}return true;}
 function routesReinit(){ROUTES.length=0;for(const r of ROUTES_BASE)ROUTES.push([...r]);}
-function redimRoute(r,n){if(ROUTES.indexOf(r)<0)return false;const e=n*32;if(r[2]>=r[3]){const w=r[2]+e;if(w<64||w>3600)return false;r[2]=w;}else{const h=r[3]+e;if(h<64||h>2700)return false;r[3]=h;}majTrajets();return true;}
+function redimRoute(r,n){if(ROUTES.indexOf(r)<0)return false;const e=n*32;if(r[2]>=r[3]){const w=r[2]+e;if(w<64||w>SC.village.w)return false;r[2]=w;}else{const h=r[3]+e;if(h<64||h>SC.village.h)return false;r[3]=h;}majTrajets();return true;}
+
+// ---------- ÉTIRER routes et murs au pixel près ; AGRANDIR le village ----------
+function etirer(r,sc,cote,d){const vil=sc==='village',liste=vil?ROUTES:MURS[sc];if(!liste||liste.indexOf(r)<0||!Number.isFinite(d))return false;
+ const R=SC[sc],hor=r[2]>=r[3];let x=r[0],y=r[1],w=r[2],h=r[3];
+ if(hor){if(cote==='fin')w+=d;else{x-=d;w+=d;}}else{if(cote==='fin')h+=d;else{y-=d;h+=d;}}
+ const min=vil?64:32,x0=vil?0:12,y0=vil?0:20,x1=vil?R.w:R.w-12,y1=vil?R.h:R.h-12;
+ const ok=hor?((cote==='fin'?x+w<=x1:x>=x0)&&w>=min):((cote==='fin'?y+h<=y1:y>=y0)&&h>=min);
+ if(!ok)return false;r[0]=x;r[1]=y;r[2]=w;r[3]=h;if(vil)majTrajets();return true;}
+function etirerRoute(r,cote,d){return etirer(r,'village',cote,d);}
+function etirerMur(sc,r,cote,d){return sc!=='village'&&etirer(r,sc,cote,d);}
+function agrandirVillage(cote,n){n=Math.max(1,Math.min(60,n|0));const e=n*32,R=SC.village;let nw=R.w,nh=R.h,sx=0,sy=0;
+ if(cote==='droite')nw+=e;else if(cote==='gauche'){nw+=e;sx=e;}else if(cote==='bas')nh+=e;else if(cote==='haut'){nh+=e;sy=e;}else return false;
+ if(nw>VMAX.w||nh>VMAX.h||nw*nh>VMAX.aire)return false;
+ if(sx||sy){for(const b of BAT){b[1]+=sx;b[2]+=sy;}for(const u of BUISSONS){u[0]+=sx;u[1]+=sy;}for(const r of ROUTES){r[0]+=sx;r[1]+=sy;}
+  const dec=o=>{if(o&&o.scene==='village'){o.x+=sx;o.y+=sy;}};dec(G.player);dec(G.suiveur);if(G.trail)for(const t of G.trail)dec(t);
+  VOFF[0]+=sx;VOFF[1]+=sy;}
+ R.w=nw;R.h=nh;appliquerPlan();return true;}
+function villageExport(){return {w:SC.village.w,h:SC.village.h,o:[VOFF[0],VOFF[1]]};}
+function villageReinit(){SC.village.w=VBASE.w;SC.village.h=VBASE.h;VOFF[0]=0;VOFF[1]=0;}
+function villageImport(v){villageReinit();if(!v||typeof v!=='object')return;const ok=Number.isFinite;
+ if(ok(v.w)&&ok(v.h)){const w=Math.round(v.w),h=Math.round(v.h);if(w>=VBASE.w&&h>=VBASE.h&&w<=VMAX.w&&h<=VMAX.h&&w*h<=VMAX.aire){SC.village.w=w;SC.village.h=h;}}
+ if(Array.isArray(v.o)&&ok(v.o[0])&&ok(v.o[1])){VOFF[0]=Math.max(0,Math.round(v.o[0]));VOFF[1]=Math.max(0,Math.round(v.o[1]));}}
 function appliquerPlan(){for(const [o,own,dx,dy,kx,ky] of LIENS){const b=BATM[own];o[kx]=b[1]+dx;o[ky]=b[2]+dy;}majCollisions();majTrajets();}
-function planExporter(){const b={};for(const x of BAT)b[x[0]]=x.off?[x[1],x[2],1]:[x[1],x[2]];return JSON.stringify({b,u:BUISSONS.map(u=>[u[0],u[1],u[2]]),i:ITEMS,m:MURS,g:geomExport(),ro:ROUTES.map(r=>r.off?[r[0],r[1],r[2],r[3],r[4],1]:[r[0],r[1],r[2],r[3],r[4]]),r:Object.entries(INTS).filter(([k,v])=>v.user).map(([k,v])=>({id:k,nom:v.nom,tw:v.tw,th:v.th,fl:v.fl,wl:v.wl,own:v.own,dec:v.dec}))});}
+function planExporter(){const b={};for(const x of BAT)b[x[0]]=x.off?[x[1],x[2],1]:[x[1],x[2]];return JSON.stringify({b,v:villageExport(),u:BUISSONS.map(u=>[u[0],u[1],u[2]]),i:ITEMS,m:MURS,g:geomExport(),ro:ROUTES.map(r=>r.off?[r[0],r[1],r[2],r[3],r[4],1]:[r[0],r[1],r[2],r[3],r[4]]),r:Object.entries(INTS).filter(([k,v])=>v.user).map(([k,v])=>({id:k,nom:v.nom,tw:v.tw,th:v.th,fl:v.fl,wl:v.wl,own:v.own,dec:v.dec}))});}
 function planImporter(txt){const p=JSON.parse(txt);for(const x of BAT){const v=p.b&&p.b[x[0]];if(v&&isFinite(v[0])&&isFinite(v[1])){x[1]=Math.round(v[0]);x[2]=Math.round(v[1]);x.off=!!v[2];}}
  if(Array.isArray(p.u)){BUISSONS.length=0;for(const v of p.u){if(v&&isFinite(v[0])&&isFinite(v[1]))BUISSONS.push([Math.round(v[0]),Math.round(v[1]),SPR[v[2]]?v[2]:'buisson']);}}
- retirerPiecesUser();geomImport(p.g);routesImport(p.ro);if(Array.isArray(p.r)){for(const r of p.r)recreerPiece(r);}mursImport(p.m);
+ retirerPiecesUser();geomImport(p.g);villageImport(p.v);routesImport(p.ro);if(Array.isArray(p.r)){for(const r of p.r)recreerPiece(r);}mursImport(p.m);
  if(p.i&&typeof p.i==='object'){for(const sc of Object.keys(ITEMS)){if(!Array.isArray(p.i[sc]))continue;ITEMS[sc].length=0;for(const v of p.i[sc]){if(v&&isFinite(v[0])&&isFinite(v[1])&&SPRI[v[2]]){const it=[Math.round(v[0]),Math.round(v[1]),v[2]];if(v[3])it.push(1);if(v[2]==='porte'||v[2]==='passage'){it.length=0;it.push(Math.round(v[0]),Math.round(v[1]),v[2],0,typeof v[4]==='string'?v[4]:'');}ITEMS[sc].push(it);}}}}
  appliquerPlan();}
-function planReinit(){for(const x of BAT){x[1]=BASE_BAT[x[0]][0];x[2]=BASE_BAT[x[0]][1];x.off=false;}BUISSONS.length=0;for(const u of BASE_BUI)BUISSONS.push([u[0],u[1],u[2]]);retirerPiecesUser();geomReinit();routesReinit();mursReinit();for(const sc in BASE_ITEMS){ITEMS[sc].length=0;for(const v of BASE_ITEMS[sc])ITEMS[sc].push([...v]);}appliquerPlan();}
+function planReinit(){villageReinit();for(const x of BAT){x[1]=BASE_BAT[x[0]][0];x[2]=BASE_BAT[x[0]][1];x.off=false;}BUISSONS.length=0;for(const u of BASE_BUI)BUISSONS.push([u[0],u[1],u[2]]);retirerPiecesUser();geomReinit();routesReinit();mursReinit();for(const sc in BASE_ITEMS){ITEMS[sc].length=0;for(const v of BASE_ITEMS[sc])ITEMS[sc].push([...v]);}appliquerPlan();}
 {const L2={Maison_Aaron:[200,364],Maison_Benjamin:[658,300],Maison_Paul:[1212,76],Pharmacie:[1766,396],Boulangerie:[2160,492],Poste_Police:[2554,364],Maison_Mami:[150,1488],Maison_Zoe:[900,1552],Maison_Marc:[1800,1488],Ecole:[2560,1264]};
  for(const n in L2){BATM[n][1]=L2[n][0];BATM[n][2]=L2[n][1];}
  CHEMINS.forEach(c=>{c[3]=90;});
@@ -403,7 +426,7 @@ function interactifs(){
  for(const id in pos){const n=pos[id];if(n.scene===pl.scene) list.push({id,type:'pnj',x:n.x,y:n.y,r:44});}
  if(pl.scene==='village'){
   if(L.cleAuSol) list.push({id:'cle',type:'obj',...P.cleSol,r:36});
-  if(G.minute>=6&&!G.prologue) list.push({id:'mot',type:'obj',x:890,y:628,r:30});
+  if(G.minute>=6&&!G.prologue) list.push({id:'mot',type:'obj',x:BATM.Maison_Paul[1]+130,y:BATM.Maison_Paul[2]+444,r:30});
   for(const p of PORTES_V) if(!BATM[p.own].off) list.push({id:p.id,type:'porte',x:p.x,y:p.y,r:52});
  }
  if(pl.scene==='chambre'){const c=itemDe('chambre','commode'),f=itemDe('chambre','fenetre_cassee'),r=itemDe('chambre','radiateur');
@@ -519,4 +542,4 @@ function bouger(dx,dy,dt){
  if(G.prologue&&G.pro&&G.pro.etape==='matin'&&pl.scene==='village'&&Math.hypot(pl.x-ECOLE.x,pl.y-ECOLE.y)<64)deposerLoulou();
  return true;
 }
-if(typeof module!=='undefined') module.exports={MURS,redimMur,ROUTES,redimRoute,majTrajets,trajets:()=>({ROUTE_Y,RECHERCHE,BALADE_PAUL}),setPublic:v=>{MODE_PUBLIC=v;},pub,agrandir,geomExport,geomImport,passageInt,PBASE,BASE_GEOM,STYLES,creerPiece,supprimerPiece,porteInt,libreIn,recreerPiece,INTS,ENTREES,arriveeVillage,DOOR,ITEMS,SPRI,itemDe,collItem,machineBase,echellePos,coupe,degager,consigne,etapes,SPR,BATM,P,planExporter,planImporter,planReinit,appliquerPlan,BUISSONS,FIXES,sauter,objectif,porte,suivre,sieste,deposerLoulou,PORTES_V,ECOLE,G,D,NOMS,LETTRE,MESSAGE_FINAL,AJOUTS_DEMO,nouvellePartie,demarrerBoucle,avancer,regler,interagir,parler,objet,code,positions,bouger,cible,changerScene,nathalie,benjamin,tempsActif,numeroBoucle,solids,machinePos,SC,BAT};
+if(typeof module!=='undefined') module.exports={etirerRoute,etirerMur,agrandirVillage,villageExport,VOFF,MURS,redimMur,ROUTES,redimRoute,majTrajets,trajets:()=>({ROUTE_Y,RECHERCHE,BALADE_PAUL}),setPublic:v=>{MODE_PUBLIC=v;},pub,agrandir,geomExport,geomImport,passageInt,PBASE,BASE_GEOM,STYLES,creerPiece,supprimerPiece,porteInt,libreIn,recreerPiece,INTS,ENTREES,arriveeVillage,DOOR,ITEMS,SPRI,itemDe,collItem,machineBase,echellePos,coupe,degager,consigne,etapes,SPR,BATM,P,planExporter,planImporter,planReinit,appliquerPlan,BUISSONS,FIXES,sauter,objectif,porte,suivre,sieste,deposerLoulou,PORTES_V,ECOLE,G,D,NOMS,LETTRE,MESSAGE_FINAL,AJOUTS_DEMO,nouvellePartie,demarrerBoucle,avancer,regler,interagir,parler,objet,code,positions,bouger,cible,changerScene,nathalie,benjamin,tempsActif,numeroBoucle,solids,machinePos,SC,BAT};

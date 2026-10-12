@@ -125,7 +125,11 @@ body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:syste
 <div id="cote" hidden>
  <div id="editeur" hidden><b>Éditeur de plan</b> <span id="ed-msg" style="color:var(--accent)"></span><p>Clique un élément pour le sélectionner, glisse-le pour le déplacer, Suppr pour le supprimer, Ctrl+Z pour annuler (grille de 32 px). Glisse le fond ou utilise les flèches pour déplacer la vue, O / P pour le zoom. Les portes, collisions, plaques et personnages suivent le bâtiment. Sauvegarde automatique dans ce navigateur.</p><div class="b"><label>Pièce : <select id="ed-scenes"></select></label></div>
 <div id="gh-etat" style="color:var(--accent);margin:.2em 0"></div><details id="ed-gh"><summary>Sauvegarde GitHub</summary><label>Clé GitHub : <input id="gh-token" type="password" placeholder="colle ta clé ici" size="26" autocomplete="off"></label><div class="b"><button id="gh-sauver-cle">Enregistrer la clé</button><button id="gh-envoyer">Envoyer maintenant</button><button id="gh-recharger">Recharger depuis GitHub</button><button id="gh-lien">Copier mon lien de connexion</button></div></details>
-<div class="b"><button id="ed-coll">Collision on/off (X)</button><button id="ed-copier">Copier le plan</button><button id="ed-appliquer">Appliquer le texte</button><button id="ed-rplus">Allonger (+2 cases)</button><button id="ed-rmoins">Raccourcir (−2 cases)</button><button id="ed-suppr">Supprimer (Suppr)</button><button id="ed-annuler">Annuler (Ctrl+Z)</button><button id="ed-reinit">Plan d'origine</button><button id="ed-quitter">Quitter</button></div><label id="ed-dest-l" hidden>Cette porte mène à : <select id="ed-dest"></select></label>
+<div class="b"><button id="ed-coll">Collision on/off (X)</button><button id="ed-copier">Copier le plan</button><button id="ed-appliquer">Appliquer le texte</button><label>Pas : <select id="ed-pas"><option value="32">1 case (32 px)</option><option value="16" selected>½ case (16 px)</option><option value="8">¼ case (8 px)</option><option value="4">4 px</option><option value="1">1 px</option></select></label><button id="ed-rplus">Allonger la fin</button><button id="ed-rmoins">Raccourcir la fin</button><button id="ed-dplus">Allonger le début</button><button id="ed-dmoins">Raccourcir le début</button><button id="ed-suppr">Supprimer (Suppr)</button><button id="ed-annuler">Annuler (Ctrl+Z)</button><button id="ed-reinit">Plan d'origine</button><button id="ed-quitter">Quitter</button></div><label id="ed-dest-l" hidden>Cette porte mène à : <select id="ed-dest"></select></label>
+<details id="ed-village"><summary>Agrandir le village (verdure autour)</summary>
+<select id="vg-cote"><option value="tout" selected>tout autour</option><option value="haut">en haut</option><option value="bas">en bas</option><option value="gauche">à gauche</option><option value="droite">à droite</option></select>
+<select id="vg-n"><option value="5">+160 px</option><option value="10">+320 px</option><option value="20" selected>+640 px</option><option value="40">+1280 px</option></select>
+<button id="vg-go">Agrandir le village</button> <span id="vg-info" style="color:var(--muted)"></span></details>
 <details id="ed-agrandir"><summary>Agrandir cette pièce</summary>
 <select id="ag-cote"><option value="droite">vers la droite</option><option value="gauche">vers la gauche</option><option value="haut">vers le haut</option><option value="bas">vers le bas</option></select>
 <select id="ag-n"><option value="1">+1 case</option><option value="2" selected>+2 cases</option><option value="4">+4 cases</option><option value="6">+6 cases</option><option value="8">+8 cases</option></select>
@@ -250,6 +254,7 @@ const BAT=[['Maison_Aaron',80,184,288,416],['Maison_Benjamin',420,184,384,480],[
 const ROUTES=[[0,870,3600,96,'p'],[0,2090,3600,96,'p'],[1560,966,64,1124,'p']];
 const ROUTES_BASE=ROUTES.map(r=>[...r]);
 let ROUTE_Y=918,RECHERCHE=[],BALADE_PAUL=[],MODE_PUBLIC=false;
+const VOFF=[0,0],VBASE={w:3600,h:2700},VMAX={w:6400,h:4800,aire:20000000};
 function pub(t){return MODE_PUBLIC?t.replace(' (K = +5 min, J = +1 min)','').replace("Fais passer le temps jusqu'à","Attends jusqu'à").replace("explore, teste des dialogues, ou fais passer le temps (K) jusqu'à 20 min pour recommencer","attends la fin des 20 minutes pour recommencer"):t;}
 const CHEMINS=[[194,600,32,50],[534,600,32,50],[874,600,32,50],[1222,600,32,50],[1512,600,32,50],[1796,600,32,50],[332,1516,32,14],[828,1516,32,14],[1848,1516,32,14],[1278,1516,32,14]];
 const BUISSONS=[[20,140,'buisson'],[20,2660,'buisson2'],[120,140,'buisson'],[120,2660,'buisson2'],[220,140,'buisson'],[220,2660,'buisson2'],[320,140,'buisson'],[320,2660,'buisson2'],[420,140,'buisson'],[420,2660,'buisson2'],[520,140,'buisson'],[520,2660,'buisson2'],[620,140,'buisson'],[620,2660,'buisson2'],[720,140,'buisson'],[720,2660,'buisson2'],[820,140,'buisson'],[820,2660,'buisson2'],[920,140,'buisson'],[920,2660,'buisson2'],[1020,140,'buisson'],[1020,2660,'buisson2'],[1120,2660,'buisson'],[1220,2660,'buisson2'],[1320,2660,'buisson'],[1420,2660,'buisson2'],[1520,2660,'buisson'],[1620,2660,'buisson2'],[1720,140,'buisson'],[1720,2660,'buisson2'],[1820,140,'buisson'],[1820,2660,'buisson2'],[1920,140,'buisson'],[1920,2660,'buisson2'],[2020,140,'buisson'],[2020,2660,'buisson2'],[2120,140,'buisson'],[2120,2660,'buisson2'],[2220,140,'buisson'],[2220,2660,'buisson2'],[2320,140,'buisson'],[2320,2660,'buisson2'],[2420,140,'buisson'],[2420,2660,'buisson2'],[2520,140,'buisson'],[2520,2660,'buisson2'],[2620,140,'buisson'],[2620,2660,'buisson2'],[2720,140,'buisson'],[2720,2660,'buisson2'],[2820,140,'buisson'],[2820,2660,'buisson2'],[2920,140,'buisson'],[2920,2660,'buisson2'],[3020,140,'buisson'],[3020,2660,'buisson2'],[3120,140,'buisson'],[3120,2660,'buisson2'],[3220,140,'buisson'],[3220,2660,'buisson2'],[3320,140,'buisson'],[3320,2660,'buisson2'],[3420,140,'buisson'],[3420,2660,'buisson2'],[10,240,'buisson'],[3510,240,'buisson2'],[10,340,'buisson'],[3510,340,'buisson2'],[10,440,'buisson'],[3510,440,'buisson2'],[10,540,'buisson'],[3510,540,'buisson2'],[10,640,'buisson'],[3510,640,'buisson2'],[10,740,'buisson'],[3510,740,'buisson2'],[10,840,'buisson'],[3510,840,'buisson2'],[10,1140,'buisson'],[3510,1140,'buisson2'],[10,1240,'buisson'],[3510,1240,'buisson2'],[10,1340,'buisson'],[3510,1340,'buisson2'],[10,1440,'buisson'],[3510,1440,'buisson2'],[10,1540,'buisson'],[3510,1540,'buisson2'],[10,1640,'buisson'],[3510,1640,'buisson2'],[10,1740,'buisson'],[3510,1740,'buisson2'],[10,1840,'buisson'],[3510,1840,'buisson2'],[10,1940,'buisson'],[3510,1940,'buisson2'],[10,2040,'buisson'],[3510,2040,'buisson2'],[10,2340,'buisson'],[3510,2340,'buisson2'],[10,2440,'buisson'],[3510,2440,'buisson2'],[10,2540,'buisson'],[3510,2540,'buisson2'],[260,236,'buisson'],[580,236,'buisson2'],[900,236,'buisson'],[1860,236,'buisson2'],[2180,236,'buisson'],[2500,236,'buisson2'],[2820,236,'buisson'],[3140,236,'buisson2'],[100,1130,'buisson'],[260,1130,'buisson2'],[420,1130,'buisson'],[580,1130,'buisson2'],[740,1130,'buisson'],[900,1130,'buisson2'],[1060,1130,'buisson'],[1220,1130,'buisson2'],[1380,1130,'buisson'],[1700,1130,'buisson2'],[1850,1130,'buisson'],[2000,1130,'buisson2'],[2150,1130,'buisson'],[2300,1130,'buisson2'],[2450,1130,'buisson'],[1460,1060,'buisson2'],[1650,1060,'buisson'],[1460,1230,'buisson2'],[1650,1230,'buisson'],[1460,1400,'buisson2'],[1650,1400,'buisson'],[1460,1570,'buisson2'],[1650,1570,'buisson'],[1460,1740,'buisson2'],[1650,1740,'buisson'],[1460,1910,'buisson2'],[1650,1910,'buisson'],[100,2400,'buisson2'],[520,2400,'buisson'],[940,2400,'buisson2'],[1360,2400,'buisson'],[1780,2400,'buisson2'],[2200,2400,'buisson'],[2620,2400,'buisson2'],[3040,2400,'buisson']];
@@ -366,25 +371,47 @@ for(const e of LIENS){const o=GEOM_OLD[e[1]],h=BATM[e[1]][4];e[2]=e[2]-o[0]+DOOR
 function majCollisions(){const v=[];for(const b of BAT){if(b.off)continue;const o=BOX[b[0]];v.push([b[1]+o[0],b[2]+o[1],o[2],o[3]]);}
  for(const u of BUISSONS){const sp=SPR[u[2]];if(sp&&sp.sol)v.push([u[0]+sp.sol[0],u[1]-sp.h+sp.sol[1],sp.sol[2],sp.sol[3]]);}COLL.village=v;}
 function majTrajets(){const n=ROUTES[0],sr=ROUTES[1],v=ROUTES[2],ny=n[1]+n[3]/2,sy=sr[1]+sr[3]/2,vx=v[0]+v[2]/2,my=(ny+sy)/2;ROUTE_Y=ny;
- RECHERCHE=[{x:1850,y:ny},{x:350,y:ny},{x:vx,y:ny},{x:vx,y:sy},{x:2600,y:sy},{x:vx,y:sy},{x:vx,y:ny},{x:3000,y:ny}];
- BALADE_PAUL=[{x:1400,y:ny},{x:2300,y:ny},{x:3200,y:ny},{x:vx,y:ny},{x:vx,y:my},{x:vx,y:ny}];}
+ const ox=VOFF[0];RECHERCHE=[{x:1850+ox,y:ny},{x:350+ox,y:ny},{x:vx,y:ny},{x:vx,y:sy},{x:2600+ox,y:sy},{x:vx,y:sy},{x:vx,y:ny},{x:3000+ox,y:ny}];
+ BALADE_PAUL=[{x:1400+ox,y:ny},{x:2300+ox,y:ny},{x:3200+ox,y:ny},{x:vx,y:ny},{x:vx,y:my},{x:vx,y:ny}];}
 function routesImport(a){if(!Array.isArray(a)||a.length<3)return;const ok=Number.isFinite,out=[];
- for(const v of a){if(!Array.isArray(v)||!v.slice(0,4).every(ok))continue;const r=[Math.round(v[0]),Math.round(v[1]),Math.max(32,Math.min(3600,Math.round(v[2]))),Math.max(32,Math.min(2700,Math.round(v[3]))),v[4]==='t'?'t':'p'];if(v[5])r.off=true;out.push(r);}
+ for(const v of a){if(!Array.isArray(v)||!v.slice(0,4).every(ok))continue;const r=[Math.round(v[0]),Math.round(v[1]),Math.max(32,Math.min(SC.village.w,Math.round(v[2]))),Math.max(32,Math.min(SC.village.h,Math.round(v[3]))),v[4]==='t'?'t':'p'];if(v[5])r.off=true;out.push(r);}
  if(out.length<3)return;ROUTES.length=0;for(const r of out)ROUTES.push(r);}
 function mursImport(m){if(!m||typeof m!=='object')return;for(const sc of Object.keys(MURS)){const a=Array.isArray(m[sc])?m[sc]:[],R=SC[sc];
  MURS[sc]=a.filter(v=>Array.isArray(v)&&v.slice(0,4).every(Number.isFinite)).slice(0,200).map(v=>[Math.round(v[0]),Math.round(v[1]),Math.max(16,Math.min(R.w,Math.round(v[2]))),Math.max(16,Math.min(R.h,Math.round(v[3])))]);}}
 function mursReinit(){for(const sc of Object.keys(MURS))MURS[sc]=[];}
 function redimMur(sc,r,n){if(!MURS[sc]||MURS[sc].indexOf(r)<0)return false;const e=n*32,R=SC[sc];if(r[2]>=r[3]){const w=r[2]+e;if(w<32||r[0]+w>R.w-12)return false;r[2]=w;}else{const h=r[3]+e;if(h<32||r[1]+h>R.h-12)return false;r[3]=h;}return true;}
 function routesReinit(){ROUTES.length=0;for(const r of ROUTES_BASE)ROUTES.push([...r]);}
-function redimRoute(r,n){if(ROUTES.indexOf(r)<0)return false;const e=n*32;if(r[2]>=r[3]){const w=r[2]+e;if(w<64||w>3600)return false;r[2]=w;}else{const h=r[3]+e;if(h<64||h>2700)return false;r[3]=h;}majTrajets();return true;}
+function redimRoute(r,n){if(ROUTES.indexOf(r)<0)return false;const e=n*32;if(r[2]>=r[3]){const w=r[2]+e;if(w<64||w>SC.village.w)return false;r[2]=w;}else{const h=r[3]+e;if(h<64||h>SC.village.h)return false;r[3]=h;}majTrajets();return true;}
+
+// ---------- ÉTIRER routes et murs au pixel près ; AGRANDIR le village ----------
+function etirer(r,sc,cote,d){const vil=sc==='village',liste=vil?ROUTES:MURS[sc];if(!liste||liste.indexOf(r)<0||!Number.isFinite(d))return false;
+ const R=SC[sc],hor=r[2]>=r[3];let x=r[0],y=r[1],w=r[2],h=r[3];
+ if(hor){if(cote==='fin')w+=d;else{x-=d;w+=d;}}else{if(cote==='fin')h+=d;else{y-=d;h+=d;}}
+ const min=vil?64:32,x0=vil?0:12,y0=vil?0:20,x1=vil?R.w:R.w-12,y1=vil?R.h:R.h-12;
+ const ok=hor?((cote==='fin'?x+w<=x1:x>=x0)&&w>=min):((cote==='fin'?y+h<=y1:y>=y0)&&h>=min);
+ if(!ok)return false;r[0]=x;r[1]=y;r[2]=w;r[3]=h;if(vil)majTrajets();return true;}
+function etirerRoute(r,cote,d){return etirer(r,'village',cote,d);}
+function etirerMur(sc,r,cote,d){return sc!=='village'&&etirer(r,sc,cote,d);}
+function agrandirVillage(cote,n){n=Math.max(1,Math.min(60,n|0));const e=n*32,R=SC.village;let nw=R.w,nh=R.h,sx=0,sy=0;
+ if(cote==='droite')nw+=e;else if(cote==='gauche'){nw+=e;sx=e;}else if(cote==='bas')nh+=e;else if(cote==='haut'){nh+=e;sy=e;}else return false;
+ if(nw>VMAX.w||nh>VMAX.h||nw*nh>VMAX.aire)return false;
+ if(sx||sy){for(const b of BAT){b[1]+=sx;b[2]+=sy;}for(const u of BUISSONS){u[0]+=sx;u[1]+=sy;}for(const r of ROUTES){r[0]+=sx;r[1]+=sy;}
+  const dec=o=>{if(o&&o.scene==='village'){o.x+=sx;o.y+=sy;}};dec(G.player);dec(G.suiveur);if(G.trail)for(const t of G.trail)dec(t);
+  VOFF[0]+=sx;VOFF[1]+=sy;}
+ R.w=nw;R.h=nh;appliquerPlan();return true;}
+function villageExport(){return {w:SC.village.w,h:SC.village.h,o:[VOFF[0],VOFF[1]]};}
+function villageReinit(){SC.village.w=VBASE.w;SC.village.h=VBASE.h;VOFF[0]=0;VOFF[1]=0;}
+function villageImport(v){villageReinit();if(!v||typeof v!=='object')return;const ok=Number.isFinite;
+ if(ok(v.w)&&ok(v.h)){const w=Math.round(v.w),h=Math.round(v.h);if(w>=VBASE.w&&h>=VBASE.h&&w<=VMAX.w&&h<=VMAX.h&&w*h<=VMAX.aire){SC.village.w=w;SC.village.h=h;}}
+ if(Array.isArray(v.o)&&ok(v.o[0])&&ok(v.o[1])){VOFF[0]=Math.max(0,Math.round(v.o[0]));VOFF[1]=Math.max(0,Math.round(v.o[1]));}}
 function appliquerPlan(){for(const [o,own,dx,dy,kx,ky] of LIENS){const b=BATM[own];o[kx]=b[1]+dx;o[ky]=b[2]+dy;}majCollisions();majTrajets();}
-function planExporter(){const b={};for(const x of BAT)b[x[0]]=x.off?[x[1],x[2],1]:[x[1],x[2]];return JSON.stringify({b,u:BUISSONS.map(u=>[u[0],u[1],u[2]]),i:ITEMS,m:MURS,g:geomExport(),ro:ROUTES.map(r=>r.off?[r[0],r[1],r[2],r[3],r[4],1]:[r[0],r[1],r[2],r[3],r[4]]),r:Object.entries(INTS).filter(([k,v])=>v.user).map(([k,v])=>({id:k,nom:v.nom,tw:v.tw,th:v.th,fl:v.fl,wl:v.wl,own:v.own,dec:v.dec}))});}
+function planExporter(){const b={};for(const x of BAT)b[x[0]]=x.off?[x[1],x[2],1]:[x[1],x[2]];return JSON.stringify({b,v:villageExport(),u:BUISSONS.map(u=>[u[0],u[1],u[2]]),i:ITEMS,m:MURS,g:geomExport(),ro:ROUTES.map(r=>r.off?[r[0],r[1],r[2],r[3],r[4],1]:[r[0],r[1],r[2],r[3],r[4]]),r:Object.entries(INTS).filter(([k,v])=>v.user).map(([k,v])=>({id:k,nom:v.nom,tw:v.tw,th:v.th,fl:v.fl,wl:v.wl,own:v.own,dec:v.dec}))});}
 function planImporter(txt){const p=JSON.parse(txt);for(const x of BAT){const v=p.b&&p.b[x[0]];if(v&&isFinite(v[0])&&isFinite(v[1])){x[1]=Math.round(v[0]);x[2]=Math.round(v[1]);x.off=!!v[2];}}
  if(Array.isArray(p.u)){BUISSONS.length=0;for(const v of p.u){if(v&&isFinite(v[0])&&isFinite(v[1]))BUISSONS.push([Math.round(v[0]),Math.round(v[1]),SPR[v[2]]?v[2]:'buisson']);}}
- retirerPiecesUser();geomImport(p.g);routesImport(p.ro);if(Array.isArray(p.r)){for(const r of p.r)recreerPiece(r);}mursImport(p.m);
+ retirerPiecesUser();geomImport(p.g);villageImport(p.v);routesImport(p.ro);if(Array.isArray(p.r)){for(const r of p.r)recreerPiece(r);}mursImport(p.m);
  if(p.i&&typeof p.i==='object'){for(const sc of Object.keys(ITEMS)){if(!Array.isArray(p.i[sc]))continue;ITEMS[sc].length=0;for(const v of p.i[sc]){if(v&&isFinite(v[0])&&isFinite(v[1])&&SPRI[v[2]]){const it=[Math.round(v[0]),Math.round(v[1]),v[2]];if(v[3])it.push(1);if(v[2]==='porte'||v[2]==='passage'){it.length=0;it.push(Math.round(v[0]),Math.round(v[1]),v[2],0,typeof v[4]==='string'?v[4]:'');}ITEMS[sc].push(it);}}}}
  appliquerPlan();}
-function planReinit(){for(const x of BAT){x[1]=BASE_BAT[x[0]][0];x[2]=BASE_BAT[x[0]][1];x.off=false;}BUISSONS.length=0;for(const u of BASE_BUI)BUISSONS.push([u[0],u[1],u[2]]);retirerPiecesUser();geomReinit();routesReinit();mursReinit();for(const sc in BASE_ITEMS){ITEMS[sc].length=0;for(const v of BASE_ITEMS[sc])ITEMS[sc].push([...v]);}appliquerPlan();}
+function planReinit(){villageReinit();for(const x of BAT){x[1]=BASE_BAT[x[0]][0];x[2]=BASE_BAT[x[0]][1];x.off=false;}BUISSONS.length=0;for(const u of BASE_BUI)BUISSONS.push([u[0],u[1],u[2]]);retirerPiecesUser();geomReinit();routesReinit();mursReinit();for(const sc in BASE_ITEMS){ITEMS[sc].length=0;for(const v of BASE_ITEMS[sc])ITEMS[sc].push([...v]);}appliquerPlan();}
 {const L2={Maison_Aaron:[200,364],Maison_Benjamin:[658,300],Maison_Paul:[1212,76],Pharmacie:[1766,396],Boulangerie:[2160,492],Poste_Police:[2554,364],Maison_Mami:[150,1488],Maison_Zoe:[900,1552],Maison_Marc:[1800,1488],Ecole:[2560,1264]};
  for(const n in L2){BATM[n][1]=L2[n][0];BATM[n][2]=L2[n][1];}
  CHEMINS.forEach(c=>{c[3]=90;});
@@ -557,7 +584,7 @@ function interactifs(){
  for(const id in pos){const n=pos[id];if(n.scene===pl.scene) list.push({id,type:'pnj',x:n.x,y:n.y,r:44});}
  if(pl.scene==='village'){
   if(L.cleAuSol) list.push({id:'cle',type:'obj',...P.cleSol,r:36});
-  if(G.minute>=6&&!G.prologue) list.push({id:'mot',type:'obj',x:890,y:628,r:30});
+  if(G.minute>=6&&!G.prologue) list.push({id:'mot',type:'obj',x:BATM.Maison_Paul[1]+130,y:BATM.Maison_Paul[2]+444,r:30});
   for(const p of PORTES_V) if(!BATM[p.own].off) list.push({id:p.id,type:'porte',x:p.x,y:p.y,r:52});
  }
  if(pl.scene==='chambre'){const c=itemDe('chambre','commode'),f=itemDe('chambre','fenetre_cassee'),r=itemDe('chambre','radiateur');
@@ -673,7 +700,7 @@ function bouger(dx,dy,dt){
  if(G.prologue&&G.pro&&G.pro.etape==='matin'&&pl.scene==='village'&&Math.hypot(pl.x-ECOLE.x,pl.y-ECOLE.y)<64)deposerLoulou();
  return true;
 }
-if(typeof module!=='undefined') module.exports={MURS,redimMur,ROUTES,redimRoute,majTrajets,trajets:()=>({ROUTE_Y,RECHERCHE,BALADE_PAUL}),setPublic:v=>{MODE_PUBLIC=v;},pub,agrandir,geomExport,geomImport,passageInt,PBASE,BASE_GEOM,STYLES,creerPiece,supprimerPiece,porteInt,libreIn,recreerPiece,INTS,ENTREES,arriveeVillage,DOOR,ITEMS,SPRI,itemDe,collItem,machineBase,echellePos,coupe,degager,consigne,etapes,SPR,BATM,P,planExporter,planImporter,planReinit,appliquerPlan,BUISSONS,FIXES,sauter,objectif,porte,suivre,sieste,deposerLoulou,PORTES_V,ECOLE,G,D,NOMS,LETTRE,MESSAGE_FINAL,AJOUTS_DEMO,nouvellePartie,demarrerBoucle,avancer,regler,interagir,parler,objet,code,positions,bouger,cible,changerScene,nathalie,benjamin,tempsActif,numeroBoucle,solids,machinePos,SC,BAT};
+if(typeof module!=='undefined') module.exports={etirerRoute,etirerMur,agrandirVillage,villageExport,VOFF,MURS,redimMur,ROUTES,redimRoute,majTrajets,trajets:()=>({ROUTE_Y,RECHERCHE,BALADE_PAUL}),setPublic:v=>{MODE_PUBLIC=v;},pub,agrandir,geomExport,geomImport,passageInt,PBASE,BASE_GEOM,STYLES,creerPiece,supprimerPiece,porteInt,libreIn,recreerPiece,INTS,ENTREES,arriveeVillage,DOOR,ITEMS,SPRI,itemDe,collItem,machineBase,echellePos,coupe,degager,consigne,etapes,SPR,BATM,P,planExporter,planImporter,planReinit,appliquerPlan,BUISSONS,FIXES,sauter,objectif,porte,suivre,sieste,deposerLoulou,PORTES_V,ECOLE,G,D,NOMS,LETTRE,MESSAGE_FINAL,AJOUTS_DEMO,nouvellePartie,demarrerBoucle,avancer,regler,interagir,parler,objet,code,positions,bouger,cible,changerScene,nathalie,benjamin,tempsActif,numeroBoucle,solids,machinePos,SC,BAT};
 </script>
 <script>// ===== CALM LAND - AFFICHAGE ET INTERFACE =====
 const PUBLIC=true,PLAN_FIGE="{\"b\":{\"Maison_Aaron\":[200,364],\"Maison_Benjamin\":[658,300],\"Maison_Paul\":[1212,76],\"Pharmacie\":[1766,396],\"Boulangerie\":[2160,492],\"Poste_Police\":[2554,364],\"Maison_Mami\":[150,1488],\"Maison_Zoe\":[900,1552],\"Maison_Marc\":[1800,1488],\"Ecole\":[2560,1264]},\"u\":[[20,140,\"buisson\"],[20,2660,\"buisson2\"],[120,140,\"buisson\"],[120,2660,\"buisson2\"],[220,140,\"buisson\"],[220,2660,\"buisson2\"],[320,140,\"buisson\"],[320,2660,\"buisson2\"],[420,140,\"buisson\"],[420,2660,\"buisson2\"],[520,140,\"buisson\"],[520,2660,\"buisson2\"],[620,140,\"buisson\"],[620,2660,\"buisson2\"],[720,140,\"buisson\"],[720,2660,\"buisson2\"],[820,140,\"buisson\"],[820,2660,\"buisson2\"],[920,140,\"buisson\"],[920,2660,\"buisson2\"],[1020,140,\"buisson\"],[1020,2660,\"buisson2\"],[1120,2660,\"buisson\"],[1220,2660,\"buisson2\"],[1320,2660,\"buisson\"],[1420,2660,\"buisson2\"],[1520,2660,\"buisson\"],[1620,2660,\"buisson2\"],[1720,140,\"buisson\"],[1720,2660,\"buisson2\"],[1820,140,\"buisson\"],[1820,2660,\"buisson2\"],[1920,140,\"buisson\"],[1920,2660,\"buisson2\"],[2020,140,\"buisson\"],[2020,2660,\"buisson2\"],[2120,140,\"buisson\"],[2120,2660,\"buisson2\"],[2220,140,\"buisson\"],[2220,2660,\"buisson2\"],[2320,140,\"buisson\"],[2320,2660,\"buisson2\"],[2420,140,\"buisson\"],[2420,2660,\"buisson2\"],[2520,140,\"buisson\"],[2520,2660,\"buisson2\"],[2620,140,\"buisson\"],[2620,2660,\"buisson2\"],[2720,140,\"buisson\"],[2720,2660,\"buisson2\"],[2820,140,\"buisson\"],[2820,2660,\"buisson2\"],[2920,140,\"buisson\"],[2920,2660,\"buisson2\"],[3020,140,\"buisson\"],[3020,2660,\"buisson2\"],[3120,140,\"buisson\"],[3120,2660,\"buisson2\"],[3220,140,\"buisson\"],[3220,2660,\"buisson2\"],[3320,140,\"buisson\"],[3320,2660,\"buisson2\"],[3420,140,\"buisson\"],[3420,2660,\"buisson2\"],[10,240,\"buisson\"],[3510,240,\"buisson2\"],[10,340,\"buisson\"],[3510,340,\"buisson2\"],[10,440,\"buisson\"],[3510,440,\"buisson2\"],[10,540,\"buisson\"],[3510,540,\"buisson2\"],[10,640,\"buisson\"],[3510,640,\"buisson2\"],[10,740,\"buisson\"],[3510,740,\"buisson2\"],[10,840,\"buisson\"],[3510,840,\"buisson2\"],[10,1140,\"buisson\"],[3510,1140,\"buisson2\"],[10,1240,\"buisson\"],[3510,1240,\"buisson2\"],[10,1340,\"buisson\"],[3510,1340,\"buisson2\"],[10,1440,\"buisson\"],[3510,1440,\"buisson2\"],[10,1540,\"buisson\"],[3510,1540,\"buisson2\"],[10,1640,\"buisson\"],[3510,1640,\"buisson2\"],[10,1740,\"buisson\"],[3510,1740,\"buisson2\"],[10,1840,\"buisson\"],[3510,1840,\"buisson2\"],[10,1940,\"buisson\"],[3510,1940,\"buisson2\"],[10,2040,\"buisson\"],[3510,2040,\"buisson2\"],[10,2340,\"buisson\"],[3510,2340,\"buisson2\"],[10,2440,\"buisson\"],[3510,2440,\"buisson2\"],[10,2540,\"buisson\"],[3510,2540,\"buisson2\"],[260,236,\"buisson\"],[580,236,\"buisson2\"],[900,236,\"buisson\"],[1860,236,\"buisson2\"],[2180,236,\"buisson\"],[2500,236,\"buisson2\"],[2820,236,\"buisson\"],[3140,236,\"buisson2\"],[100,1130,\"buisson\"],[260,1130,\"buisson2\"],[420,1130,\"buisson\"],[580,1130,\"buisson2\"],[740,1130,\"buisson\"],[900,1130,\"buisson2\"],[1060,1130,\"buisson\"],[1220,1130,\"buisson2\"],[1380,1130,\"buisson\"],[1700,1130,\"buisson2\"],[1850,1130,\"buisson\"],[2000,1130,\"buisson2\"],[2150,1130,\"buisson\"],[2300,1130,\"buisson2\"],[2450,1130,\"buisson\"],[1460,1060,\"buisson2\"],[1650,1060,\"buisson\"],[1460,1230,\"buisson2\"],[1650,1230,\"buisson\"],[1460,1400,\"buisson2\"],[1650,1400,\"buisson\"],[1460,1570,\"buisson2\"],[1650,1570,\"buisson\"],[1460,1740,\"buisson2\"],[1650,1740,\"buisson\"],[1460,1910,\"buisson2\"],[1650,1910,\"buisson\"],[100,2400,\"buisson2\"],[520,2400,\"buisson\"],[940,2400,\"buisson2\"],[1360,2400,\"buisson\"],[1780,2400,\"buisson2\"],[2200,2400,\"buisson\"],[2620,2400,\"buisson2\"],[3040,2400,\"buisson\"]],\"i\":{\"chambre\":[[176,250,\"tapis_rond\",1],[36,150,\"lit_vert\"],[190,118,\"commode\"],[316,120,\"armoire\"],[120,50,\"fenetre_cassee\"],[52,50,\"radiateur\"],[134,114,\"pierre\",1]],\"salon\":[[40,114,\"cheminee\"],[110,120,\"bibliotheque\"],[176,122,\"plante\"],[70,236,\"canape\"],[20,290,\"plante_grande\"],[372,120,\"buffet\"],[470,300,\"plante\"],[332,196,\"machine\"]],\"soussol\":[[20,128,\"bibliotheque\"],[100,128,\"armoire\"],[300,160,\"lit_petit\"],[330,276,\"tapis_rond\",1],[56,176,\"trappe_bas\",1]],\"int_paul\":[[20,128,\"bibliotheque\"],[88,128,\"bibliotheque\"],[156,128,\"bibliotheque\"],[250,120,\"buffet\"],[400,130,\"plante_grande\"],[60,250,\"canape\"],[380,290,\"plante\"],[210,260,\"tapis_rond\",1]],\"int_mami\":[[40,114,\"cheminee\"],[130,118,\"commode\"],[238,120,\"armoire\"],[378,150,\"lit_vert\"],[30,290,\"plante\"],[200,260,\"tapis_rond\",1]],\"int_zoe\":[[40,150,\"lit_petit\"],[110,150,\"lit_petit\"],[200,118,\"commode\"],[320,128,\"bibliotheque\"],[400,130,\"plante\"],[250,250,\"canape\"],[150,260,\"tapis_rond\",1],[460,300,\"plante_grande\"]],\"int_marc\":[[36,150,\"lit_vert\"],[110,120,\"armoire\"],[250,120,\"buffet\"],[370,128,\"bibliotheque\"],[30,290,\"plante\"],[200,260,\"tapis_rond\",1]],\"int_pharmacie\":[[30,128,\"bibliotheque\"],[100,128,\"bibliotheque\"],[170,128,\"bibliotheque\"],[240,128,\"bibliotheque\"],[310,128,\"bibliotheque\"],[160,230,\"buffet\"],[440,130,\"plante\"],[60,290,\"plante\"]],\"int_boulangerie\":[[30,120,\"buffet\"],[140,120,\"buffet\"],[260,128,\"bibliotheque\"],[330,128,\"bibliotheque\"],[200,240,\"buffet\"],[400,290,\"plante\"],[400,130,\"plante\"]],\"int_poste\":[[30,120,\"buffet\"],[140,120,\"buffet\"],[260,120,\"armoire\"],[400,128,\"bibliotheque\"],[200,240,\"buffet\"],[30,290,\"plante\"],[470,300,\"plante_grande\"]],\"int_ecole\":[[30,128,\"bibliotheque\"],[100,128,\"bibliotheque\"],[250,120,\"buffet\"],[420,120,\"armoire\"],[560,128,\"bibliotheque\"],[120,230,\"buffet\"],[260,230,\"buffet\"],[400,230,\"buffet\"],[120,310,\"buffet\"],[260,310,\"buffet\"],[400,310,\"buffet\"],[590,340,\"plante_grande\"],[540,250,\"tapis_rond\",1]]},\"m\":{\"chambre\":[],\"salon\":[],\"soussol\":[],\"int_paul\":[],\"int_mami\":[],\"int_zoe\":[],\"int_marc\":[],\"int_pharmacie\":[],\"int_boulangerie\":[],\"int_poste\":[],\"int_ecole\":[]},\"g\":{\"chambre\":{\"w\":448,\"h\":320,\"dec\":[0,0],\"gap\":[196,226],\"cl\":[]},\"salon\":{\"w\":512,\"h\":320,\"dec\":[0,0],\"gap\":[240,272],\"cl\":[]},\"soussol\":{\"w\":448,\"h\":320,\"dec\":[0,0],\"gap\":null,\"cl\":[[248,64,16,98,\"t\"],[248,240,16,70,\"b\"]]},\"int_paul\":{\"w\":448,\"h\":320,\"dec\":[0,0],\"gap\":[208,240],\"cl\":[]},\"int_mami\":{\"w\":448,\"h\":320,\"dec\":[0,0],\"gap\":[208,240],\"cl\":[]},\"int_zoe\":{\"w\":512,\"h\":320,\"dec\":[0,0],\"gap\":[240,272],\"cl\":[]},\"int_marc\":{\"w\":448,\"h\":320,\"dec\":[0,0],\"gap\":[208,240],\"cl\":[]},\"int_pharmacie\":{\"w\":512,\"h\":320,\"dec\":[0,0],\"gap\":[240,272],\"cl\":[]},\"int_boulangerie\":{\"w\":448,\"h\":320,\"dec\":[0,0],\"gap\":[208,240],\"cl\":[]},\"int_poste\":{\"w\":512,\"h\":320,\"dec\":[0,0],\"gap\":[240,272],\"cl\":[]},\"int_ecole\":{\"w\":640,\"h\":384,\"dec\":[0,0],\"gap\":[304,336],\"cl\":[]}},\"ro\":[[0,870,3600,96,\"p\"],[0,2090,3600,96,\"p\"],[1560,966,64,1124,\"p\"]],\"r\":[]}";MODE_PUBLIC=PUBLIC;
@@ -699,9 +726,10 @@ function majMusique(dt){
 }
 
 // ---------- FOND DU VILLAGE (dessiné une fois) ----------
-function dessinerFond(){
- const R=SC.village;fond=document.createElement('canvas');fond.width=R.w;fond.height=R.h;const f=fond.getContext('2d');f.imageSmoothingEnabled=false;
- for(let y=0;y<R.h;y+=32)for(let x=0;x<R.w;x+=32)f.drawImage(IMG.t_herbe,x,y);
+function dessinerFond(){const R=SC.village,TS=1024;fond=[];
+ for(let ty=0;ty<R.h;ty+=TS)for(let tx=0;tx<R.w;tx+=TS){const c=document.createElement('canvas');c.width=Math.min(TS,R.w-tx);c.height=Math.min(TS,R.h-ty);const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.translate(-tx,-ty);dessinerFondSur(g,tx,ty,c.width,c.height);fond.push({x:tx,y:ty,w:c.width,h:c.height,c});}}
+function dessinerFondSur(f,tx,ty,tw,th){
+ for(let y=Math.floor(ty/32)*32;y<ty+th;y+=32)for(let x=Math.floor(tx/32)*32;x<tx+tw;x+=32)f.drawImage(IMG.t_herbe,x,y);
  for(const r of ROUTES){if(r.off)continue;const t=r[4]==='t',ts=t?32:64,im=t?IMG.t_terre:IMG.t_pave;for(let y=r[1];y<r[1]+r[3];y+=ts)for(let x=r[0];x<r[0]+r[2];x+=ts){const ww=Math.min(ts,r[0]+r[2]-x),hh=Math.min(ts,r[1]+r[3]-y);f.drawImage(im,0,0,ww,hh,x,y,ww,hh);}}
  const ch=CHEMINS;
  for(const c of ch)for(let y=c[1];y<c[1]+c[3];y+=32)for(let x=c[0];x<c[0]+c[2];x+=32)f.drawImage(IMG.t_terre,0,0,32,Math.min(32,c[1]+c[3]-y),x,y,32,Math.min(32,c[1]+c[3]-y));
@@ -743,7 +771,7 @@ function dessiner(t){
  if(!L)return;
  cx.save();cx.scale(ZOOM,ZOOM);cx.translate(-Math.round(cam.x),-Math.round(cam.y));
  const labels=[];
- if(pl.scene==='village')cx.drawImage(fond,0,0);else cx.drawImage(baseDe(pl.scene),0,0);
+ if(pl.scene==='village'){for(const t of fond){if(t.x+t.w<cam.x||t.y+t.h<cam.y||t.x>cam.x+VW/ZOOM||t.y>cam.y+VH/ZOOM)continue;cx.drawImage(t.c,0,0,t.w,t.h,t.x,t.y,t.w+1,t.h+1);}}else cx.drawImage(baseDe(pl.scene),0,0);
  const objs=[];
  if(pl.scene==='village')for(const u of BUISSONS){const sp=SPR[u[2]];if(sp.h>=96){const ux=u[0],uy=u[1],c=coupe(sp),yb=sp.sol?sp.sol[1]+sp.sol[3]:sp.h;if(c>0)objs.push({y:uy-sp.h+yb,d:()=>cx.drawImage(IMG.atlas,sp.x,sp.y,sp.w,c,ux,uy-sp.h,sp.w,c)});}}
  // objets
@@ -819,7 +847,7 @@ addEventListener('keyup',e=>{touches[e.key.toLowerCase()]=false;});
 function basculerSon(){son=!son;majBoutonSon();}
 function majBoutonSon(){const b=$('b-son');if(b)b.textContent=son?'🔊':'🔇';}
 function sauterTemps(d){if(EDIT||G.mode!=='jeu'||G.prologue||G.queue.length||G.keypad)return;sauter(d);pomper();}
-function zoom(d){const Z=[0.2,0.28,0.4,0.5,0.7,1,1.4,1.8,2.4];let i=Z.indexOf(ZOOM);if(i<0)i=5;ZOOM=Z[Math.max(0,Math.min(Z.length-1,i+d))];$('zoom-val').textContent=Math.round(ZOOM*100)+' %';}
+function zoom(d){const Z=[0.08,0.11,0.14,0.2,0.28,0.4,0.5,0.7,1,1.4,1.8,2.4];let i=Z.indexOf(ZOOM);if(i<0){i=Z.findIndex(z=>z>=ZOOM);if(i<0)i=Z.length-1;if(d<0&&Z[i]>ZOOM)i=Math.max(0,i);else if(d>0&&Z[i]>ZOOM)i=Math.max(0,i-1);}ZOOM=Z[Math.max(0,Math.min(Z.length-1,i+d))];$('zoom-val').textContent=Math.round(ZOOM*100)+' %';}
 function dirClavier(){let dx=0,dy=0;const T=touches;
  if(T.arrowleft||T.q||T.a||T.tg)dx-=1;if(T.arrowright||T.d||T.td)dx+=1;if(T.arrowup||T.z||T.w||T.th)dy-=1;if(T.arrowdown||T.s||T.tb)dy+=1;
  if(dx&&dy){dx*=0.707;dy*=0.707;}return {dx,dy};}
@@ -1045,7 +1073,7 @@ function allerEd(sc){const p=(SPAWN[sc]||(()=>({x:SC[sc].w/2,y:SC[sc].h-80})))()
 function basculerColl(){if(!selEd||selEd.kind!=='i'){msg('Sélectionne un meuble dans une pièce');return;}pushUndo();const it=selEd.ref;if(it[3])it.length=3;else it[3]=1;msg(it[3]?'Ce meuble est traversable':'Ce meuble est solide');majApres();}
 function panEditeur(dt){const {dx,dy}=dirClavier();EC.x+=dx*420*dt/ZOOM;EC.y+=dy*420*dt/ZOOM;}
 function debutPinch(){const v=[...ptrs.values()],a=v[0],b=v[1],r=cv.getBoundingClientRect();drag=null;const mx=((a.x+b.x)/2-r.left)*VW/r.width,my=((a.y+b.y)/2-r.top)*VH/r.height,c=camera();pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,z:ZOOM,mx,my,wx:c.x+mx/ZOOM,wy:c.y+my/ZOOM};}
-function majPinch(){const v=[...ptrs.values()],a=v[0],b=v[1],d=Math.hypot(a.x-b.x,a.y-b.y)||1;ZOOM=Math.max(0.2,Math.min(2.4,pinch.z*d/pinch.d));EC.x=pinch.wx-pinch.mx/ZOOM;EC.y=pinch.wy-pinch.my/ZOOM;$('zoom-val').textContent=Math.round(ZOOM*100)+' %';}
+function majPinch(){const v=[...ptrs.values()],a=v[0],b=v[1],d=Math.hypot(a.x-b.x,a.y-b.y)||1;ZOOM=Math.max(0.08,Math.min(2.4,pinch.z*d/pinch.d));EC.x=pinch.wx-pinch.mx/ZOOM;EC.y=pinch.wy-pinch.my/ZOOM;$('zoom-val').textContent=Math.round(ZOOM*100)+' %';}
 // ---------- MODE MOBILE (page mobile.html : jeu, éditeur et test au doigt) ----------
 let toastT=null;
 function toast(t){const e=$('mob-toast');e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{e.hidden=true;},3500);}
@@ -1101,25 +1129,35 @@ const R=SC.village;nx=Math.max(0,Math.min(R.w-h.w,nx));
  if(h.kind==='b'){ny=Math.max(0,Math.min(R.h-h.h,ny));if(h.ref[1]===nx&&h.ref[2]===ny)return;h.ref[1]=nx;h.ref[2]=ny;}
  else{ny=Math.max(h.h,Math.min(R.h,ny));if(h.ref[0]===nx&&h.ref[1]===ny)return;h.ref[0]=nx;h.ref[1]=ny;}
  appliquerPlan();dessinerFond();sauverPlan();majTexteEd();}
-function dessinerEditeur(cam){const vw=VW/ZOOM,vh=VH/ZOOM;
+const PAS_ED={v:16};let fondSale=false,dernFond=0;
+function poignees(){if(!selEd||(selEd.kind!=='r'&&selEd.kind!=='m'))return [];const r=selEd.ref;if(r.off)return [];const hor=r[2]>=r[3];
+ return hor?[{c:'debut',x:r[0],y:r[1]+r[3]/2},{c:'fin',x:r[0]+r[2],y:r[1]+r[3]/2}]:[{c:'debut',x:r[0]+r[2]/2,y:r[1]},{c:'fin',x:r[0]+r[2]/2,y:r[1]+r[3]}];}
+function toucherPoignee(w){const k=cv.getBoundingClientRect().width/VW,R=(MOBILE?34:18)/(k*ZOOM);let best=null,bd=R;for(const p of poignees()){const d=Math.hypot(p.x-w.x,p.y-w.y);if(d<=bd){bd=d;best=p;}}return best;}
+function dessinerPoignees(){const s=(MOBILE?16:8)/ZOOM;cx.lineWidth=2/ZOOM;for(const p of poignees()){cx.fillStyle='#ffe15a';cx.strokeStyle='#1b1b1b';cx.fillRect(p.x-s,p.y-s,2*s,2*s);cx.strokeRect(p.x-s,p.y-s,2*s,2*s);}}
+function etirerSel(cote,d){if(!d)return true;const ok=selEd.kind==='r'?etirerRoute(selEd.ref,cote,d):etirerMur(G.player.scene,selEd.ref,cote,d);
+ if(ok){selEd.w=selEd.ref[2];selEd.h=selEd.ref[3];appliquerPlan();if(G.player.scene==='village')fondSale=true;sauverPlan();majTexteEd();}return ok;}
+function dessinerEditeur(cam){dessinerEditeur0(cam);dessinerPoignees();}
+function dessinerEditeur0(cam){const vw=VW/ZOOM,vh=VH/ZOOM;
  cx.strokeStyle='rgba(255,255,255,.12)';cx.lineWidth=1/ZOOM;cx.beginPath();
- const gs=G.player.scene==='village'?32:16;
+ const gs=(G.player.scene==='village'?32:16)*(ZOOM<0.18?4:ZOOM<0.35?2:1);
  for(let x=Math.floor(cam.x/gs)*gs;x<cam.x+vw;x+=gs){cx.moveTo(x,cam.y);cx.lineTo(x,cam.y+vh);}
  for(let y=Math.floor(cam.y/gs)*gs;y<cam.y+vh;y+=gs){cx.moveTo(cam.x,y);cx.lineTo(cam.x+vw,y);}cx.stroke();
  if(G.player.scene!=='village'){cx.lineWidth=1.5/ZOOM;for(const it of ITEMS[G.player.scene]){const sp=SPRI[it[2]];if(!sp)continue;const s=selEd&&selEd.ref===it;cx.strokeStyle=s?'#ffe15a':(sp.story?'rgba(255,170,90,.9)':'rgba(120,200,255,.7)');cx.strokeRect(it[0],it[1]-sp.h,sp.w,sp.h);if(s){cx.fillStyle='rgba(255,225,90,.14)';cx.fillRect(it[0],it[1]-sp.h,sp.w,sp.h);cx.fillStyle='#ffe15a';cx.font='bold '+(11/ZOOM)+'px system-ui';cx.textAlign='left';cx.fillText(sp.nom+'  '+it[0]+', '+it[1]+(it[3]?'  (traversable)':''),it[0],it[1]-sp.h-3/ZOOM);}}for(const r of (MURS[G.player.scene]||[])){const s=selEd&&selEd.ref===r;cx.strokeStyle=s?'#ffe15a':'rgba(255,120,200,.9)';cx.strokeRect(r[0],r[1],r[2],r[3]);}return;}
 
- cx.lineWidth=2/ZOOM;cx.font='bold '+(12/ZOOM)+'px system-ui';cx.textAlign='left';
+ const fsz=Math.min(12/ZOOM,34);cx.lineWidth=2/ZOOM;cx.font='bold '+fsz+'px system-ui';cx.textAlign='left';
  for(const b of BAT){if(b.off)continue;const s=selEd&&selEd.ref===b;cx.strokeStyle=s?'#ffe15a':'rgba(120,200,255,.85)';cx.strokeRect(b[1],b[2],b[3],b[4]);if(s){cx.fillStyle='rgba(255,225,90,.12)';cx.fillRect(b[1],b[2],b[3],b[4]);}
-  cx.fillStyle=s?'#ffe15a':'#bfe6ff';cx.fillText(b[0].replace('_',' ')+'  '+b[1]+', '+b[2],b[1]+4,b[2]+16/ZOOM);}
+  cx.fillStyle=s?'#ffe15a':'#bfe6ff';cx.fillText(b[0].replace('_',' ')+'  '+b[1]+', '+b[2],b[1]+4,b[2]+fsz*1.3);}
  for(const u of BUISSONS){const sp=SPR[u[2]],w=sp.w,h=sp.h,s=selEd&&selEd.ref===u;cx.strokeStyle=s?'#ffe15a':'rgba(120,255,160,.85)';cx.strokeRect(u[0],u[1]-h,w,h);}
  for(const r of ROUTES){if(r.off)continue;const s=selEd&&selEd.ref===r;cx.strokeStyle=s?'#ffe15a':'rgba(255,170,90,.85)';cx.strokeRect(r[0],r[1],r[2],r[3]);}}
 function brancherEditeur(){
- cv.addEventListener('pointerdown',e=>{if(!EDIT)return;e.preventDefault();if(e.pointerType==='mouse')ptrs.clear();ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});if(ptrs.size===2){debutPinch();try{cv.setPointerCapture(e.pointerId);}catch(x){}return;}const w=mondeDe(e),h=toucher(w);
+ cv.addEventListener('pointerdown',e=>{if(!EDIT)return;e.preventDefault();if(e.pointerType==='mouse')ptrs.clear();ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});if(ptrs.size===2){debutPinch();try{cv.setPointerCapture(e.pointerId);}catch(x){}return;}const w=mondeDe(e),hp=toucherPoignee(w);if(hp){drag={poignee:hp.c};try{cv.setPointerCapture(e.pointerId);}catch(x){}return;}const h=toucher(w);
   if(h){selEd=h;const p=h.kind==='b'?{x:h.ref[1],y:h.ref[2]}:{x:h.ref[0],y:h.ref[1]};drag={ox:w.x-p.x,oy:w.y-p.y};}
   else{selEd=null;drag={pan:true,sx:e.clientX,sy:e.clientY,cx:EC.x,cy:EC.y};}
   majDest();try{cv.setPointerCapture(e.pointerId);}catch(x){}});
  cv.addEventListener('pointermove',e=>{if(ptrs.has(e.pointerId))ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pinch&&ptrs.size>=2){majPinch();return;}if(!EDIT||!drag)return;
   if(drag.pan){const r=cv.getBoundingClientRect();EC.x=drag.cx-(e.clientX-drag.sx)*VW/r.width/ZOOM;EC.y=drag.cy-(e.clientY-drag.sy)*VH/r.height/ZOOM;return;}
+  if(drag.poignee){if(!drag.pushed){pushUndo();drag.pushed=true;}const w=mondeDe(e),r=selEd.ref,pas=PAS_ED.v;
+   if(r[2]>=r[3]){const t=Math.round(w.x/pas)*pas;etirerSel(drag.poignee,drag.poignee==='fin'?t-(r[0]+r[2]):r[0]-t);}else{const t=Math.round(w.y/pas)*pas;etirerSel(drag.poignee,drag.poignee==='fin'?t-(r[1]+r[3]):r[1]-t);}return;}
   if(!drag.pushed){pushUndo();drag.pushed=true;}
   const w=mondeDe(e);{const g=G.player.scene==='village'?32:16;deplacer(selEd,Math.round((w.x-drag.ox)/g)*g,Math.round((w.y-drag.oy)/g)*g);}});
  const finPtr=e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;drag=null;};cv.addEventListener('pointerup',finPtr);cv.addEventListener('pointercancel',finPtr);
@@ -1136,8 +1174,13 @@ function brancherEditeur(){
   if(!agrandir(sc,$('ag-cote').value,+$('ag-n').value)){undo.pop();msg('Impossible : taille maximale 40 x 25 cases');return;}
   {const e=+$('ag-n').value*32,c=$('ag-cote').value;if(c==='gauche')EC.x+=e;if(c==='haut')EC.y+=e;}selEd=null;sauverPlan();majTexteEd();msg('Pièce agrandie');};
  $('np-suppr').onclick=()=>{const id=G.player.scene,I=INTS[id];if(!I||!I.user)return;const dep=Object.keys(ITEMS).find(k=>k!==id&&ITEMS[k].some(i=>i[2]==='porte'&&i[4]===id));pushUndo();supprimerPiece(id);sauverPlan();majScenesEd();allerEd(dep&&INTS[dep]?dep:'village');majTexteEd();msg('Pièce supprimée');};$('ed-coll').onclick=()=>basculerColl();
- const rd=n=>()=>{if(!selEd||(selEd.kind!=='r'&&selEd.kind!=='m')){msg('Sélectionne une route ou un mur');return;}pushUndo();const ok=selEd.kind==='r'?redimRoute(selEd.ref,n):redimMur(G.player.scene,selEd.ref,n);if(ok){selEd.w=selEd.ref[2];selEd.h=selEd.ref[3];majApres();}else{undo.pop();msg('Taille limite atteinte');}};
- $('ed-rplus').onclick=rd(2);$('ed-rmoins').onclick=rd(-2);
+ const pasEd=()=>+$('ed-pas').value||16;
+ const et=(cote,sg)=>()=>{if(!selEd||(selEd.kind!=='r'&&selEd.kind!=='m')){msg('Sélectionne une route ou un mur');return;}pushUndo();if(!etirerSel(cote,sg*pasEd())){undo.pop();msg('Limite atteinte');}};
+ $('ed-rplus').onclick=et('fin',1);$('ed-rmoins').onclick=et('fin',-1);$('ed-dplus').onclick=et('debut',1);$('ed-dmoins').onclick=et('debut',-1);
+ $('ed-pas').onchange=()=>{PAS_ED.v=pasEd();};
+ $('vg-go').onclick=()=>{if(G.player.scene!=='village'){msg('Choisis « Village » dans Pièce');return;}pushUndo();const c=$('vg-cote').value,n=+$('vg-n').value,e=n*32,cs=c==='tout'?['haut','bas','gauche','droite']:[c];let fait=0;
+  for(const q of cs){if(!agrandirVillage(q,n))break;fait++;if(q==='gauche')EC.x+=e;if(q==='haut')EC.y+=e;}
+  if(!fait){undo.pop();msg('Taille maximale atteinte ('+VMAX.w+' x '+VMAX.h+')');return;}selEd=null;dessinerFond();sauverPlan();majTexteEd();majDest();msg(fait<cs.length?'Agrandi en partie (taille maximale)':'Village agrandi');};
  $('ed-suppr').onclick=()=>supprimerSel();$('ed-annuler').onclick=()=>annuler();
  $('b-editeur').onclick=()=>{demarrer(false);G.queue=[];courant=null;attenteFx=0;$('dialogue').hidden=true;$('titre').hidden=true;$('titre').dataset.noir='0';basculerEditeur(true);};
 }
@@ -1147,7 +1190,8 @@ function frame(now){majCote();
  const dt=Math.min(0.05,(now-dernier)/1000);dernier=now;tReel+=dt;
  majMusique(dt);majBoutonSon();
  if(MOBILE)majMobile();
- if(EDIT){const sl=$('ed-scenes');if(sl&&sl.value!==G.player.scene)sl.value=G.player.scene;}
+ if(EDIT){const sl=$('ed-scenes');if(sl&&sl.value!==G.player.scene)sl.value=G.player.scene;const vi=$('vg-info');if(vi){const t='Village : '+SC.village.w+' x '+SC.village.h+' px';if(vi.textContent!==t)vi.textContent=t;}}
+ if(fondSale&&now-dernFond>70){fondSale=false;dernFond=now;dessinerFond();}
  if(attenteFx>0){attenteFx-=dt;if(attenteFx<=0){attenteFx=0;G.queue.shift();$('titre').hidden=true;$('titre').dataset.noir='0';courant=null;pomper();}}
  if(G.mode==='jeu'&&EDIT){panEditeur(dt);}
  if(G.mode==='jeu'&&!EDIT){
