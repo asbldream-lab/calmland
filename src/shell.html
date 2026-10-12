@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calm Land — démo jouable</title>
+<style>
+:root{--bg:#0b0b10;--fg:#ece7da;--panel:rgba(16,16,26,.92);--line:#3a3a52;--accent:#d9b56a;--muted:#a9a3b8;--paper:#efe3c4;--ink:#2b241a;
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#1a1a22;--fg:#f2eee4;}}
+:root[data-theme="dark"]{--bg:#0b0b10;--fg:#ece7da;}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);}
+body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+#ecran{position:relative;background:#000;box-shadow:0 0 0 1px var(--line);}
+#jeu{touch-action:none;width:100%;height:100%;display:block;image-rendering:pixelated;image-rendering:crisp-edges;}
+.ov{position:absolute;inset:0;}
+#hud{position:absolute;top:.5em;left:.6em;font-size:.8em;color:var(--fg);text-shadow:0 1px 2px #000;opacity:.9;}
+#inv{position:absolute;top:.5em;right:.6em;font-size:.8em;text-shadow:0 1px 2px #000;}
+#dialogue{display:flex;gap:.8em;align-items:flex-start;position:absolute;left:3%;right:3%;bottom:4%;background:var(--panel);border:2px solid var(--line);border-radius:.5em;padding:.7em 1em;min-height:4.2em;cursor:pointer;}
+#visage{width:4.4em;height:4.4em;image-rendering:pixelated;border:2px solid var(--line);border-radius:.3em;flex:none;}
+#dtxt{flex:1;min-width:0;}
+#outils{position:absolute;top:2em;left:.5em;display:flex;gap:.3em;flex-wrap:wrap;font-size:.72em;}
+#outils button{font:inherit;background:rgba(20,20,32,.75);color:var(--fg);border:1px solid var(--line);border-radius:.3em;padding:.2em .5em;cursor:pointer;}
+#obj{position:absolute;top:4.1em;left:.7em;right:.7em;font-size:.82em;line-height:1.35;background:rgba(10,10,18,.55);padding:.15em .5em;border-radius:.3em;color:#ffe9a8;text-shadow:0 1px 2px #000;max-width:70%;}
+#guide{position:absolute;inset:3%;background:rgba(10,10,18,.97);border:1px solid var(--line);border-radius:.5em;overflow:auto;padding:1em 1.4em;font-size:.78em;line-height:1.45;}
+#guide h3{color:var(--accent);margin:.9em 0 .3em;}#guide li{margin:.25em 0;}#guide kbd{background:#2a2a3c;border:1px solid var(--line);border-radius:.25em;padding:0 .35em;}
+#dialogue #nom{color:var(--accent);font-weight:700;margin-bottom:.25em;min-height:1.1em;}
+#dialogue[data-who="_"] #texte{font-style:italic;color:var(--muted);}
+#dialogue[data-who="V"] #texte{font-style:italic;color:#c9d6ff;}
+#texte{line-height:1.35;white-space:pre-wrap;}
+#suite{position:absolute;right:.7em;bottom:.4em;font-size:.75em;color:var(--muted);}
+#choix{display:flex;gap:.6em;margin-top:.6em;}
+#choix button,.btn{font:inherit;background:#2a2a3c;color:var(--fg);border:1px solid var(--line);border-radius:.4em;padding:.4em .9em;cursor:pointer;}
+#choix button:focus,.btn:focus,#choix button:hover,.btn:hover{outline:2px solid var(--accent);}
+#titre{position:absolute;inset:0;background:#000;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 12%;font-size:1.15em;line-height:1.5;color:var(--fg);cursor:pointer;}
+#pave{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--panel);border:2px solid var(--line);border-radius:.6em;padding:.8em 1em;text-align:center;}
+#pave-val{font-family:ui-monospace,Menlo,monospace;font-size:1.6em;letter-spacing:.1em;margin:.2em 0 .5em;}
+#pave-temps{font-size:.8em;color:var(--muted);margin-bottom:.5em;}
+#pave .g{display:grid;grid-template-columns:repeat(3,2.6em);gap:.35em;justify-content:center;}
+#pave button{font:inherit;height:2.2em;background:#2a2a3c;color:var(--fg);border:1px solid var(--line);border-radius:.35em;cursor:pointer;}
+#lettre{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#000;}
+#lettre.papier #lettre-txt{background:var(--paper);color:var(--ink);font-family:Georgia,"Times New Roman",serif;padding:1.4em 1.8em;max-width:70%;max-height:80%;overflow:auto;white-space:pre-wrap;line-height:1.5;border-radius:.2em;box-shadow:0 6px 30px #000;}
+#lettre.final #lettre-txt{color:var(--fg);font-size:1.3em;text-align:center;max-width:70%;line-height:1.6;}
+#menu,#chargement{position:absolute;inset:0;background:radial-gradient(ellipse at center,#1d1d2c 0%,#07070b 75%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7em;text-align:center;}
+#menu h1{margin:0;font-size:2.2em;letter-spacing:.08em;color:var(--fg);}
+#menu p{margin:0;color:var(--muted);font-size:.85em;max-width:80%;}
+#menu .row{display:flex;gap:.6em;flex-wrap:wrap;justify-content:center;}
+#menu select{font:inherit;background:#2a2a3c;color:var(--fg);border:1px solid var(--line);border-radius:.4em;padding:.3em;}
+#test{position:absolute;top:0;right:0;bottom:0;width:38%;background:rgba(10,10,18,.95);border-left:1px solid var(--line);overflow:auto;padding:.6em;font-size:.72em;}
+#test h4{margin:.6em 0 .3em;color:var(--accent);}
+#test .b{display:flex;flex-wrap:wrap;gap:.3em;}
+#editeur{position:absolute;left:0;bottom:0;width:46%;background:rgba(10,10,18,.94);border:1px solid var(--line);padding:.5em .6em;font-size:.72em;}
+#editeur p{margin:.3em 0;color:var(--muted);}
+#editeur input,#editeur select{font:inherit;background:#14141f;color:var(--fg);border:1px solid var(--line);border-radius:.3em;padding:.2em .4em;margin:.2em 0;max-width:100%;}
+#editeur summary{cursor:pointer;color:var(--accent);font-weight:700;margin:.4em 0;}
+.grille2{display:flex;flex-wrap:wrap;gap:3px;max-height:7em;overflow:auto;margin:.2em 0;}.grille2 canvas{border:2px solid transparent;border-radius:.2em;cursor:pointer;image-rendering:pixelated;}.grille2 canvas.sel{border-color:var(--accent);}
+#editeur .b{display:flex;flex-wrap:wrap;gap:.3em;margin:.3em 0;}
+#editeur textarea{width:100%;box-sizing:border-box;height:4.6em;font-family:ui-monospace,Menlo,monospace;font-size:.9em;background:#14141f;color:var(--fg);border:1px solid var(--line);}
+#biblio{position:absolute;right:0;top:0;bottom:0;width:24%;background:rgba(10,10,18,.94);border-left:1px solid var(--line);overflow:auto;padding:.5em;font-size:.72em;}
+#biblio h4{margin:.7em 0 .3em;color:var(--accent);}#biblio p{margin:.2em 0;color:var(--muted);}
+.grille{display:flex;flex-wrap:wrap;gap:.3em;}.grille canvas{width:44px;height:44px;background:#2a3a2a;border:1px solid var(--line);border-radius:.25em;cursor:grab;image-rendering:pixelated;touch-action:none;}
+#editeur button,#biblio button,#test button{font:inherit;background:#252536;color:var(--fg);border:1px solid var(--line);border-radius:.3em;padding:.25em .5em;cursor:pointer;}
+#test label{display:block;margin:.15em 0;}
+#liste{position:absolute;inset:4%;background:rgba(10,10,18,.97);border:1px solid var(--line);border-radius:.5em;overflow:auto;padding:1em;font-size:.75em;}
+#liste h3{color:var(--accent);margin:1em 0 .3em;font-size:1em;}
+#liste p{margin:.15em 0;}#liste b{color:var(--muted);margin-right:.4em;}
+#tactile{position:absolute;inset:0;pointer-events:none;}
+#tactile button{pointer-events:auto;position:absolute;width:3em;height:3em;border-radius:50%;border:1px solid var(--line);background:rgba(30,30,45,.55);color:var(--fg);font:inherit;font-size:1em;touch-action:none;}
+#cote{display:flex;flex-direction:column;gap:.6em;width:340px;height:100%;box-sizing:border-box;padding:.6em;overflow:auto;background:#0f0f18;border-left:1px solid var(--line);font-size:13px;flex:none;}
+#cote #editeur,#cote #biblio,#cote #test{position:static;inset:auto;width:auto;border:1px solid var(--line);border-radius:.4em;padding:.5em .6em;font-size:1em;background:rgba(20,20,32,.9);}
+#cote #biblio{flex:1 1 auto;min-height:12em;overflow:auto;}
+#cote #test{overflow:visible;}
+@media (max-width:800px){body{flex-direction:column;}#cote{width:100%;height:42vh;border-left:0;border-top:1px solid var(--line);}}
+[hidden]{display:none !important;}
+</style>
+</head>
+<body>
+<div id="ecran">
+ <canvas id="jeu" width="640" height="360"></canvas>
+ <div id="hud"></div><div id="inv"></div>
+ <div id="outils"><button data-o="m1">+1 min (J)</button><button data-o="m5">+5 min (K)</button><button data-o="z-">Zoom − (O)</button><button data-o="z+">Zoom + (P)</button><span id="zoom-val" style="align-self:center;color:var(--muted)">100 %</span><button data-o="edit">Éditeur (I)</button><button data-o="coll">Collisions (C)</button><button data-o="guide">Guide (G)</button></div>
+ <div id="obj"></div>
+ <div id="dialogue" hidden><canvas id="visage" width="48" height="48"></canvas><div id="dtxt"><div id="nom"></div><div id="texte"></div><div id="choix" hidden></div></div><div id="suite">E / Espace ▸</div></div>
+ <div id="pave" hidden><div>Cadenas à code</div><div id="pave-val"></div><div id="pave-temps"></div>
+  <div class="g"><button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button><button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button data-k="⌫">⌫</button><button data-k="0">0</button><button data-k="OK">OK</button></div>
+  <div style="margin-top:.4em"><button data-k="X" style="width:auto;padding:0 .8em">Annuler</button></div></div>
+ <div id="titre" hidden></div>
+ <div id="lettre" hidden><div id="lettre-txt"></div></div>
+ <div id="tactile" hidden>
+  <button data-t="th" style="left:4.2em;bottom:7.6em">▲</button><button data-t="tg" style="left:1em;bottom:4.4em">◀</button><button data-t="td" style="left:7.4em;bottom:4.4em">▶</button><button data-t="tb" style="left:4.2em;bottom:1.2em">▼</button>
+  <button data-t="e" style="right:1.4em;bottom:3em;width:3.6em;height:3.6em">E</button></div>
+ <div id="guide" hidden><button id="guide-fermer" class="btn" style="float:right">Fermer (G)</button><h2 style="margin-top:0">Parcours pour tout tester en une seule partie</h2>
+  <p>Touches : <kbd>flèches</kbd> ou <kbd>ZQSD</kbd> marcher · <kbd>Maj</kbd> courir (x2) · <kbd>E</kbd> parler, agir, entrer, passer · <kbd>J</kbd> +1 min · <kbd>K</kbd> +5 min (hors prologue) · <kbd>O</kbd>/<kbd>P</kbd> zoom · <kbd>T</kbd> atelier de test · <kbd>G</kbd> ce guide · <kbd>I</kbd> éditeur de plan · <kbd>M</kbd> son</p>
+  <h3>Partie 1 — Prologue (menu : « Jouer avec le prologue »)</h3><ol>
+  <li>Aaron et Loulou se lèvent. Sors par la porte en bas de la chambre : Loulou te suit.</li>
+  <li>Suis la flèche jaune jusqu'à l'école (grand bâtiment rouge, en bas à droite). Aaron dépose Loulou.</li>
+  <li>L'écran « Il est temps de faire une sieste » apparaît. Rentre chez toi (toit orange, en haut à gauche) : <kbd>E</kbd> devant la porte.</li>
+  <li>Aaron s'endort, le réveil sonne, Nathalie parle par la fenêtre cassée. Regarde la pierre.</li>
+  <li>Cours à l'école parler à Marc : la recherche, la crise cardiaque, puis retour au réveil (boucle 1).</li></ol>
+  <h3>Partie 2 — La boucle de 20 minutes</h3><ol start="6">
+  <li>Le dialogue avec Nathalie est forcé. Puis <kbd>E</kbd> sur la fenêtre, le radiateur et le meuble aux photos (bracelet).</li>
+  <li>Poste de police (Reda, en haut à droite), puis Benjamin dans son salon (toit marron) : tu apprends le code.</li>
+  <li>Boulangerie (Cédric) : la viande, et ses phrases sur le chien et les courses.</li>
+  <li>Minute 4 : la clé tombe devant la pharmacie. Ramasse-la avant la minute 7.</li>
+  <li>Lilya te parle de Mami. Va chez Mami (maison de campagne, en bas à gauche) : sa phrase et son avertissement.</li>
+  <li>Minute 8 : Benjamin dit « un peu seul » et on entend le marteau. Minute 10 : il part chez Paul, le salon est vide 2 minutes.</li>
+  <li>Salon : <kbd>E</kbd> sur la machine, cadenas, code 080912 en 1 minute. En bas : lance la viande au chien (<kbd>E</kbd>), parle à Loulou, hôpital, lettre.</li></ol>
+  <h3>Variantes à essayer</h3><ul>
+  <li>Ne ramasse pas la clé : Nathalie la reprend à la minute 7 et la boucle est perdue.</li>
+  <li>Rends la clé à Nathalie ou à Benjamin (choix quand tu leur parles avec la clé).</li>
+  <li>Tape un faux code, ou dépasse la minute : le cadenas se bloque.</li>
+  <li>Meurs à 20 minutes (<kbd>K</kbd> plusieurs fois) : le code et la phrase de Mami restent en mémoire.</li>
+  <li>Atelier de test (<kbd>T</kbd>) : minute précise, drapeaux, téléportation, et « Voir tous les dialogues ».</li></ul></div>
+ <div id="liste" hidden><button id="liste-fermer" class="btn" style="float:right">Fermer</button><h2 style="margin-top:0">Tous les dialogues</h2><div id="liste-contenu"></div></div>
+ <div id="menu" hidden>
+  <h1 id="menu-titre">CALM LAND</h1><p>Démo jouable — Aaron a 20 minutes pour retrouver Loulou.</p>
+  <div class="row"><button class="btn" id="b-prologue">Jouer avec le prologue</button><button class="btn" id="b-boucle">Commencer à la boucle 1</button><button class="btn" id="b-test">Atelier de test</button><button class="btn" id="b-editeur">Éditeur de plan</button></div>
+  <div class="row"><label>1 minute de jeu = <select id="vitesse"><option value="10">10 s</option><option value="20">20 s</option><option value="30" selected>30 s</option><option value="60">60 s (temps réel)</option></select></label></div>
+  <p>Flèches ou ZQSD : marcher · Maj : courir (x2) · E, Espace ou Entrée : parler, agir, entrer, passer · J / K : +1 / +5 min · O / P : zoom · T : test · G : guide · M : son</p>
+ </div>
+ <div id="chargement"><p>Chargement…</p></div>
+</div>
+<div id="cote" hidden>
+ <div id="editeur" hidden><b>Éditeur de plan</b> <span id="ed-msg" style="color:var(--accent)"></span><p>Clique un élément pour le sélectionner, glisse-le pour le déplacer, Suppr pour le supprimer, Ctrl+Z pour annuler (grille de 32 px). Glisse le fond ou utilise les flèches pour déplacer la vue, O / P pour le zoom. Les portes, collisions, plaques et personnages suivent le bâtiment. Sauvegarde automatique dans ce navigateur.</p><div class="b" id="ed-scenes"><button data-s="village">Village</button><button data-s="chambre">Chambre d'Aaron</button><button data-s="salon">Salon de Benjamin</button><button data-s="soussol">Sous-sol</button></div>
+<div class="b"><button id="ed-coll">Collision on/off (X)</button><button id="ed-copier">Copier le plan</button><button id="ed-appliquer">Appliquer le texte</button><button id="ed-rplus">Allonger (+2 cases)</button><button id="ed-rmoins">Raccourcir (−2 cases)</button><button id="ed-suppr">Supprimer (Suppr)</button><button id="ed-annuler">Annuler (Ctrl+Z)</button><button id="ed-reinit">Plan d'origine</button><button id="ed-quitter">Quitter</button></div><label id="ed-dest-l" hidden>Cette porte mène à : <select id="ed-dest"></select></label>
+<details id="ed-agrandir"><summary>Agrandir cette pièce</summary>
+<select id="ag-cote"><option value="droite">vers la droite</option><option value="gauche">vers la gauche</option><option value="haut">vers le haut</option><option value="bas">vers le bas</option></select>
+<select id="ag-n"><option value="1">+1 case</option><option value="2" selected>+2 cases</option><option value="4">+4 cases</option><option value="6">+6 cases</option><option value="8">+8 cases</option></select>
+<button id="ag-go">Agrandir</button></details>
+<details id="ed-nouvelle"><summary>Nouvelle pièce</summary>
+<input id="np-nom" placeholder="Nom de la pièce (ex. cuisine)" maxlength="30">
+<select id="np-taille"><option value="10,8">Petite (320 x 256)</option><option value="14,10" selected>Moyenne (448 x 320)</option><option value="20,12">Grande (640 x 384)</option></select>
+<div>Sol :</div><div id="np-sols" class="grille2"></div><div>Murs :</div><div id="np-murs" class="grille2"></div>
+<label><input type="checkbox" id="np-passage"> Relier par un passage ouvert (sans porte)</label>
+<div class="b"><button id="np-creer">Créer la pièce (avec une porte ici)</button><button id="np-suppr" hidden>Supprimer cette pièce</button></div></details>
+<textarea id="ed-txt" spellcheck="false"></textarea></div>
+ <div id="biblio" hidden><b>Bibliothèque</b><p>Glisse un élément sur la carte, ou clique dessus pour le poser au centre de la vue.</p><div id="biblio-liste"></div></div>
+ <div id="test" hidden>
+  <div id="t-etat" style="font-weight:700"></div>
+  <h4>Aller à une minute</h4><div class="b" id="t-minutes"></div><div class="b" style="margin-top:.3em"><button id="t-plus">+1 minute</button><button id="t-mourir">Mourir maintenant</button><button id="t-boucle">Nouvelle boucle</button></div>
+  <h4>Mémoire d'Aaron (garde entre les boucles)</h4><label><input type="checkbox" id="t-code"> Code 080912 connu</label><label><input type="checkbox" id="t-mami"> Phrase de Mami connue</label>
+  <h4>État de la boucle</h4><div id="t-drapeaux"></div>
+  <h4>Se téléporter</h4><div class="b" id="t-lieux"></div>
+  <h4>Dialogues</h4><button id="t-dialogues">Voir tous les dialogues</button>
+  <p style="color:var(--muted)">Touche T : ouvrir / fermer ce panneau. M : couper le son.</p>
+ </div>
+</div>
+<script>/*ASSETS*/</script>
+<script>/*LOGIC*/</script>
+<script>/*MAIN*/</script>
+</body>
+</html>
