@@ -33,6 +33,15 @@ let bad=0;const ok=(c,m)=>{console.log(c?'ok  ':'ECHEC',m);if(!c){bad++;process.
  el('mob-token').value='ghp_ABCDEFGHIJKLMNOPQRSTUV';store.calmland_gh_token='';el('mob-token').oninput();await tick();
  ok(store.calmland_gh_token==='ghp_ABCDEFGHIJKLMNOPQRSTUV','coller dans le champ enregistre tout seul');
  run("demarrer(false);");frames(30);
+ el('mob-joy').getBoundingClientRect=()=>({left:20,top:600,width:150,height:150});
+ run("joyPoser(95+60,675)");ok(run('touches.td&&!touches.tg&&!touches.th&&!touches.tb'),'joystick à droite : va à droite');
+ run("joyPoser(95-50,675-50)");ok(run('touches.tg&&touches.th&&!touches.td&&!touches.tb'),'joystick en haut à gauche : diagonale');
+ run("joyPoser(95+3,675+3)");ok(run('!touches.tg&&!touches.td&&!touches.th&&!touches.tb'),'joystick au centre : zone morte, immobile');
+ run("joyPoser(95,675+70)");ok(run('touches.tb&&!touches.th&&!touches.tg&&!touches.td'),'joystick en bas : va en bas');
+ ok(/translate\(/.test(el('mob-joy-knob').style.transform),'la boule suit le doigt');
+ run("joyReset()");ok(run('!touches.tb')&&el('mob-joy-knob').style.transform==='translate(-50%,-50%)','relâcher : tout s\'arrête, la boule revient');
+ ok(el('mob-joy').hidden===false,'joystick visible en jeu');
+
  ok(el('tactile').hidden===false,'croix de déplacement visible en jeu');
  el('mob-fab').onclick();ok(el('mob-menu').hidden===false,'le bouton ☰ ouvre le menu');
  el('mm-son').onclick();ok(run('son')===false,'Son : bouton bascule');el('mm-son').onclick();
@@ -40,7 +49,7 @@ let bad=0;const ok=(c,m)=>{console.log(c?'ok  ':'ECHEC',m);if(!c){bad++;process.
  el('mm-edit').onclick();frames(3);ok(run('EDIT')===false&&el('mob-toast').hidden===false,'pendant un dialogue : message clair au lieu de rien');
  run('G.queue.length=0;courant=null;');el('mob-fab').onclick();el('mm-edit').onclick();frames(10);
  ok(run('EDIT')===true&&el('mob-menu').hidden===true,'« Éditeur » active l\'éditeur et ferme le menu');
- ok(el('mob-barre').hidden===false&&el('tactile').hidden===true,'éditeur : barre d\'outils visible, croix cachée');
+ ok(el('mob-barre').hidden===false&&el('tactile').hidden===true&&el('mob-joy').hidden===true,'éditeur : barre d\'outils visible, joystick caché');
  ok(sandbox.document.body.style.paddingBottom==='56px','place réservée pour la barre');
  // pincement : le point sous les doigts reste fixe
  run("ptrs.clear();ptrs.set(1,{x:150,y:100});ptrs.set(2,{x:250,y:100});debutPinch();");

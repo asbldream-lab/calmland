@@ -375,9 +375,18 @@ function fermerMenuMob(){$('mob-menu').hidden=true;}
 function majLibMob(){$('mm-son').textContent=son?'🔊 Son : oui':'🔇 Son : non';$('mm-courir').textContent=touches.shift?'🏃 Courir : oui':'🏃 Courir : non';$('mm-coll').textContent=VOIR_COLL?'🧱 Collisions : vues':'🧱 Collisions : cachées';$('mm-panneau').textContent=panneauMasque?'▤ Panneau : caché':'▤ Panneau : visible';}
 function ouvrirCle(){$('mob-gh-etat').textContent=($('gh-etat')&&$('gh-etat').textContent)||'';$('mob-cle').hidden=false;}
 function pleinEcran(){const d=typeof document!=='undefined'?document.documentElement:null;try{if(document.fullscreenElement){document.exitFullscreen();return;}if(d&&d.requestFullscreen){d.requestFullscreen();return;}}catch(e){}toast('Sur iPhone : touche Partager, puis « Sur l\'écran d\'accueil », et ouvre Calm Land depuis cette icône');}
-function majMobile(){const portrait=innerHeight>innerWidth;$('mob-barre').hidden=!EDIT;$('obj').hidden=EDIT;$('tactile').hidden=EDIT||G.mode!=='jeu'||(coteVisible&&portrait);if(((MOBILE&&EDIT)?56:0)!==derBh)ajuster();}
+let joyOn=null;
+function joyReset(){joyOn=null;touches.tg=touches.td=touches.th=touches.tb=false;const k=$('mob-joy-knob');if(k)k.style.transform='translate(-50%,-50%)';}
+function joyPoser(x,y){const r=$('mob-joy').getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,R=r.width/2;let dx=x-cx,dy=y-cy;const m=Math.hypot(dx,dy);
+ if(m>R*0.5){dx*=R*0.5/m;dy*=R*0.5/m;}$('mob-joy-knob').style.transform='translate(-50%,-50%) translate('+dx+'px,'+dy+'px)';
+ if(m<R*0.22){touches.tg=touches.td=touches.th=touches.tb=false;return;}
+ const nx=(x-cx)/m,ny=(y-cy)/m;touches.tg=nx<-0.38;touches.td=nx>0.38;touches.th=ny<-0.38;touches.tb=ny>0.38;}
+function majMobile(){const portrait=innerHeight>innerWidth;$('mob-barre').hidden=!EDIT;$('obj').hidden=EDIT;$('tactile').hidden=EDIT||G.mode!=='jeu'||(coteVisible&&portrait);$('mob-joy').hidden=$('tactile').hidden;if($('mob-joy').hidden&&joyOn!==null)joyReset();if(((MOBILE&&EDIT)?56:0)!==derBh)ajuster();}
 function brancherMobile(){if(!MOBILE)return;
  const f=fn=>()=>{fn();fermerMenuMob();};
+ const J=$('mob-joy');J.addEventListener('pointerdown',e=>{e.preventDefault();joyOn=e.pointerId;try{J.setPointerCapture(e.pointerId);}catch(x){}joyPoser(e.clientX,e.clientY);});
+ J.addEventListener('pointermove',e=>{if(joyOn===e.pointerId)joyPoser(e.clientX,e.clientY);});
+ const joyFin=e=>{if(joyOn===e.pointerId)joyReset();};J.addEventListener('pointerup',joyFin);J.addEventListener('pointercancel',joyFin);
  $('mob-fab').onclick=ouvrirMenuMob;$('gh-etat').onclick=ouvrirCle;$('mob-fermer').onclick=fermerMenuMob;$('mob-menu').onclick=e=>{if(e.target===$('mob-menu'))fermerMenuMob();};
  $('mm-edit').onclick=f(()=>{panneauMasque=false;if(!$('menu').hidden)$('b-editeur').onclick();else if(G.mode==='jeu'&&!EDIT&&(G.queue.length||G.keypad))toast('Termine d\'abord le dialogue en cours (touche l\'écran)');else if(G.mode==='jeu')basculerEditeur();});
  $('mm-test').onclick=f(()=>{panneauMasque=false;if(G.mode!=='menu')basculerTest();});
