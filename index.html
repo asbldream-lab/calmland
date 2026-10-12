@@ -15,10 +15,11 @@ body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:syste
 #jeu{touch-action:none;width:100%;height:100%;display:block;image-rendering:pixelated;image-rendering:crisp-edges;}
 .ov{position:absolute;inset:0;}
 #hud{position:absolute;top:.5em;left:.6em;font-size:.8em;color:var(--fg);text-shadow:0 1px 2px #000;opacity:.9;}
-#inv{position:absolute;top:.5em;right:.6em;font-size:.8em;text-shadow:0 1px 2px #000;}
+#inv{position:absolute;top:.5em;right:3.4em;font-size:.8em;text-shadow:0 1px 2px #000;}
 #dialogue{display:flex;gap:.8em;align-items:flex-start;position:absolute;left:3%;right:3%;bottom:4%;background:var(--panel);border:2px solid var(--line);border-radius:.5em;padding:.7em 1em;min-height:4.2em;cursor:pointer;}
 #visage{width:4.4em;height:4.4em;image-rendering:pixelated;border:2px solid var(--line);border-radius:.3em;flex:none;}
 #dtxt{flex:1;min-width:0;}
+#b-son{position:absolute;top:.35em;right:.5em;width:2.2em;height:2.2em;border-radius:.4em;border:1px solid var(--line);background:rgba(20,20,32,.75);color:var(--fg);font-size:.85em;cursor:pointer;padding:0;z-index:5;}
 #outils{position:absolute;top:2em;left:.5em;display:flex;gap:.3em;flex-wrap:wrap;font-size:.72em;}
 #outils button{font:inherit;background:rgba(20,20,32,.75);color:var(--fg);border:1px solid var(--line);border-radius:.3em;padding:.2em .5em;cursor:pointer;}
 #obj{position:absolute;top:4.1em;left:.7em;right:.7em;font-size:.82em;line-height:1.35;background:rgba(10,10,18,.55);padding:.15em .5em;border-radius:.3em;color:#ffe9a8;text-shadow:0 1px 2px #000;max-width:70%;}
@@ -78,7 +79,7 @@ body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:syste
 <body>
 <div id="ecran">
  <canvas id="jeu" width="640" height="360"></canvas>
- <div id="hud"></div><div id="inv"></div>
+ <div id="hud"></div><div id="inv"></div><button id="b-son" title="Couper / remettre le son (M)">🔊</button>
  <div id="outils"><button data-o="m1">+1 min (J)</button><button data-o="m5">+5 min (K)</button><button data-o="z-">Zoom − (O)</button><button data-o="z+">Zoom + (P)</button><span id="zoom-val" style="align-self:center;color:var(--muted)">100 %</span><button data-o="edit">Éditeur (I)</button><button data-o="coll">Collisions (C)</button><button data-o="guide">Guide (G)</button></div>
  <div id="obj"></div>
  <div id="dialogue" hidden><canvas id="visage" width="48" height="48"></canvas><div id="dtxt"><div id="nom"></div><div id="texte"></div><div id="choix" hidden></div></div><div id="suite">E / Espace ▸</div></div>
@@ -805,7 +806,7 @@ addEventListener('keydown',e=>{
  if(EDIT&&k==='x'){basculerColl();return;}if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
  if(G.keypad&&!G.queue.length){if(/^[0-9]$/.test(k))pave(k);else if(k==='backspace')pave('⌫');else if(k==='enter')pave('OK');else if(k==='escape')pave('X');return;}
  if(k==='t'&&G.mode!=='menu'){basculerTest();return;}
- if(k==='m'){son=!son;return;}
+ if(k==='m'){basculerSon();return;}
  if(k==='c'){VOIR_COLL=!VOIR_COLL;return;}
  if(k==='j'){sauterTemps(1);return;} if(k==='k'){sauterTemps(5);return;}
  if(k==='o'||k==='-'){zoom(-1);return;} if(k==='p'||k==='+'||k==='='){zoom(1);return;}
@@ -815,6 +816,8 @@ addEventListener('keydown',e=>{
  if(['e',' ','enter'].includes(k)&&!e.repeat)action();
 });
 addEventListener('keyup',e=>{touches[e.key.toLowerCase()]=false;});
+function basculerSon(){son=!son;majBoutonSon();}
+function majBoutonSon(){const b=$('b-son');if(b)b.textContent=son?'🔊':'🔇';}
 function sauterTemps(d){if(EDIT||G.mode!=='jeu'||G.prologue||G.queue.length||G.keypad)return;sauter(d);pomper();}
 function zoom(d){const Z=[0.2,0.28,0.4,0.5,0.7,1,1.4,1.8,2.4];let i=Z.indexOf(ZOOM);if(i<0)i=5;ZOOM=Z[Math.max(0,Math.min(Z.length-1,i+d))];$('zoom-val').textContent=Math.round(ZOOM*100)+' %';}
 function dirClavier(){let dx=0,dy=0;const T=touches;
@@ -1142,7 +1145,7 @@ function brancherEditeur(){
 let dernier=performance.now();
 function frame(now){majCote();
  const dt=Math.min(0.05,(now-dernier)/1000);dernier=now;tReel+=dt;
- majMusique(dt);
+ majMusique(dt);majBoutonSon();
  if(MOBILE)majMobile();
  if(EDIT){const sl=$('ed-scenes');if(sl&&sl.value!==G.player.scene)sl.value=G.player.scene;}
  if(attenteFx>0){attenteFx-=dt;if(attenteFx<=0){attenteFx=0;G.queue.shift();$('titre').hidden=true;$('titre').dataset.noir='0';courant=null;pomper();}}
@@ -1174,6 +1177,7 @@ function pret(){
  lirePlan();dessinerFond();construireTest();ajuster();brancherEditeur();construireBiblio();brancherGh();ghCharger(false);brancherMobile();
  document.querySelectorAll('#outils [data-o]').forEach(b=>b.onclick=()=>{const o=b.dataset.o;if(o==='m1')sauterTemps(1);else if(o==='m5')sauterTemps(5);else if(o==='z-')zoom(-1);else if(o==='z+')zoom(1);else if(o==='guide')$('guide').hidden=!$('guide').hidden;else if(o==='edit')basculerEditeur();else if(o==='coll')VOIR_COLL=!VOIR_COLL;b.blur();});
  $('guide-fermer').onclick=()=>$('guide').hidden=true;
+ $('b-son').onclick=()=>{basculerSon();$('b-son').blur();};
  $('b-prologue').onclick=()=>demarrer(true);$('b-boucle').onclick=()=>demarrer(false);
  $('b-test').onclick=()=>{demarrer(false);$('test').hidden=false;};
  $('dialogue').onclick=()=>action();$('titre').onclick=()=>action();$('lettre').onclick=()=>action();

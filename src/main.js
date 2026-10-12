@@ -129,7 +129,7 @@ addEventListener('keydown',e=>{
  if(EDIT&&k==='x'){basculerColl();return;}if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
  if(G.keypad&&!G.queue.length){if(/^[0-9]$/.test(k))pave(k);else if(k==='backspace')pave('⌫');else if(k==='enter')pave('OK');else if(k==='escape')pave('X');return;}
  if(k==='t'&&G.mode!=='menu'){basculerTest();return;}
- if(k==='m'){son=!son;return;}
+ if(k==='m'){basculerSon();return;}
  if(k==='c'){VOIR_COLL=!VOIR_COLL;return;}
  if(k==='j'){sauterTemps(1);return;} if(k==='k'){sauterTemps(5);return;}
  if(k==='o'||k==='-'){zoom(-1);return;} if(k==='p'||k==='+'||k==='='){zoom(1);return;}
@@ -139,6 +139,8 @@ addEventListener('keydown',e=>{
  if(['e',' ','enter'].includes(k)&&!e.repeat)action();
 });
 addEventListener('keyup',e=>{touches[e.key.toLowerCase()]=false;});
+function basculerSon(){son=!son;majBoutonSon();}
+function majBoutonSon(){const b=$('b-son');if(b)b.textContent=son?'🔊':'🔇';}
 function sauterTemps(d){if(EDIT||G.mode!=='jeu'||G.prologue||G.queue.length||G.keypad)return;sauter(d);pomper();}
 function zoom(d){const Z=[0.2,0.28,0.4,0.5,0.7,1,1.4,1.8,2.4];let i=Z.indexOf(ZOOM);if(i<0)i=5;ZOOM=Z[Math.max(0,Math.min(Z.length-1,i+d))];$('zoom-val').textContent=Math.round(ZOOM*100)+' %';}
 function dirClavier(){let dx=0,dy=0;const T=touches;
@@ -466,7 +468,7 @@ function brancherEditeur(){
 let dernier=performance.now();
 function frame(now){majCote();
  const dt=Math.min(0.05,(now-dernier)/1000);dernier=now;tReel+=dt;
- majMusique(dt);
+ majMusique(dt);majBoutonSon();
  if(MOBILE)majMobile();
  if(EDIT){const sl=$('ed-scenes');if(sl&&sl.value!==G.player.scene)sl.value=G.player.scene;}
  if(attenteFx>0){attenteFx-=dt;if(attenteFx<=0){attenteFx=0;G.queue.shift();$('titre').hidden=true;$('titre').dataset.noir='0';courant=null;pomper();}}
@@ -498,6 +500,7 @@ function pret(){
  lirePlan();dessinerFond();construireTest();ajuster();brancherEditeur();construireBiblio();brancherGh();ghCharger(false);brancherMobile();
  document.querySelectorAll('#outils [data-o]').forEach(b=>b.onclick=()=>{const o=b.dataset.o;if(o==='m1')sauterTemps(1);else if(o==='m5')sauterTemps(5);else if(o==='z-')zoom(-1);else if(o==='z+')zoom(1);else if(o==='guide')$('guide').hidden=!$('guide').hidden;else if(o==='edit')basculerEditeur();else if(o==='coll')VOIR_COLL=!VOIR_COLL;b.blur();});
  $('guide-fermer').onclick=()=>$('guide').hidden=true;
+ $('b-son').onclick=()=>{basculerSon();$('b-son').blur();};
  $('b-prologue').onclick=()=>demarrer(true);$('b-boucle').onclick=()=>demarrer(false);
  $('b-test').onclick=()=>{demarrer(false);$('test').hidden=false;};
  $('dialogue').onclick=()=>action();$('titre').onclick=()=>action();$('lettre').onclick=()=>action();

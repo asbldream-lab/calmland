@@ -15,10 +15,11 @@ body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:syste
 #jeu{touch-action:none;width:100%;height:100%;display:block;image-rendering:pixelated;image-rendering:crisp-edges;}
 .ov{position:absolute;inset:0;}
 #hud{position:absolute;top:.5em;left:.6em;font-size:.8em;color:var(--fg);text-shadow:0 1px 2px #000;opacity:.9;}
-#inv{position:absolute;top:.5em;right:.6em;font-size:.8em;text-shadow:0 1px 2px #000;}
+#inv{position:absolute;top:.5em;right:3.4em;font-size:.8em;text-shadow:0 1px 2px #000;}
 #dialogue{display:flex;gap:.8em;align-items:flex-start;position:absolute;left:3%;right:3%;bottom:4%;background:var(--panel);border:2px solid var(--line);border-radius:.5em;padding:.7em 1em;min-height:4.2em;cursor:pointer;}
 #visage{width:4.4em;height:4.4em;image-rendering:pixelated;border:2px solid var(--line);border-radius:.3em;flex:none;}
 #dtxt{flex:1;min-width:0;}
+#b-son{position:absolute;top:.35em;right:.5em;width:2.2em;height:2.2em;border-radius:.4em;border:1px solid var(--line);background:rgba(20,20,32,.75);color:var(--fg);font-size:.85em;cursor:pointer;padding:0;z-index:5;}
 #outils{position:absolute;top:2em;left:.5em;display:flex;gap:.3em;flex-wrap:wrap;font-size:.72em;}
 #outils button{font:inherit;background:rgba(20,20,32,.75);color:var(--fg);border:1px solid var(--line);border-radius:.3em;padding:.2em .5em;cursor:pointer;}
 #obj{position:absolute;top:4.1em;left:.7em;right:.7em;font-size:.82em;line-height:1.35;background:rgba(10,10,18,.55);padding:.15em .5em;border-radius:.3em;color:#ffe9a8;text-shadow:0 1px 2px #000;max-width:70%;}
@@ -77,7 +78,7 @@ body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:syste
 <body>
 <div id="ecran">
  <canvas id="jeu" width="640" height="360"></canvas>
- <div id="hud"></div><div id="inv"></div>
+ <div id="hud"></div><div id="inv"></div><button id="b-son" title="Couper / remettre le son (M)">🔊</button>
  <div id="outils"><button data-o="m1">+1 min (J)</button><button data-o="m5">+5 min (K)</button><button data-o="z-">Zoom − (O)</button><button data-o="z+">Zoom + (P)</button><span id="zoom-val" style="align-self:center;color:var(--muted)">100 %</span><button data-o="edit">Éditeur (I)</button><button data-o="coll">Collisions (C)</button><button data-o="guide">Guide (G)</button></div>
  <div id="obj"></div>
  <div id="dialogue" hidden><canvas id="visage" width="48" height="48"></canvas><div id="dtxt"><div id="nom"></div><div id="texte"></div><div id="choix" hidden></div></div><div id="suite">E / Espace ▸</div></div>

@@ -49,3 +49,4 @@ body.mob #gh-etat{padding:10px;border:1px solid var(--line);border-radius:10px;b
 body.mob #tactile button:not([data-t="e"]){display:none!important;}
 #mob-joy{position:fixed;left:26px;bottom:44px;width:150px;height:150px;border-radius:50%;background:rgba(30,30,45,.45);border:2px solid rgba(255,255,255,.2);z-index:30;touch-action:none;}
 #mob-joy-knob{position:absolute;left:50%;top:50%;width:70px;height:70px;border-radius:50%;background:rgba(220,220,235,.35);border:2px solid rgba(255,255,255,.45);transform:translate(-50%,-50%);pointer-events:none;}
+body.mob #b-son{display:none;}

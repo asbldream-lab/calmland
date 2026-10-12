@@ -1,7 +1,7 @@
 // faux navigateur minimal pour exécuter tout l'affichage
 const vm=require('vm'),fs=require('fs');
 const els={};function el(id){if(!els[id])els[id]={id,hidden:true,textContent:'',innerHTML:'',className:'',dataset:{},style:{},children:[],onclick:null,
- appendChild(c){this.children.push(c);},getContext(){return ctx;},querySelector(){return {onchange:null};},addEventListener(){} ,focus(){}};return els[id];}
+ appendChild(c){this.children.push(c);},getContext(){return ctx;},querySelector(){return {onchange:null};},addEventListener(){} ,focus(){},blur(){}};return els[id];}
 const ctx=new Proxy({},{get:(t,k)=>k==='measureText'?(()=>({width:20})):(k in t?t[k]:()=>{}),set:(t,k,v)=>{t[k]=v;return true;}});
 let rafs=[];let now=0;
 const sandbox={console,Math,JSON,String,Number,setTimeout:(f,ms)=>{f();},
@@ -54,6 +54,7 @@ setImmediate(()=>setImmediate(()=>{
  vm.runInContext("changerScene('chambre',110,166,3);document.getElementById('ag-cote').value='gauche';document.getElementById('ag-n').value='4';document.getElementById('ag-go').onclick();",S);run(40);
  console.log('chambre agrandie via l\'interface :',vm.runInContext("SC.chambre.w+'x'+SC.chambre.h+' | départ x='+P.chambreDepart.x",S));
  vm.runInContext("planReinit();EDIT=false;",S);run(10);
+ vm.runInContext("document.getElementById('b-son').onclick();",S);console.log('bouton son : son coupé =',vm.runInContext('son===false',S),'icône',vm.runInContext("document.getElementById('b-son').textContent",S));vm.runInContext("document.getElementById('b-son').onclick();",S);console.log('bouton son : remis =',vm.runInContext('son===true',S));
  console.log('écritures dans le stockage :',global.ECRIT||false);console.log('menu visible',!els_menu(),'OK smoke');
  function els_menu(){return vm.runInContext("document.getElementById('menu').hidden",S);}
 }));
