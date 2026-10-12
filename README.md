@@ -15,3 +15,5 @@ python3 build.py
 # et dist/calmland_demo.html vers ../editeur.html
 
 Le plan fait dans l'éditeur est enregistré dans `plan.json` à la racine du dépôt (envoi automatique depuis `editeur.html`, il faut coller une clé GitHub une fois par appareil).
+
+`mobile.html` : version téléphone / tablette en plein écran (jeu, éditeur et atelier de test au doigt). Ajoutée avec `manifest.json` et les deux `icon-*.png` pour l'installer sur l'écran d'accueil.

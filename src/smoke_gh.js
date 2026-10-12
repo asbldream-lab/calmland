@@ -16,7 +16,7 @@ const sandbox={console,Math,JSON,String,Number,Date,Promise,TextEncoder,TextDeco
  document:{getElementById:el,createElement:(t)=>t==='canvas'?{getContext:()=>ctx,width:0,height:0,style:{},title:'',classList:{add(){},remove(){}},addEventListener(){},appendChild(){},remove(){}}:el('x'+Math.random()),querySelectorAll:()=>[]},
  Image:class{set src(v){this._s=v;setImmediate(()=>this.onload&&this.onload());} get src(){return this._s;} },
  Audio:class{constructor(){this._vol=1;} set src(v){} play(){return Promise.resolve();} set volume(v){this._vol=v;} get volume(){return this._vol;} },
- addEventListener:()=>{},innerWidth:1280,innerHeight:720,matchMedia:()=>({matches:false}),performance:{now:()=>now},requestAnimationFrame:(f)=>rafs.push(f),window:{},setImmediate};
+ location:{hash:'',pathname:'/calmland/editeur.html',search:'',origin:'https://asbldream-lab.github.io'},history:{replaceState(a,b,u){global.HIST=u;}},prompt:(m,v)=>{global.PROMPT=v;}, addEventListener:()=>{},innerWidth:1280,innerHeight:720,matchMedia:()=>({matches:false}),performance:{now:()=>now},requestAnimationFrame:(f)=>rafs.push(f),window:{},setImmediate};
 sandbox.window=sandbox;el('jeu').getContext=()=>ctx;vm.createContext(sandbox);
 for(const f of ['assets.js','logic.js','main.js'])vm.runInContext(fs.readFileSync(f,'utf8'),sandbox,{filename:f});
 const tick=async(n=6)=>{for(let i=0;i<n;i++)await new Promise(r=>setImmediate(r));};
@@ -42,5 +42,11 @@ const run=c=>vm.runInContext(c,sandbox);let bad=0;const ok=(c,m)=>{console.log(c
  // clé refusée
  store.calmland_gh_token='';run("BATM.Maison_Aaron[1]+=32;sauverPlan();ghEnvoyer();");await tick();
  ok(remote.puts.length===2,'sans clé : pas d\'envoi');
+ // lien de connexion : une clé dans l'adresse s'installe toute seule
+ store.calmland_gh_token='ghp_LINK';el('gh-lien').onclick();
+ ok(global.PROMPT==='https://asbldream-lab.github.io/calmland/editeur.html#cle=ghp_LINK','le bouton fabrique le lien de connexion');
+ delete store.calmland_gh_token;run("location.hash='#cle=ghp_NEW';brancherGh();");
+ ok(store.calmland_gh_token==='ghp_NEW','ouvrir le lien installe la clé sans rien taper');
+ ok(global.HIST==='/calmland/editeur.html','la clé disparaît de la barre d\'adresse');
  console.log(bad?'ECHECS':'OK smoke GitHub');
 })();

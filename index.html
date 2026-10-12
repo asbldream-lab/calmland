@@ -123,7 +123,7 @@ body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:syste
 </div>
 <div id="cote" hidden>
  <div id="editeur" hidden><b>Éditeur de plan</b> <span id="ed-msg" style="color:var(--accent)"></span><p>Clique un élément pour le sélectionner, glisse-le pour le déplacer, Suppr pour le supprimer, Ctrl+Z pour annuler (grille de 32 px). Glisse le fond ou utilise les flèches pour déplacer la vue, O / P pour le zoom. Les portes, collisions, plaques et personnages suivent le bâtiment. Sauvegarde automatique dans ce navigateur.</p><div class="b"><label>Pièce : <select id="ed-scenes"></select></label></div>
-<div id="gh-etat" style="color:var(--accent);margin:.2em 0"></div><details id="ed-gh"><summary>Sauvegarde GitHub</summary><label>Clé GitHub : <input id="gh-token" type="password" placeholder="colle ta clé ici" size="26" autocomplete="off"></label><div class="b"><button id="gh-sauver-cle">Enregistrer la clé</button><button id="gh-envoyer">Envoyer maintenant</button><button id="gh-recharger">Recharger depuis GitHub</button></div></details>
+<div id="gh-etat" style="color:var(--accent);margin:.2em 0"></div><details id="ed-gh"><summary>Sauvegarde GitHub</summary><label>Clé GitHub : <input id="gh-token" type="password" placeholder="colle ta clé ici" size="26" autocomplete="off"></label><div class="b"><button id="gh-sauver-cle">Enregistrer la clé</button><button id="gh-envoyer">Envoyer maintenant</button><button id="gh-recharger">Recharger depuis GitHub</button><button id="gh-lien">Copier mon lien de connexion</button></div></details>
 <div class="b"><button id="ed-coll">Collision on/off (X)</button><button id="ed-copier">Copier le plan</button><button id="ed-appliquer">Appliquer le texte</button><button id="ed-rplus">Allonger (+2 cases)</button><button id="ed-rmoins">Raccourcir (−2 cases)</button><button id="ed-suppr">Supprimer (Suppr)</button><button id="ed-annuler">Annuler (Ctrl+Z)</button><button id="ed-reinit">Plan d'origine</button><button id="ed-quitter">Quitter</button></div><label id="ed-dest-l" hidden>Cette porte mène à : <select id="ed-dest"></select></label>
 <details id="ed-agrandir"><summary>Agrandir cette pièce</summary>
 <select id="ag-cote"><option value="droite">vers la droite</option><option value="gauche">vers la gauche</option><option value="haut">vers le haut</option><option value="bas">vers le bas</option></select>
@@ -676,6 +676,8 @@ if(typeof module!=='undefined') module.exports={MURS,redimMur,ROUTES,redimRoute,
 </script>
 <script>// ===== CALM LAND - AFFICHAGE ET INTERFACE =====
 const PUBLIC=true,PLAN_FIGE="{\"b\":{\"Maison_Aaron\":[200,364],\"Maison_Benjamin\":[658,300],\"Maison_Paul\":[1212,76],\"Pharmacie\":[1766,396],\"Boulangerie\":[2160,492],\"Poste_Police\":[2554,364],\"Maison_Mami\":[150,1488],\"Maison_Zoe\":[900,1552],\"Maison_Marc\":[1800,1488],\"Ecole\":[2560,1264]},\"u\":[[20,140,\"buisson\"],[20,2660,\"buisson2\"],[120,140,\"buisson\"],[120,2660,\"buisson2\"],[220,140,\"buisson\"],[220,2660,\"buisson2\"],[320,140,\"buisson\"],[320,2660,\"buisson2\"],[420,140,\"buisson\"],[420,2660,\"buisson2\"],[520,140,\"buisson\"],[520,2660,\"buisson2\"],[620,140,\"buisson\"],[620,2660,\"buisson2\"],[720,140,\"buisson\"],[720,2660,\"buisson2\"],[820,140,\"buisson\"],[820,2660,\"buisson2\"],[920,140,\"buisson\"],[920,2660,\"buisson2\"],[1020,140,\"buisson\"],[1020,2660,\"buisson2\"],[1120,2660,\"buisson\"],[1220,2660,\"buisson2\"],[1320,2660,\"buisson\"],[1420,2660,\"buisson2\"],[1520,2660,\"buisson\"],[1620,2660,\"buisson2\"],[1720,140,\"buisson\"],[1720,2660,\"buisson2\"],[1820,140,\"buisson\"],[1820,2660,\"buisson2\"],[1920,140,\"buisson\"],[1920,2660,\"buisson2\"],[2020,140,\"buisson\"],[2020,2660,\"buisson2\"],[2120,140,\"buisson\"],[2120,2660,\"buisson2\"],[2220,140,\"buisson\"],[2220,2660,\"buisson2\"],[2320,140,\"buisson\"],[2320,2660,\"buisson2\"],[2420,140,\"buisson\"],[2420,2660,\"buisson2\"],[2520,140,\"buisson\"],[2520,2660,\"buisson2\"],[2620,140,\"buisson\"],[2620,2660,\"buisson2\"],[2720,140,\"buisson\"],[2720,2660,\"buisson2\"],[2820,140,\"buisson\"],[2820,2660,\"buisson2\"],[2920,140,\"buisson\"],[2920,2660,\"buisson2\"],[3020,140,\"buisson\"],[3020,2660,\"buisson2\"],[3120,140,\"buisson\"],[3120,2660,\"buisson2\"],[3220,140,\"buisson\"],[3220,2660,\"buisson2\"],[3320,140,\"buisson\"],[3320,2660,\"buisson2\"],[3420,140,\"buisson\"],[3420,2660,\"buisson2\"],[10,240,\"buisson\"],[3510,240,\"buisson2\"],[10,340,\"buisson\"],[3510,340,\"buisson2\"],[10,440,\"buisson\"],[3510,440,\"buisson2\"],[10,540,\"buisson\"],[3510,540,\"buisson2\"],[10,640,\"buisson\"],[3510,640,\"buisson2\"],[10,740,\"buisson\"],[3510,740,\"buisson2\"],[10,840,\"buisson\"],[3510,840,\"buisson2\"],[10,1140,\"buisson\"],[3510,1140,\"buisson2\"],[10,1240,\"buisson\"],[3510,1240,\"buisson2\"],[10,1340,\"buisson\"],[3510,1340,\"buisson2\"],[10,1440,\"buisson\"],[3510,1440,\"buisson2\"],[10,1540,\"buisson\"],[3510,1540,\"buisson2\"],[10,1640,\"buisson\"],[3510,1640,\"buisson2\"],[10,1740,\"buisson\"],[3510,1740,\"buisson2\"],[10,1840,\"buisson\"],[3510,1840,\"buisson2\"],[10,1940,\"buisson\"],[3510,1940,\"buisson2\"],[10,2040,\"buisson\"],[3510,2040,\"buisson2\"],[10,2340,\"buisson\"],[3510,2340,\"buisson2\"],[10,2440,\"buisson\"],[3510,2440,\"buisson2\"],[10,2540,\"buisson\"],[3510,2540,\"buisson2\"],[260,236,\"buisson\"],[580,236,\"buisson2\"],[900,236,\"buisson\"],[1860,236,\"buisson2\"],[2180,236,\"buisson\"],[2500,236,\"buisson2\"],[2820,236,\"buisson\"],[3140,236,\"buisson2\"],[100,1130,\"buisson\"],[260,1130,\"buisson2\"],[420,1130,\"buisson\"],[580,1130,\"buisson2\"],[740,1130,\"buisson\"],[900,1130,\"buisson2\"],[1060,1130,\"buisson\"],[1220,1130,\"buisson2\"],[1380,1130,\"buisson\"],[1700,1130,\"buisson2\"],[1850,1130,\"buisson\"],[2000,1130,\"buisson2\"],[2150,1130,\"buisson\"],[2300,1130,\"buisson2\"],[2450,1130,\"buisson\"],[1460,1060,\"buisson2\"],[1650,1060,\"buisson\"],[1460,1230,\"buisson2\"],[1650,1230,\"buisson\"],[1460,1400,\"buisson2\"],[1650,1400,\"buisson\"],[1460,1570,\"buisson2\"],[1650,1570,\"buisson\"],[1460,1740,\"buisson2\"],[1650,1740,\"buisson\"],[1460,1910,\"buisson2\"],[1650,1910,\"buisson\"],[100,2400,\"buisson2\"],[520,2400,\"buisson\"],[940,2400,\"buisson2\"],[1360,2400,\"buisson\"],[1780,2400,\"buisson2\"],[2200,2400,\"buisson\"],[2620,2400,\"buisson2\"],[3040,2400,\"buisson\"]],\"i\":{\"chambre\":[[176,250,\"tapis_rond\",1],[36,150,\"lit_vert\"],[190,118,\"commode\"],[316,120,\"armoire\"],[120,50,\"fenetre_cassee\"],[52,50,\"radiateur\"],[134,114,\"pierre\",1]],\"salon\":[[40,114,\"cheminee\"],[110,120,\"bibliotheque\"],[176,122,\"plante\"],[70,236,\"canape\"],[20,290,\"plante_grande\"],[372,120,\"buffet\"],[470,300,\"plante\"],[332,196,\"machine\"]],\"soussol\":[[20,128,\"bibliotheque\"],[100,128,\"armoire\"],[300,160,\"lit_petit\"],[330,276,\"tapis_rond\",1],[56,176,\"trappe_bas\",1]],\"int_paul\":[[20,128,\"bibliotheque\"],[88,128,\"bibliotheque\"],[156,128,\"bibliotheque\"],[250,120,\"buffet\"],[400,130,\"plante_grande\"],[60,250,\"canape\"],[380,290,\"plante\"],[210,260,\"tapis_rond\",1]],\"int_mami\":[[40,114,\"cheminee\"],[130,118,\"commode\"],[238,120,\"armoire\"],[378,150,\"lit_vert\"],[30,290,\"plante\"],[200,260,\"tapis_rond\",1]],\"int_zoe\":[[40,150,\"lit_petit\"],[110,150,\"lit_petit\"],[200,118,\"commode\"],[320,128,\"bibliotheque\"],[400,130,\"plante\"],[250,250,\"canape\"],[150,260,\"tapis_rond\",1],[460,300,\"plante_grande\"]],\"int_marc\":[[36,150,\"lit_vert\"],[110,120,\"armoire\"],[250,120,\"buffet\"],[370,128,\"bibliotheque\"],[30,290,\"plante\"],[200,260,\"tapis_rond\",1]],\"int_pharmacie\":[[30,128,\"bibliotheque\"],[100,128,\"bibliotheque\"],[170,128,\"bibliotheque\"],[240,128,\"bibliotheque\"],[310,128,\"bibliotheque\"],[160,230,\"buffet\"],[440,130,\"plante\"],[60,290,\"plante\"]],\"int_boulangerie\":[[30,120,\"buffet\"],[140,120,\"buffet\"],[260,128,\"bibliotheque\"],[330,128,\"bibliotheque\"],[200,240,\"buffet\"],[400,290,\"plante\"],[400,130,\"plante\"]],\"int_poste\":[[30,120,\"buffet\"],[140,120,\"buffet\"],[260,120,\"armoire\"],[400,128,\"bibliotheque\"],[200,240,\"buffet\"],[30,290,\"plante\"],[470,300,\"plante_grande\"]],\"int_ecole\":[[30,128,\"bibliotheque\"],[100,128,\"bibliotheque\"],[250,120,\"buffet\"],[420,120,\"armoire\"],[560,128,\"bibliotheque\"],[120,230,\"buffet\"],[260,230,\"buffet\"],[400,230,\"buffet\"],[120,310,\"buffet\"],[260,310,\"buffet\"],[400,310,\"buffet\"],[590,340,\"plante_grande\"],[540,250,\"tapis_rond\",1]]},\"m\":{\"chambre\":[],\"salon\":[],\"soussol\":[],\"int_paul\":[],\"int_mami\":[],\"int_zoe\":[],\"int_marc\":[],\"int_pharmacie\":[],\"int_boulangerie\":[],\"int_poste\":[],\"int_ecole\":[]},\"g\":{\"chambre\":{\"w\":448,\"h\":320,\"dec\":[0,0],\"gap\":[196,226],\"cl\":[]},\"salon\":{\"w\":512,\"h\":320,\"dec\":[0,0],\"gap\":[240,272],\"cl\":[]},\"soussol\":{\"w\":448,\"h\":320,\"dec\":[0,0],\"gap\":null,\"cl\":[[248,64,16,98,\"t\"],[248,240,16,70,\"b\"]]},\"int_paul\":{\"w\":448,\"h\":320,\"dec\":[0,0],\"gap\":[208,240],\"cl\":[]},\"int_mami\":{\"w\":448,\"h\":320,\"dec\":[0,0],\"gap\":[208,240],\"cl\":[]},\"int_zoe\":{\"w\":512,\"h\":320,\"dec\":[0,0],\"gap\":[240,272],\"cl\":[]},\"int_marc\":{\"w\":448,\"h\":320,\"dec\":[0,0],\"gap\":[208,240],\"cl\":[]},\"int_pharmacie\":{\"w\":512,\"h\":320,\"dec\":[0,0],\"gap\":[240,272],\"cl\":[]},\"int_boulangerie\":{\"w\":448,\"h\":320,\"dec\":[0,0],\"gap\":[208,240],\"cl\":[]},\"int_poste\":{\"w\":512,\"h\":320,\"dec\":[0,0],\"gap\":[240,272],\"cl\":[]},\"int_ecole\":{\"w\":640,\"h\":384,\"dec\":[0,0],\"gap\":[304,336],\"cl\":[]}},\"ro\":[[0,870,3600,96,\"p\"],[0,2090,3600,96,\"p\"],[1560,966,64,1124,\"p\"]],\"r\":[]}";MODE_PUBLIC=PUBLIC;
+const MOBILE=typeof document!=='undefined'&&!!document.body&&!!document.body.classList&&document.body.classList.contains('mob');
+let panneauMasque=false,pinch=null,derBh=0;const ptrs=new Map();
 const VW=640,VH=360;
 const cv=document.getElementById('jeu'),cx=cv.getContext('2d');cx.imageSmoothingEnabled=false;
 const $=id=>document.getElementById(id);
@@ -940,7 +942,7 @@ const CLE_PLAN='calmland_plan_v9';let undo=[],confirmDel=null;
 const GH_DEPOT='asbldream-lab/calmland',GH_FICHIER='plan.json',GH_BRANCHE='main',CLE_GH='calmland_gh_token',CLE_ATTENTE='calmland_gh_attente';
 let ghTimer=null,ghEnCours=false,ghRelance=false;
 function ghToken(){try{return localStorage.getItem(CLE_GH)||'';}catch(e){return '';}}
-function ghEtat(t){const e=$('gh-etat');if(e)e.textContent=t;}
+function ghEtat(t){const e=$('gh-etat');if(e)e.textContent=t;const m=$('mob-gh-etat');if(m)m.textContent=t;}
 function ghUrl(){return 'https://api.github.com/repos/'+GH_DEPOT+'/contents/'+GH_FICHIER;}
 function ghB64(t){const b=new TextEncoder().encode(t);let s='';for(const c of b)s+=String.fromCharCode(c);return btoa(s);}
 function ghDecode(b){const s=atob(b.replace(/\s/g,'')),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return new TextDecoder().decode(u);}
@@ -974,6 +976,8 @@ async function ghCharger(force){
  }catch(e){ghEtat('⚠️ GitHub injoignable : plan local utilisé');}
 }
 function brancherGh(){if(PUBLIC)return;
+ if(typeof location!=='undefined'){const m=(location.hash||'').match(/^#cle=(.+)$/);if(m){try{localStorage.setItem(CLE_GH,decodeURIComponent(m[1]));}catch(e){}try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}}}
+ $('gh-lien').onclick=()=>{const t=ghToken();if(!t){ghEtat('Enregistre d\'abord ta clé');return;}const u=location.origin+location.pathname+'#cle='+encodeURIComponent(t);const fin=()=>{try{prompt('Copie ce lien et garde-le (notes, favoris) :',u);}catch(e){}};try{navigator.clipboard.writeText(u).then(()=>ghEtat('✅ Lien copié : garde-le en lieu sûr'),fin);}catch(e){fin();}};
  $('gh-sauver-cle').onclick=()=>{const v=$('gh-token').value.trim();if(!v){ghEtat('Colle ta clé dans le champ avant');return;}try{localStorage.setItem(CLE_GH,v);}catch(e){}$('gh-token').value='';ghEtat('Clé enregistrée sur cet appareil');ghCharger(false);};
  $('gh-envoyer').onclick=()=>ghEnvoyer();
  $('gh-recharger').onclick=()=>ghCharger(true);}
@@ -1037,6 +1041,39 @@ for(const k in INTS)if(!SPAWN[k])SPAWN[k]=()=>{const R=SC[k];return {x:R.w/2,y:R
 function allerEd(sc){const p=(SPAWN[sc]||(()=>({x:SC[sc].w/2,y:SC[sc].h-80})))();changerScene(sc,p.x,p.y,3);selEd=null;drag=null;degager();centrerEd();majTexteEd();}
 function basculerColl(){if(!selEd||selEd.kind!=='i'){msg('Sélectionne un meuble dans une pièce');return;}pushUndo();const it=selEd.ref;if(it[3])it.length=3;else it[3]=1;msg(it[3]?'Ce meuble est traversable':'Ce meuble est solide');majApres();}
 function panEditeur(dt){const {dx,dy}=dirClavier();EC.x+=dx*420*dt/ZOOM;EC.y+=dy*420*dt/ZOOM;}
+function debutPinch(){const v=[...ptrs.values()],a=v[0],b=v[1],r=cv.getBoundingClientRect();drag=null;const mx=((a.x+b.x)/2-r.left)*VW/r.width,my=((a.y+b.y)/2-r.top)*VH/r.height,c=camera();pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,z:ZOOM,mx,my,wx:c.x+mx/ZOOM,wy:c.y+my/ZOOM};}
+function majPinch(){const v=[...ptrs.values()],a=v[0],b=v[1],d=Math.hypot(a.x-b.x,a.y-b.y)||1;ZOOM=Math.max(0.2,Math.min(2.4,pinch.z*d/pinch.d));EC.x=pinch.wx-pinch.mx/ZOOM;EC.y=pinch.wy-pinch.my/ZOOM;$('zoom-val').textContent=Math.round(ZOOM*100)+' %';}
+// ---------- MODE MOBILE (page mobile.html : jeu, éditeur et test au doigt) ----------
+let toastT=null;
+function toast(t){const e=$('mob-toast');e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{e.hidden=true;},3500);}
+function ouvrirMenuMob(){majLibMob();$('mob-menu').hidden=false;}
+function fermerMenuMob(){$('mob-menu').hidden=true;}
+function majLibMob(){$('mm-son').textContent=son?'🔊 Son : oui':'🔇 Son : non';$('mm-courir').textContent=touches.shift?'🏃 Courir : oui':'🏃 Courir : non';$('mm-coll').textContent=VOIR_COLL?'🧱 Collisions : vues':'🧱 Collisions : cachées';$('mm-panneau').textContent=panneauMasque?'▤ Panneau : caché':'▤ Panneau : visible';}
+function ouvrirCle(){$('mob-gh-etat').textContent=($('gh-etat')&&$('gh-etat').textContent)||'';$('mob-cle').hidden=false;}
+function pleinEcran(){const d=typeof document!=='undefined'?document.documentElement:null;try{if(document.fullscreenElement){document.exitFullscreen();return;}if(d&&d.requestFullscreen){d.requestFullscreen();return;}}catch(e){}toast('Sur iPhone : touche Partager, puis « Sur l\'écran d\'accueil », et ouvre Calm Land depuis cette icône');}
+function majMobile(){const portrait=innerHeight>innerWidth;$('mob-barre').hidden=!EDIT;$('obj').hidden=EDIT;$('tactile').hidden=EDIT||G.mode!=='jeu'||(coteVisible&&portrait);if(((MOBILE&&EDIT)?56:0)!==derBh)ajuster();}
+function brancherMobile(){if(!MOBILE)return;
+ const f=fn=>()=>{fn();fermerMenuMob();};
+ $('mob-fab').onclick=ouvrirMenuMob;$('gh-etat').onclick=ouvrirCle;$('mob-fermer').onclick=fermerMenuMob;$('mob-menu').onclick=e=>{if(e.target===$('mob-menu'))fermerMenuMob();};
+ $('mm-edit').onclick=f(()=>{panneauMasque=false;if(!$('menu').hidden)$('b-editeur').onclick();else if(G.mode==='jeu'&&!EDIT&&(G.queue.length||G.keypad))toast('Termine d\'abord le dialogue en cours (touche l\'écran)');else if(G.mode==='jeu')basculerEditeur();});
+ $('mm-test').onclick=f(()=>{panneauMasque=false;if(G.mode!=='menu')basculerTest();});
+ $('mm-cle').onclick=f(ouvrirCle);$('mm-m1').onclick=f(()=>sauterTemps(1));$('mm-m5').onclick=f(()=>sauterTemps(5));
+ $('mm-courir').onclick=()=>{touches.shift=!touches.shift;majLibMob();};
+ $('mm-zm').onclick=()=>zoom(-1);$('mm-zp').onclick=()=>zoom(1);
+ $('mm-coll').onclick=()=>{VOIR_COLL=!VOIR_COLL;majLibMob();};
+ $('mm-panneau').onclick=()=>{panneauMasque=!panneauMasque;majLibMob();};
+ $('mm-son').onclick=()=>{son=!son;majLibMob();};
+ $('mm-guide').onclick=f(()=>{if(G.mode!=='menu')$('guide').hidden=!$('guide').hidden;});
+ $('mm-plein').onclick=f(pleinEcran);
+ $('mb-annuler').onclick=()=>annuler();$('mb-suppr').onclick=()=>supprimerSel();$('mb-zm').onclick=()=>zoom(-1);$('mb-zp').onclick=()=>zoom(1);
+ $('mb-panneau').onclick=()=>{panneauMasque=!panneauMasque;};$('mb-quitter').onclick=()=>basculerEditeur();
+ $('mob-cle-fermer').onclick=()=>{$('mob-cle').hidden=true;};
+ $('mob-coller').onclick=async()=>{let t=($('mob-token').value||'').trim();if(!t){try{t=((await navigator.clipboard.readText())||'').trim();}catch(e){}}
+  if(!t){ghEtat('Rien dans le presse-papiers : fais un appui long dans le champ du dessous, Coller, puis ré-appuie ici');$('mob-token').focus();return;}
+  $('gh-token').value=t;$('mob-token').value='';$('gh-sauver-cle').onclick();setTimeout(()=>{$('mob-cle').hidden=true;},1500);};
+ $('mob-token').oninput=()=>{const v=$('mob-token').value.trim();if(/^(github_pat_|ghp_|gho_)\w{20,}$/.test(v))$('mob-coller').onclick();};
+ $('mob-envoyer').onclick=()=>ghEnvoyer();$('mob-recharger').onclick=()=>ghCharger(true);$('mob-lien').onclick=()=>$('gh-lien').onclick();
+ if(!ghToken())ouvrirCle();}
 function mondeDe(e){const r=cv.getBoundingClientRect(),c=camera();return {x:c.x+(e.clientX-r.left)*VW/r.width/ZOOM,y:c.y+(e.clientY-r.top)*VH/r.height/ZOOM};}
 function toucher(w){let best=null,ba=1e12;
  if(G.player.scene!=='village'){for(const it of ITEMS[G.player.scene]){const sp=SPRI[it[2]];if(!sp)continue;if(w.x>=it[0]&&w.x<=it[0]+sp.w&&w.y>=it[1]-sp.h&&w.y<=it[1]){const a=sp.w*sp.h;if(a<=ba){ba=a;best={kind:'i',ref:it,w:sp.w,h:sp.h};}}}for(const r of (MURS[G.player.scene]||[])){if(w.x>=r[0]&&w.x<=r[0]+r[2]&&w.y>=r[1]&&w.y<=r[1]+r[3]){const a=r[2]*r[3];if(a<=ba){ba=a;best={kind:'m',ref:r,w:r[2],h:r[3]};}}}return best;}
@@ -1065,15 +1102,15 @@ function dessinerEditeur(cam){const vw=VW/ZOOM,vh=VH/ZOOM;
  for(const u of BUISSONS){const sp=SPR[u[2]],w=sp.w,h=sp.h,s=selEd&&selEd.ref===u;cx.strokeStyle=s?'#ffe15a':'rgba(120,255,160,.85)';cx.strokeRect(u[0],u[1]-h,w,h);}
  for(const r of ROUTES){if(r.off)continue;const s=selEd&&selEd.ref===r;cx.strokeStyle=s?'#ffe15a':'rgba(255,170,90,.85)';cx.strokeRect(r[0],r[1],r[2],r[3]);}}
 function brancherEditeur(){
- cv.addEventListener('pointerdown',e=>{if(!EDIT)return;e.preventDefault();const w=mondeDe(e),h=toucher(w);
+ cv.addEventListener('pointerdown',e=>{if(!EDIT)return;e.preventDefault();if(e.pointerType==='mouse')ptrs.clear();ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});if(ptrs.size===2){debutPinch();try{cv.setPointerCapture(e.pointerId);}catch(x){}return;}const w=mondeDe(e),h=toucher(w);
   if(h){selEd=h;const p=h.kind==='b'?{x:h.ref[1],y:h.ref[2]}:{x:h.ref[0],y:h.ref[1]};drag={ox:w.x-p.x,oy:w.y-p.y};}
   else{selEd=null;drag={pan:true,sx:e.clientX,sy:e.clientY,cx:EC.x,cy:EC.y};}
   majDest();try{cv.setPointerCapture(e.pointerId);}catch(x){}});
- cv.addEventListener('pointermove',e=>{if(!EDIT||!drag)return;
+ cv.addEventListener('pointermove',e=>{if(ptrs.has(e.pointerId))ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pinch&&ptrs.size>=2){majPinch();return;}if(!EDIT||!drag)return;
   if(drag.pan){const r=cv.getBoundingClientRect();EC.x=drag.cx-(e.clientX-drag.sx)*VW/r.width/ZOOM;EC.y=drag.cy-(e.clientY-drag.sy)*VH/r.height/ZOOM;return;}
   if(!drag.pushed){pushUndo();drag.pushed=true;}
   const w=mondeDe(e);{const g=G.player.scene==='village'?32:16;deplacer(selEd,Math.round((w.x-drag.ox)/g)*g,Math.round((w.y-drag.oy)/g)*g);}});
- cv.addEventListener('pointerup',()=>{drag=null;});
+ const finPtr=e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;drag=null;};cv.addEventListener('pointerup',finPtr);cv.addEventListener('pointercancel',finPtr);
  $('ed-copier').onclick=()=>{const t=$('ed-txt');t.value=planExporter();const fin=()=>{t.select();try{document.execCommand('copy');}catch(x){}msg('Plan copié');};
   try{navigator.clipboard.writeText(t.value).then(()=>msg('Plan copié'),fin);}catch(x){fin();}};
  $('ed-appliquer').onclick=()=>{try{pushUndo();planImporter($('ed-txt').value);if(!SC[G.player.scene])allerEd('village');majScenesEd();dessinerFond();sauverPlan();msg('Plan appliqué');}catch(x){msg('Texte invalide');}};
@@ -1097,6 +1134,7 @@ let dernier=performance.now();
 function frame(now){majCote();
  const dt=Math.min(0.05,(now-dernier)/1000);dernier=now;tReel+=dt;
  majMusique(dt);
+ if(MOBILE)majMobile();
  if(EDIT){const sl=$('ed-scenes');if(sl&&sl.value!==G.player.scene)sl.value=G.player.scene;}
  if(attenteFx>0){attenteFx-=dt;if(attenteFx<=0){attenteFx=0;G.queue.shift();$('titre').hidden=true;$('titre').dataset.noir='0';courant=null;pomper();}}
  if(G.mode==='jeu'&&EDIT){panEditeur(dt);}
@@ -1119,19 +1157,19 @@ function frame(now){majCote();
  dessiner(tReel);requestAnimationFrame(frame);
 }
 let coteVisible=false;
-function majCote(){const v=!($('editeur').hidden&&$('biblio').hidden&&$('test').hidden);if(v!==coteVisible){coteVisible=v;$('cote').hidden=!v;ajuster();}}
-function ajuster(){const etroit=innerWidth<=800,cw=coteVisible&&!etroit?340:0,ch=coteVisible&&etroit?Math.round(innerHeight*0.42):0;const s=Math.min((innerWidth-cw)/VW,(innerHeight-ch)/VH);const w=Math.floor(VW*s),h=Math.floor(VH*s);const z=$('ecran');z.style.width=w+'px';z.style.height=h+'px';z.style.fontSize=Math.max(11,Math.round(h/30))+'px';}
+function majCote(){const v=!panneauMasque&&!($('editeur').hidden&&$('biblio').hidden&&$('test').hidden);if(v!==coteVisible){coteVisible=v;$('cote').hidden=!v;ajuster();}}
+function ajuster(){const bh=(MOBILE&&EDIT)?56:0,etroit=MOBILE?innerHeight>innerWidth:innerWidth<=800,cw=coteVisible&&!etroit?(MOBILE?Math.min(340,Math.round(innerWidth*0.42)):340):0,ch=coteVisible&&etroit&&!MOBILE?Math.round(innerHeight*0.42):0;derBh=bh;if(MOBILE&&document.body.style){document.body.style.paddingBottom=bh+'px';if(document.body.style.setProperty)document.body.style.setProperty('--cw',cw+'px');}const s=Math.min((innerWidth-cw)/VW,(innerHeight-bh-ch)/VH);const w=Math.floor(VW*s),h=Math.floor(VH*s);if(MOBILE&&document.body.style&&document.body.style.setProperty)document.body.style.setProperty('--eh',h+'px');const z=$('ecran');z.style.width=w+'px';z.style.height=h+'px';z.style.fontSize=Math.max(MOBILE?14:11,Math.round(h/30))+'px';}
 addEventListener('resize',ajuster);
 function demarrer(prol){initSon();lancerMusique();VITESSE=+$('vitesse').value||30;$('menu').hidden=true;$('lettre').hidden=true;nouvellePartie(prol);courant=null;pomper();}
 function pret(){
- lirePlan();dessinerFond();construireTest();ajuster();brancherEditeur();construireBiblio();brancherGh();ghCharger(false);
+ lirePlan();dessinerFond();construireTest();ajuster();brancherEditeur();construireBiblio();brancherGh();ghCharger(false);brancherMobile();
  document.querySelectorAll('#outils [data-o]').forEach(b=>b.onclick=()=>{const o=b.dataset.o;if(o==='m1')sauterTemps(1);else if(o==='m5')sauterTemps(5);else if(o==='z-')zoom(-1);else if(o==='z+')zoom(1);else if(o==='guide')$('guide').hidden=!$('guide').hidden;else if(o==='edit')basculerEditeur();else if(o==='coll')VOIR_COLL=!VOIR_COLL;b.blur();});
  $('guide-fermer').onclick=()=>$('guide').hidden=true;
  $('b-prologue').onclick=()=>demarrer(true);$('b-boucle').onclick=()=>demarrer(false);
  $('b-test').onclick=()=>{demarrer(false);$('test').hidden=false;};
  $('dialogue').onclick=()=>action();$('titre').onclick=()=>action();$('lettre').onclick=()=>action();
  document.querySelectorAll('#pave button').forEach(b=>b.onclick=()=>pave(b.dataset.k));
- if(matchMedia('(pointer:coarse)').matches)$('tactile').hidden=false;
+ if(MOBILE||matchMedia('(pointer:coarse)').matches)$('tactile').hidden=false;
  document.querySelectorAll('#tactile [data-t]').forEach(b=>{const k=b.dataset.t;b.addEventListener('pointerdown',e=>{e.preventDefault();if(k==='e')action();else touches[k]=true;});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>touches[k]=false));});
  $('chargement').hidden=true;$('menu').hidden=false;requestAnimationFrame(frame);
 }
