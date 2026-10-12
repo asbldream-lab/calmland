@@ -22,16 +22,20 @@ function majMusique(dt){
 }
 
 // ---------- FOND DU VILLAGE (dessiné une fois) ----------
-function dessinerFond(){const R=SC.village,TS=1024;fond=[];
- for(let ty=0;ty<R.h;ty+=TS)for(let tx=0;tx<R.w;tx+=TS){const c=document.createElement('canvas');c.width=Math.min(TS,R.w-tx);c.height=Math.min(TS,R.h-ty);const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.translate(-tx,-ty);dessinerFondSur(g,tx,ty,c.width,c.height);fond.push({x:tx,y:ty,w:c.width,h:c.height,c});}}
-function dessinerFondSur(f,tx,ty,tw,th){
- for(let y=Math.floor(ty/32)*32;y<ty+th;y+=32)for(let x=Math.floor(tx/32)*32;x<tx+tw;x+=32)f.drawImage(IMG.t_herbe,x,y);
- for(const r of ROUTES){if(r.off)continue;const t=r[4]==='t',ts=t?32:64,im=t?IMG.t_terre:IMG.t_pave;for(let y=r[1];y<r[1]+r[3];y+=ts)for(let x=r[0];x<r[0]+r[2];x+=ts){const ww=Math.min(ts,r[0]+r[2]-x),hh=Math.min(ts,r[1]+r[3]-y);f.drawImage(im,0,0,ww,hh,x,y,ww,hh);}}
- for(const b of BAT)if(!b.off)f.drawImage(IMG['b_'+b[0]],b[1],b[2]);
- const LBL={Maison_Aaron:'Maison d\'Aaron',Maison_Benjamin:'Maison de Benjamin et Nathalie',Maison_Paul:'Maison de Paul',Pharmacie:'Pharmacie de Lilya',Boulangerie:'Boulangerie de Cédric',Poste_Police:'Poste de police · Reda',Maison_Mami:'Maison de Mami',Maison_Zoe:'Maison de Zoé et ses parents',Maison_Marc:'Maison de Marc',Ecole:'École · Marc, le concierge'};
+let BUI_TRIES=[];const PAT={},LW={};
+function dessinerFond(){BUI_TRIES=[...BUISSONS].sort((p,q)=>p[1]-q[1]);}
+const MOY={};
+function couleurMoy(nom,img,def){if(MOY[nom])return MOY[nom];let c=def;try{const k=document.createElement('canvas');k.width=1;k.height=1;const g=k.getContext('2d');g.drawImage(img,0,0,1,1);const d=g.getImageData(0,0,1,1).data;if(d&&d.length>=3)c='rgb('+d[0]+','+d[1]+','+d[2]+')';}catch(e){}return MOY[nom]=c;}
+function motif(f,nom,img){if(ZOOM<0.12)return couleurMoy(nom,img,nom==='herbe'?'#3f8f4f':nom==='terre'?'#a8794a':'#8a8a8a');let m=PAT[nom];if(!m||m.f!==f){m=PAT[nom]={f,p:f.createPattern(img,'repeat')};}return m.p;}
+const LBL={Maison_Aaron:'Maison d\'Aaron',Maison_Benjamin:'Maison de Benjamin et Nathalie',Maison_Paul:'Maison de Paul',Pharmacie:'Pharmacie de Lilya',Boulangerie:'Boulangerie de Cédric',Poste_Police:'Poste de police · Reda',Maison_Mami:'Maison de Mami',Maison_Zoe:'Maison de Zoé et ses parents',Maison_Marc:'Maison de Marc',Ecole:'École · Marc, le concierge'};
+function dessinerFondSur(f,vx,vy,vw,vh){
+ const R=SC.village,x0=Math.max(0,vx),y0=Math.max(0,vy),x1=Math.min(R.w,vx+vw),y1=Math.min(R.h,vy+vh);if(x1<=x0||y1<=y0)return;
+ f.fillStyle=motif(f,'herbe',IMG.t_herbe);f.fillRect(x0,y0,x1-x0,y1-y0);
+ for(const r of ROUTES){if(r.off||r[0]>x1||r[1]>y1||r[0]+r[2]<x0||r[1]+r[3]<y0)continue;const t=r[4]==='t';f.save();f.translate(r[0],r[1]);f.fillStyle=motif(f,t?'terre':'pave',t?IMG.t_terre:IMG.t_pave);f.fillRect(0,0,r[2],r[3]);f.restore();}
+ for(const b of BAT){if(b.off||b[1]>x1||b[2]>y1||b[1]+b[3]<x0||b[2]+b[4]<y0)continue;f.drawImage(IMG['b_'+b[0]],b[1],b[2]);}
  f.font='bold 12px system-ui';f.textAlign='center';
- for(const b of BAT){if(b.off)continue;const t=LBL[b[0]],w=f.measureText(t).width+14,cxp=b[1]+b[3]/2,y=b[2]-14;f.fillStyle='#3a2a1c';f.fillRect(cxp-w/2-2,y-14,w+4,22);f.fillStyle='#8a6a42';f.fillRect(cxp-w/2,y-12,w,18);f.fillStyle='#f4ead2';f.fillText(t,cxp,y+1);}
- for(const b of [...BUISSONS].sort((p,q)=>p[1]-q[1])){const sp=SPR[b[2]];if(sp.h>=96){const c=coupe(sp);if(sp.h-c>0)f.drawImage(IMG.atlas,sp.x,sp.y+c,sp.w,sp.h-c,b[0],b[1]-sp.h+c,sp.w,sp.h-c);continue;}f.drawImage(IMG.atlas,sp.x,sp.y,sp.w,sp.h,b[0],b[1]-sp.h,sp.w,sp.h);}
+ for(const b of BAT){if(b.off||b[1]>x1||b[2]>y1+20||b[1]+b[3]<x0||b[2]<y0-20)continue;const t=LBL[b[0]];if(!LW[t])LW[t]=f.measureText(t).width;const w=LW[t]+14,cxp=b[1]+b[3]/2,y=b[2]-14;f.fillStyle='#3a2a1c';f.fillRect(cxp-w/2-2,y-14,w+4,22);f.fillStyle='#8a6a42';f.fillRect(cxp-w/2,y-12,w,18);f.fillStyle='#f4ead2';f.fillText(t,cxp,y+1);}
+ for(const b of BUI_TRIES){const sp=SPR[b[2]];if(!sp)continue;if(b[0]>x1||b[0]+sp.w<x0||b[1]-sp.h>y1||b[1]<y0)continue;if(sp.h>=96){const c=coupe(sp);if(sp.h-c>0)f.drawImage(IMG.atlas,sp.x,sp.y+c,sp.w,sp.h-c,b[0],b[1]-sp.h+c,sp.w,sp.h-c);continue;}f.drawImage(IMG.atlas,sp.x,sp.y,sp.w,sp.h,b[0],b[1]-sp.h,sp.w,sp.h);}
 }
 
 // ---------- SONS (générés, aucun fichier) ----------
@@ -65,7 +69,7 @@ function dessiner(t){
  if(!L)return;
  cx.save();cx.scale(ZOOM,ZOOM);cx.translate(-Math.round(cam.x),-Math.round(cam.y));
  const labels=[];
- if(pl.scene==='village'){for(const t of fond){if(t.x+t.w<cam.x||t.y+t.h<cam.y||t.x>cam.x+VW/ZOOM||t.y>cam.y+VH/ZOOM)continue;cx.drawImage(t.c,0,0,t.w,t.h,t.x,t.y,t.w+1,t.h+1);}}else cx.drawImage(baseDe(pl.scene),0,0);
+ if(pl.scene==='village')dessinerFondSur(cx,Math.floor(cam.x)-2,Math.floor(cam.y)-2,VW/ZOOM+4,VH/ZOOM+4);else{const I=INTS[pl.scene],R=SC[pl.scene];dessinerBase(cx,R.w,R.h,I.fl,I.wc,I.gap,I.cloisons,I.dec,Math.floor(cam.x)-2,Math.floor(cam.y)-2,VW/ZOOM+4,VH/ZOOM+4);}
  const objs=[];
  if(pl.scene==='village')for(const u of BUISSONS){const sp=SPR[u[2]];if(sp.h>=96){const ux=u[0],uy=u[1],c=coupe(sp),yb=sp.sol?sp.sol[1]+sp.sol[3]:sp.h;if(c>0)objs.push({y:uy-sp.h+yb,d:()=>cx.drawImage(IMG.atlas,sp.x,sp.y,sp.w,c,ux,uy-sp.h,sp.w,c)});}}
  // objets
@@ -141,7 +145,7 @@ addEventListener('keyup',e=>{touches[e.key.toLowerCase()]=false;});
 function basculerSon(){son=!son;majBoutonSon();}
 function majBoutonSon(){const b=$('b-son');if(b)b.textContent=son?'🔊':'🔇';}
 function sauterTemps(d){if(EDIT||G.mode!=='jeu'||G.prologue||G.queue.length||G.keypad)return;sauter(d);pomper();}
-function zoom(d){const Z=[0.08,0.11,0.14,0.2,0.28,0.4,0.5,0.7,1,1.4,1.8,2.4];let i=Z.indexOf(ZOOM);if(i<0){i=Z.findIndex(z=>z>=ZOOM);if(i<0)i=Z.length-1;if(d<0&&Z[i]>ZOOM)i=Math.max(0,i);else if(d>0&&Z[i]>ZOOM)i=Math.max(0,i-1);}ZOOM=Z[Math.max(0,Math.min(Z.length-1,i+d))];$('zoom-val').textContent=Math.round(ZOOM*100)+' %';}
+function zoom(d){const Z=[0.01,0.02,0.04,0.08,0.11,0.14,0.2,0.28,0.4,0.5,0.7,1,1.4,1.8,2.4];let i=Z.indexOf(ZOOM);if(i<0){i=Z.findIndex(z=>z>=ZOOM);if(i<0)i=Z.length-1;if(d<0&&Z[i]>ZOOM)i=Math.max(0,i);else if(d>0&&Z[i]>ZOOM)i=Math.max(0,i-1);}ZOOM=Z[Math.max(0,Math.min(Z.length-1,i+d))];$('zoom-val').textContent=Math.round(ZOOM*100)+' %';}
 function dirClavier(){let dx=0,dy=0;const T=touches;
  if(T.arrowleft||T.q||T.a||T.tg)dx-=1;if(T.arrowright||T.d||T.td)dx+=1;if(T.arrowup||T.z||T.w||T.th)dy-=1;if(T.arrowdown||T.s||T.tb)dy+=1;
  if(dx&&dy){dx*=0.707;dy*=0.707;}return {dx,dy};}
@@ -228,17 +232,19 @@ function construireTest(){
 }
 
 // ---------- PIÈCES CRÉÉES ----------
-const BASES={};const NP={fl:0,wl:0};
-function fabriquerBase(w,h,fl,col,gap,clo,ph){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.imageSmoothingEnabled=false;
+const NP={fl:0,wl:0};
+function dessinerBase(x,w,h,fl,col,gap,clo,ph,vx,vy,vw,vh){
  col=col||[200,190,170];const rgb=f=>'rgb('+col.map(v=>Math.round(v*f)).join(',')+')';
  x.fillStyle='#1e191e';x.fillRect(0,0,w,h);
- x.save();x.beginPath();x.rect(12,64,w-24,h-76);x.clip();const fx=(fl%8)*96,fy=Math.floor(fl/8)*64;{const px=((ph&&ph[0])||0)%96,py=((ph&&ph[1])||0)%64;for(let yy=64+py-(py?64:0);yy<h;yy+=64)for(let xx=px-(px?96:0);xx<w;xx+=96)x.drawImage(IMG.floors,fx,fy,96,64,xx,yy,96,64);}x.restore();
+ x.save();x.beginPath();x.rect(12,64,w-24,h-76);x.clip();const fx=(fl%8)*96,fy=Math.floor(fl/8)*64;
+ {const px=((ph&&ph[0])||0)%96,py=((ph&&ph[1])||0)%64,ox=px-(px?96:0),oy=64+py-(py?64:0);
+  const xs=ox+96*Math.max(0,Math.floor((vx-ox)/96)),ys=oy+64*Math.max(0,Math.floor((vy-oy)/64)),xe=Math.min(w,vx+vw),ye=Math.min(h,vy+vh);
+  for(let yy=ys;yy<ye;yy+=64)for(let xx=xs;xx<xe;xx+=96)x.drawImage(IMG.floors,fx,fy,96,64,xx,yy,96,64);}x.restore();
  x.fillStyle=rgb(.45);x.fillRect(0,0,12,h);x.fillRect(w-12,0,12,h);x.fillRect(0,h-12,w,12);
  x.fillStyle=rgb(1);x.fillRect(0,0,w,64);x.fillStyle=rgb(.45);x.fillRect(0,0,w,4);x.fillStyle=rgb(.8);x.fillRect(0,52,w,6);x.fillStyle=rgb(.6);x.fillRect(0,58,w,6);
  x.fillStyle='rgba(0,0,0,.18)';x.fillRect(12,64,w-24,7);
  x.fillStyle=rgb(.7);for(const q of (clo||[]))x.fillRect(q[0],q[1],q[2],q[3]);
- if(gap){x.fillStyle='#281e19';x.fillRect(gap[0],h-12,gap[1]-gap[0],12);}return c;}
-function baseDe(sc){const I=INTS[sc],R=SC[sc];const sig=[R.w,R.h,I.fl,I.wc,I.gap,I.dec,JSON.stringify(I.cloisons||[])].join('|');if(!BASES[sc]||BASES[sc].sig!==sig)BASES[sc]={sig,c:fabriquerBase(R.w,R.h,I.fl,I.wc,I.gap,I.cloisons,I.dec)};return BASES[sc].c;}
+ if(gap){x.fillStyle='#281e19';x.fillRect(gap[0],h-12,gap[1]-gap[0],12);}}
 function dessinerMur(r,col){const x=r[0],y=r[1],w=r[2],h=r[3],c=f=>'rgb('+col.map(v=>Math.round(v*f)).join(',')+')';
  if(w>=h){cx.fillStyle=c(1);cx.fillRect(x,y,w,h);cx.fillStyle=c(.8);cx.fillRect(x,y+h-14,w,6);cx.fillStyle=c(.6);cx.fillRect(x,y+h-8,w,8);cx.fillStyle=c(.45);cx.fillRect(x,y,w,3);}
  else{cx.fillStyle=c(.75);cx.fillRect(x,y,w,h);cx.fillStyle=c(1);cx.fillRect(x,y,w,5);cx.fillStyle=c(.5);cx.fillRect(x,y,2,h);cx.fillRect(x+w-2,y,2,h);}}
@@ -367,7 +373,7 @@ function allerEd(sc){const p=(SPAWN[sc]||(()=>({x:SC[sc].w/2,y:SC[sc].h-80})))()
 function basculerColl(){if(!selEd||selEd.kind!=='i'){msg('Sélectionne un meuble dans une pièce');return;}pushUndo();const it=selEd.ref;if(it[3])it.length=3;else it[3]=1;msg(it[3]?'Ce meuble est traversable':'Ce meuble est solide');majApres();}
 function panEditeur(dt){const {dx,dy}=dirClavier();EC.x+=dx*420*dt/ZOOM;EC.y+=dy*420*dt/ZOOM;}
 function debutPinch(){const v=[...ptrs.values()],a=v[0],b=v[1],r=cv.getBoundingClientRect();drag=null;const mx=((a.x+b.x)/2-r.left)*VW/r.width,my=((a.y+b.y)/2-r.top)*VH/r.height,c=camera();pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,z:ZOOM,mx,my,wx:c.x+mx/ZOOM,wy:c.y+my/ZOOM};}
-function majPinch(){const v=[...ptrs.values()],a=v[0],b=v[1],d=Math.hypot(a.x-b.x,a.y-b.y)||1;ZOOM=Math.max(0.08,Math.min(2.4,pinch.z*d/pinch.d));EC.x=pinch.wx-pinch.mx/ZOOM;EC.y=pinch.wy-pinch.my/ZOOM;$('zoom-val').textContent=Math.round(ZOOM*100)+' %';}
+function majPinch(){const v=[...ptrs.values()],a=v[0],b=v[1],d=Math.hypot(a.x-b.x,a.y-b.y)||1;ZOOM=Math.max(0.01,Math.min(2.4,pinch.z*d/pinch.d));EC.x=pinch.wx-pinch.mx/ZOOM;EC.y=pinch.wy-pinch.my/ZOOM;$('zoom-val').textContent=Math.round(ZOOM*100)+' %';}
 // ---------- MODE MOBILE (page mobile.html : jeu, éditeur et test au doigt) ----------
 let toastT=null;
 function toast(t){const e=$('mob-toast');e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{e.hidden=true;},3500);}
@@ -434,7 +440,7 @@ function dessinerZonesPortes(){cx.lineWidth=1.5/ZOOM;for(const p of PORTES_V){co
 function dessinerEditeur(cam){dessinerEditeur0(cam);if(G.player.scene==='village')dessinerZonesPortes();dessinerPoignees();}
 function dessinerEditeur0(cam){const vw=VW/ZOOM,vh=VH/ZOOM;
  cx.strokeStyle='rgba(255,255,255,.12)';cx.lineWidth=1/ZOOM;cx.beginPath();
- const gs=(G.player.scene==='village'?32:16)*(ZOOM<0.18?4:ZOOM<0.35?2:1);
+ let gs=G.player.scene==='village'?32:16;while(gs*ZOOM<6)gs*=2;
  for(let x=Math.floor(cam.x/gs)*gs;x<cam.x+vw;x+=gs){cx.moveTo(x,cam.y);cx.lineTo(x,cam.y+vh);}
  for(let y=Math.floor(cam.y/gs)*gs;y<cam.y+vh;y+=gs){cx.moveTo(cam.x,y);cx.lineTo(cam.x+vw,y);}cx.stroke();
  if(G.player.scene!=='village'){cx.lineWidth=1.5/ZOOM;for(const it of ITEMS[G.player.scene]){const sp=SPRI[it[2]];if(!sp)continue;const s=selEd&&selEd.ref===it;cx.strokeStyle=s?'#ffe15a':(sp.story?'rgba(255,170,90,.9)':'rgba(120,200,255,.7)');cx.strokeRect(it[0],it[1]-sp.h,sp.w,sp.h);if(s){cx.fillStyle='rgba(255,225,90,.14)';cx.fillRect(it[0],it[1]-sp.h,sp.w,sp.h);cx.fillStyle='#ffe15a';cx.font='bold '+(11/ZOOM)+'px system-ui';cx.textAlign='left';cx.fillText(sp.nom+'  '+it[0]+', '+it[1]+(it[3]?'  (traversable)':''),it[0],it[1]-sp.h-3/ZOOM);}}for(const r of (MURS[G.player.scene]||[])){const s=selEd&&selEd.ref===r;cx.strokeStyle=s?'#ffe15a':'rgba(255,120,200,.9)';cx.strokeRect(r[0],r[1],r[2],r[3]);}return;}

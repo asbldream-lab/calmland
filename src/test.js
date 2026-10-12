@@ -165,7 +165,7 @@ L.sauter(5);L.sauter(5);L.sauter(5);vider();ok(G.reveil>=3||G.minute<1,'sauter j
  // bas : la sortie reste sur le bas de la pièce
  const h1=L.SC.chambre.h;ok(L.agrandir('chambre','bas',2)&&L.SC.chambre.h===h1+64,'agrandir en bas');
  G.player.scene='chambre';G.player.x=(L.INTS.chambre.gap[0]+L.INTS.chambre.gap[1])/2;G.player.y=L.SC.chambre.h-60;for(let i=0;i<160&&G.player.scene==='chambre';i++)L.bouger(0,1,0.016);ok(G.player.scene==='village','sortie encore possible après agrandissement en bas');
- ok(!L.agrandir('chambre','droite',16)||L.SC.chambre.w<=1280,'taille maximale respectée (40 x 25 cases)');ok(!L.agrandir('chambre','diagonale',2),'côté inconnu refusé');
+ L.agrandir('chambre','droite',16);ok(L.SC.chambre.w<=12800,'taille maximale respectée');ok(!L.agrandir('chambre','diagonale',2),'côté inconnu refusé');
  // sous-sol : les cloisons suivent
  const cl0=JSON.stringify(L.INTS.soussol.cloisons);L.agrandir('soussol','haut',2);L.agrandir('soussol','bas',2);const cl=L.INTS.soussol.cloisons;
  ok(cl[0][1]===64&&cl[0][3]===98+64&&cl[1][1]===240+64&&cl[1][3]===70+64,'cloison du sous-sol : prolongée jusqu\'au nouveau mur haut et bas');
@@ -231,7 +231,6 @@ console.log('dialogues joués :',new Set(G.log).size);
  const sy=L.ROUTES[0][1];
  ok(L.agrandirVillage('haut',10)&&L.SC.village.h===3020&&L.ROUTES[0][1]===sy+320&&L.G.player.y===1220,'agrandir en haut');
  ok(L.agrandirVillage('bas',5)&&L.SC.village.h===3180,'agrandir en bas');
- ok(!L.agrandirVillage('bas',60)&&L.SC.village.h===3180,'trop grand : refusé, rien ne change');
  ok(!L.agrandirVillage('milieu',5),'côté inconnu refusé');
  const t=L.planExporter();ok(JSON.parse(t).v.w===4240,'le plan contient la taille du village');
  L.planReinit();ok(L.SC.village.w===3600&&L.SC.village.h===2700&&L.VOFF[0]===0&&L.BATM.Maison_Aaron[1]===a0[0]&&L.PORTES_V[0].x===pv,'plan d\'origine : village remis tel quel');
@@ -296,6 +295,23 @@ console.log('dialogues joués :',new Set(G.log).size);
  {const pe=L.PORTES_V.find(p=>p.id==='p_ecole'),zs=L.zonesPorte(pe);ok(zs.length===2,'école : deux portes');
   aller('village',(zs[1][0]+zs[1][2])/2,(zs[1][1]+zs[1][3])/2);const c=L.cible();ok(c&&c.id==='p_ecole'&&Math.abs(c.x-(zs[1][0]+zs[1][2])/2)<1,'école : la bulle E se place sur la porte où l\'on se trouve');
   aller('village',(zs[0][2]+zs[1][0])/2,(zs[0][1]+zs[0][3])/2);ok(nom()!=='p_ecole','école : entre les deux portes, pas de E');}
+ L.planReinit();
+}
+// ---- Limites ×10
+{
+ L.planReinit();let g=0;while(L.agrandirVillage('droite',400)&&g<500)g++;
+ ok(L.SC.village.w<=64000&&L.SC.village.w>64000-12800&&!L.agrandirVillage('droite',400),'village : jusqu\'à 64000 px de large');
+ g=0;while(L.agrandirVillage('bas',400)&&g<500)g++;
+ ok(L.SC.village.h<=48000&&L.SC.village.h>48000-12800&&!L.agrandirVillage('bas',400),'village : jusqu\'à 48000 px de haut');
+ const gros=L.planExporter();L.planReinit();ok(L.SC.village.w===3600,'plan d\'origine : taille de départ');L.planImporter(gros);
+ ok(L.SC.village.w>50000&&L.SC.village.h>40000,'un village géant se recharge tel quel');
+ L.planReinit();
+ let gi=0;while(L.agrandir('chambre','droite',100)&&gi<100)gi++;
+ ok(L.SC.chambre.w<=12800&&L.SC.chambre.w>12800-3200&&!L.agrandir('chambre','droite',100),'intérieur : jusqu\'à 12800 px de large');
+ gi=0;while(L.agrandir('chambre','bas',100)&&gi<100)gi++;
+ ok(L.SC.chambre.h<=8000&&L.SC.chambre.h>8000-3200,'intérieur : jusqu\'à 8000 px de haut');
+ const u=L.creerPiece('Géante',24,16,1,1,'salon');for(let i=0;i<3;i++)L.agrandir(u,'droite',100);
+ const w2=L.SC[u].w,exp=L.planExporter();L.planReinit();L.planImporter(exp);ok(L.SC[u]&&L.SC[u].w===w2,'une pièce créée très grande se recharge sans être rognée');
  L.planReinit();
 }
 
