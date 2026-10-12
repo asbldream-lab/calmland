@@ -249,7 +249,7 @@ function glisserMur(mt,e){const r0=cv.getBoundingClientRect(),f=document.createE
   if(ev.clientX>=r.left&&ev.clientX<=r.right&&ev.clientY>=r.top&&ev.clientY<=r.bottom&&document.elementFromPoint(ev.clientX,ev.clientY)===cv)w=mondeDe(ev);else{const c=camera();w={x:c.x+VW/ZOOM/2,y:c.y+VH/ZOOM/2};}
   const R=SC[G.player.scene];pushUndo();const q=[Math.max(12,Math.min(R.w-12-mt.w,Math.round((w.x-mt.w/2)/16)*16)),Math.max(20,Math.min(R.h-12-mt.h,Math.round((w.y-mt.h/2)/16)*16)),mt.w,mt.h];MURS[G.player.scene].push(q);selEd={kind:'m',ref:q,w:q[2],h:q[3]};majApres();msg('Posé : '+mt.nom);};
  document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);}
-function majScenesEd(){const cont=$('ed-scenes');cont.innerHTML='';[['village','Village'],...Object.keys(INTS).map(k=>[k,INTS[k].nom])].forEach(([k,n])=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>allerEd(k);cont.appendChild(b);});}
+function majScenesEd(){const sel=$('ed-scenes');sel.innerHTML='';[['village','Village'],...Object.keys(INTS).map(k=>[k,INTS[k].nom])].forEach(([k,n])=>{const o=document.createElement('option');o.value=k;o.textContent=n;sel.appendChild(o);});sel.value=G.player.scene;sel.onchange=()=>{allerEd(sel.value);sel.blur();};}
 function majDest(){const l=$('ed-dest-l'),s=$('ed-dest'),ok=!!(selEd&&selEd.kind==='i'&&(selEd.ref[2]==='porte'||selEd.ref[2]==='passage'));l.hidden=!ok;
  if(ok){s.innerHTML='';const add=(v,n)=>{const o=document.createElement('option');o.value=v;o.textContent=n;s.appendChild(o);};add('','(aucune destination)');add('@village','Dehors (le village)');for(const k in INTS)if(k!==G.player.scene)add(k,INTS[k].nom);s.value=selEd.ref[4]||'';}
  const I=INTS[G.player.scene];$('np-suppr').hidden=!(I&&I.user);}
@@ -380,6 +380,7 @@ let dernier=performance.now();
 function frame(now){majCote();
  const dt=Math.min(0.05,(now-dernier)/1000);dernier=now;tReel+=dt;
  majMusique(dt);
+ if(EDIT){const sl=$('ed-scenes');if(sl&&sl.value!==G.player.scene)sl.value=G.player.scene;}
  if(attenteFx>0){attenteFx-=dt;if(attenteFx<=0){attenteFx=0;G.queue.shift();$('titre').hidden=true;$('titre').dataset.noir='0';courant=null;pomper();}}
  if(G.mode==='jeu'&&EDIT){panEditeur(dt);}
  if(G.mode==='jeu'&&!EDIT){
