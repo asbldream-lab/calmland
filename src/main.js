@@ -27,8 +27,6 @@ function dessinerFond(){const R=SC.village,TS=1024;fond=[];
 function dessinerFondSur(f,tx,ty,tw,th){
  for(let y=Math.floor(ty/32)*32;y<ty+th;y+=32)for(let x=Math.floor(tx/32)*32;x<tx+tw;x+=32)f.drawImage(IMG.t_herbe,x,y);
  for(const r of ROUTES){if(r.off)continue;const t=r[4]==='t',ts=t?32:64,im=t?IMG.t_terre:IMG.t_pave;for(let y=r[1];y<r[1]+r[3];y+=ts)for(let x=r[0];x<r[0]+r[2];x+=ts){const ww=Math.min(ts,r[0]+r[2]-x),hh=Math.min(ts,r[1]+r[3]-y);f.drawImage(im,0,0,ww,hh,x,y,ww,hh);}}
- const ch=CHEMINS;
- for(const c of ch)for(let y=c[1];y<c[1]+c[3];y+=32)for(let x=c[0];x<c[0]+c[2];x+=32)f.drawImage(IMG.t_terre,0,0,32,Math.min(32,c[1]+c[3]-y),x,y,32,Math.min(32,c[1]+c[3]-y));
  for(const b of BAT)if(!b.off)f.drawImage(IMG['b_'+b[0]],b[1],b[2]);
  const LBL={Maison_Aaron:'Maison d\'Aaron',Maison_Benjamin:'Maison de Benjamin et Nathalie',Maison_Paul:'Maison de Paul',Pharmacie:'Pharmacie de Lilya',Boulangerie:'Boulangerie de Cédric',Poste_Police:'Poste de police · Reda',Maison_Mami:'Maison de Mami',Maison_Zoe:'Maison de Zoé et ses parents',Maison_Marc:'Maison de Marc',Ecole:'École · Marc, le concierge'};
  f.font='bold 12px system-ui';f.textAlign='center';
@@ -432,7 +430,8 @@ function toucherPoignee(w){const k=cv.getBoundingClientRect().width/VW,R=(MOBILE
 function dessinerPoignees(){const s=(MOBILE?16:8)/ZOOM;cx.lineWidth=2/ZOOM;for(const p of poignees()){cx.fillStyle='#ffe15a';cx.strokeStyle='#1b1b1b';cx.fillRect(p.x-s,p.y-s,2*s,2*s);cx.strokeRect(p.x-s,p.y-s,2*s,2*s);}}
 function etirerSel(cote,d){if(!d)return true;const ok=selEd.kind==='r'?etirerRoute(selEd.ref,cote,d):etirerMur(G.player.scene,selEd.ref,cote,d);
  if(ok){selEd.w=selEd.ref[2];selEd.h=selEd.ref[3];appliquerPlan();if(G.player.scene==='village')fondSale=true;sauverPlan();majTexteEd();}return ok;}
-function dessinerEditeur(cam){dessinerEditeur0(cam);dessinerPoignees();}
+function dessinerZonesPortes(){cx.lineWidth=1.5/ZOOM;for(const p of PORTES_V){const b=BATM[p.own];if(b.off)continue;for(const z of zonesPorte(p)){cx.fillStyle='rgba(60,230,255,.28)';cx.fillRect(z[0],z[1],z[2]-z[0],z[3]-z[1]);cx.strokeStyle='rgba(60,230,255,.95)';cx.strokeRect(z[0],z[1],z[2]-z[0],z[3]-z[1]);}}}
+function dessinerEditeur(cam){dessinerEditeur0(cam);if(G.player.scene==='village')dessinerZonesPortes();dessinerPoignees();}
 function dessinerEditeur0(cam){const vw=VW/ZOOM,vh=VH/ZOOM;
  cx.strokeStyle='rgba(255,255,255,.12)';cx.lineWidth=1/ZOOM;cx.beginPath();
  const gs=(G.player.scene==='village'?32:16)*(ZOOM<0.18?4:ZOOM<0.35?2:1);

@@ -8,7 +8,7 @@ function prologue(){L.nouvellePartie(true);vider();
  L.changerScene('village',L.PORTES_V[0].x,L.PORTES_V[0].y+30,3);G.trail=[];for(let i=0;i<80;i++){L.bouger(1,0,0.016);L.suivre(0.016);}
  ok(G.suiveur.scene==='village'&&Math.hypot(G.suiveur.x-G.player.x,G.suiveur.y-G.player.y)<60,'Loulou reste derrière Aaron (<60 px)');
  aller('village',L.ECOLE.x,L.ECOLE.y-10);L.bouger(0,1,0.05);vider();ok(G.pro.etape==='retour'&&!G.suiveur,'Loulou déposée à l\'école');
- aller('village',L.PORTES_V[0].x,L.PORTES_V[0].y+24);L.interagir();vider();ok(G.pro.etape==='reveil'&&G.player.scene==='chambre','sieste -> réveil dans la chambre');
+ aller('village',L.PORTES_V[0].x,L.PORTES_V[0].y);L.interagir();vider();ok(G.pro.etape==='reveil'&&G.player.scene==='chambre','sieste -> réveil dans la chambre');
  ok(G.log.includes('prologue_reveil')&&G.log.includes('matin_ecole'),'dialogues du matin et du réveil');}
 // ---- Partie 1 : chemin parfait
 L.nouvellePartie(false);vider();
@@ -45,7 +45,7 @@ L.nouvellePartie(false);vider();G.mem.codeAppris=true;avance(4.1);aller('village
 avance(12.1-G.minute);ok(G.L.surpris||G.L.cadenasBloque,'retour de Benjamin géré');
 // portes, collisions serrées, temps
 L.nouvellePartie(false);vider();aller('village',L.PORTES_V[1].x,L.PORTES_V[1].y+24);let c=L.cible();ok(c&&c.type==='porte'&&c.id==='p_benjamin','E devant la porte de Benjamin');L.interagir();vider();ok(G.player.scene==='salon','on entre chez Benjamin avec E');
-aller('village',L.PORTES_V[2].x,L.PORTES_V[2].y+24);L.interagir();vider();ok(G.player.scene==='int_paul','porte de Paul : on entre chez Paul');
+aller('village',L.PORTES_V[2].x,L.PORTES_V[2].y);L.interagir();vider();ok(G.player.scene==='int_paul','porte de Paul : on entre chez Paul');
 aller('village',L.PORTES_V[0].x,L.PORTES_V[0].y+30);for(let i=0;i<60;i++)L.bouger(0,-1,0.016);ok(G.player.scene==='village'&&G.player.y<L.BAT[0][2]+L.BAT[0][4]-8,'on monte sur le palier, devant la porte (plus de mur invisible)');L.interagir();vider();ok(G.player.scene==='chambre','E sur le palier : on entre');
 aller('village',L.BAT[0][1]+60,L.BAT[0][2]+L.BAT[0][4]+40);for(let i=0;i<400;i++)L.bouger(0,-1,0.016);ok(!L.solids('village').some(r=>G.player.x+6>r[0]&&G.player.x-6<r[0]+r[2]&&G.player.y>r[1]&&G.player.y-3<r[1]+r[3]),'collision : on s\'arrête contre la maison, jamais dedans');
 const bA0=L.BAT[0];const mur=L.solids('village').find(r=>r[0]<=bA0[1]+100&&r[0]+r[2]>=bA0[1]+100&&r[1]<=bA0[2]+100&&r[1]+r[3]>=bA0[2]+100);ok(mur&&mur[3]<=bA0[4]-40&&mur[2]<=bA0[3],'collision = emprise de la maison, palier libre');
@@ -59,7 +59,7 @@ L.sauter(5);L.sauter(5);L.sauter(5);vider();ok(G.reveil>=3||G.minute<1,'sauter j
  ok(L.FIXES.reda.x===rx+64,'Reda suit le poste de police');
  ok(L.solids('village').some(r=>r[0]<=bA[1]+130&&r[0]+r[2]>=bA[1]+130&&r[1]<=bA[2]+300&&r[1]+r[3]>=bA[2]+300),'la collision suit la maison');
  {const ox=bA[1]-32,oy=bA[2]-64;ok(!L.solids('village').some(r=>r[0]<=ox+100&&r[0]+r[2]>=ox+100&&r[1]<=oy+10&&r[1]+r[3]>=oy+10),'plus de collision à l\'ancien emplacement');}
- aller('village',L.PORTES_V[0].x,L.PORTES_V[0].y+24);L.interagir();vider();ok(G.player.scene==='chambre','on peut entrer dans la maison déplacée');
+ aller('village',L.PORTES_V[0].x,L.PORTES_V[0].y);L.interagir();vider();ok(G.player.scene==='chambre','on peut entrer dans la maison déplacée');
  const exp=L.planExporter();L.planReinit();ok(L.planExporter()===p0&&L.PORTES_V[0].x===px,'plan d\'origine remis');
  L.planImporter(exp);ok(L.planExporter()===exp&&L.PORTES_V[0].x===px+32,'le texte copié recharge le même plan');L.planReinit();}
 // bibliothèque : ajout, suppression, annulation, bâtiment supprimé
@@ -114,12 +114,12 @@ L.sauter(5);L.sauter(5);L.sauter(5);vider();ok(G.reveil>=3||G.minute<1,'sauter j
   L.nouvellePartie(false);vider();L.planReinit();const b=L.BATM[own],it0=JSON.stringify(L.ITEMS[sc]),px0=pv.x,py0=pv.y;
   b[1]+=64;b[2]+=32;L.appliquerPlan();const pv2=L.PORTES_V.find(p=>p.id===id);
   ok(pv2.x===px0+64&&pv2.y===py0+32,id+' : la porte suit la maison déplacée');
-  aller('village',pv2.x,pv2.y+24);const c=L.cible();ok(c&&c.id===id,id+' : E devant la porte déplacée');L.interagir();vider();
+  aller('village',pv2.x,pv2.y);const c=L.cible();ok(c&&c.id===id,id+' : E devant la porte déplacée');L.interagir();vider();
   ok(G.player.scene===sc,id+' : on entre dans '+sc);ok(JSON.stringify(L.ITEMS[sc])===it0,id+' : l\'intérieur n\'a pas bougé');
   ok(!L.degager(),id+' : point d\'arrivée libre à l\'intérieur');
   for(let i=0;i<260&&G.player.scene===sc;i++)L.bouger(0,1,0.016);
   ok(G.player.scene==='village','sortie depuis '+sc+' vers le village');
-  const a=L.arriveeVillage(sc);ok(Math.abs(G.player.x-a.x)<2&&G.player.y>b[2]+b[4]&&Math.abs(G.player.x-(b[1]+L.DOOR[own]))<2,'on ressort devant la maison déplacée ('+own+')');
+  const a=L.arriveeVillage(sc);{const dv=L.PORTES_V.find(p=>p.own===own),c2=L.cible();ok(Math.abs(G.player.x-a.x)<2&&Math.abs(G.player.y-a.y)<2&&c2&&c2.id===dv.id,'on ressort pile devant la porte, E actif ('+own+')');}
   L.planReinit();}}
 // nouvelle pièce
 {L.planReinit();L.nouvellePartie(false);vider();const nI=Object.keys(L.INTS).length;
@@ -278,3 +278,24 @@ console.log('dialogues joués :',new Set(G.log).size);
  ok(L.BUISSONS.length===1&&L.BUISSONS[0][2]==='arbre1','village décalé : les haies d\'origine sont retrouvées malgré le décalage');
  L.planReinit();
 }
+// ---- E actif uniquement devant la porte, pile alignée sur la vraie porte
+{
+ L.planReinit();L.nouvellePartie(false);vider();G.minute=0;G.mode='jeu';
+ const nom=id=>{const c=L.cible();return c?c.id:null;};
+ for(const p of L.PORTES_V){const b=L.BATM[p.own],zs=L.zonesPorte(p);
+  for(const z of zs){const cxz=(z[0]+z[2])/2,cyz=(z[1]+z[3])/2;
+   aller('village',cxz,cyz);ok(nom()===p.id,p.id+' : E actif au milieu devant la porte');
+   aller('village',z[0]+1,z[1]+1);ok(nom()===p.id,p.id+' : E actif dans le coin de la zone');
+   aller('village',z[0]-6,cyz);ok(nom()!==p.id,p.id+' : plus de E à 6 px à gauche de la porte');
+   aller('village',z[2]+6,cyz);ok(nom()!==p.id,p.id+' : plus de E à 6 px à droite de la porte');
+   aller('village',cxz,z[3]+6);ok(nom()!==p.id,p.id+' : plus de E en reculant de la porte');}
+  const a=L.G.L?null:null;}
+ // l'ancien point (au pied du chemin, à côté de la vraie porte d'Aaron) n'ouvre plus rien
+ {const b=L.BATM.Maison_Aaron;aller('village',b[1]+130,b[2]+406);ok(nom()!=='p_aaron','Aaron : l\'ancien point (côté escalier) n\'est plus actif');}
+ // école : deux portes, deux zones, une seule entrée
+ {const pe=L.PORTES_V.find(p=>p.id==='p_ecole'),zs=L.zonesPorte(pe);ok(zs.length===2,'école : deux portes');
+  aller('village',(zs[1][0]+zs[1][2])/2,(zs[1][1]+zs[1][3])/2);const c=L.cible();ok(c&&c.id==='p_ecole'&&Math.abs(c.x-(zs[1][0]+zs[1][2])/2)<1,'école : la bulle E se place sur la porte où l\'on se trouve');
+  aller('village',(zs[0][2]+zs[1][0])/2,(zs[0][1]+zs[0][3])/2);ok(nom()!=='p_ecole','école : entre les deux portes, pas de E');}
+ L.planReinit();
+}
+

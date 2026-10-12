@@ -25,7 +25,7 @@ setImmediate(()=>setImmediate(()=>{
  vm.runInContext("changerScene('village',ECOLE.x,ECOLE.y-10,3);bouger(0,1,0.05);pomper();",S);run(30);
  for(let i=0;i<12&&G.queue.length;i++){vm.runInContext('action()',S);run(60);}
  console.log('étape après école:',G.pro&&G.pro.etape,'file',G.queue.length);
- vm.runInContext("changerScene('village',PORTES_V[0].x,PORTES_V[0].y+24,3);action();",S);run(30);
+ vm.runInContext("changerScene('village',PORTES_V[0].x,PORTES_V[0].y,3);action();",S);run(30);
  for(let i=0;i<14&&G.queue.length;i++){vm.runInContext('action()',S);run(60);}
  console.log('étape après sieste:',G.pro&&G.pro.etape,'scène',G.player.scene);
  vm.runInContext("changerScene('village',FIXES.marc.x,FIXES.marc.y+14,1);action();",S);run(30);
