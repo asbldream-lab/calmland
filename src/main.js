@@ -260,7 +260,48 @@ function construireStyles(){const fs=$('np-sols'),ws=$('np-murs');
   c.onclick=()=>{NP.wl=i;ws.querySelectorAll('canvas').forEach(e=>e.classList.remove('sel'));c.classList.add('sel');};if(i===0)c.classList.add('sel');ws.appendChild(c);});}
 // ---------- ÉDITEUR DE PLAN ----------
 const CLE_PLAN='calmland_plan_v9';let undo=[],confirmDel=null;
-function sauverPlan(){if(PUBLIC)return;try{localStorage.setItem(CLE_PLAN,planExporter());}catch(e){}}
+// ---------- SAUVEGARDE SUR GITHUB (éditeur uniquement, le plan vit dans plan.json du dépôt) ----------
+const GH_DEPOT='asbldream-lab/calmland',GH_FICHIER='plan.json',GH_BRANCHE='main',CLE_GH='calmland_gh_token',CLE_ATTENTE='calmland_gh_attente';
+let ghTimer=null,ghEnCours=false,ghRelance=false;
+function ghToken(){try{return localStorage.getItem(CLE_GH)||'';}catch(e){return '';}}
+function ghEtat(t){const e=$('gh-etat');if(e)e.textContent=t;}
+function ghUrl(){return 'https://api.github.com/repos/'+GH_DEPOT+'/contents/'+GH_FICHIER;}
+function ghB64(t){const b=new TextEncoder().encode(t);let s='';for(const c of b)s+=String.fromCharCode(c);return btoa(s);}
+function ghDecode(b){const s=atob(b.replace(/\s/g,'')),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return new TextDecoder().decode(u);}
+async function ghLire(){const r=await fetch(ghUrl()+'?ref='+GH_BRANCHE+'&t='+Date.now(),{headers:{Accept:'application/vnd.github+json'},cache:'no-store'});if(r.status===404)return null;if(!r.ok)throw new Error('lecture '+r.status);const j=await r.json();return {sha:j.sha,texte:ghDecode(j.content)};}
+async function ghEnvoyer(){
+ const tok=ghToken();if(!tok){ghEtat('⚠️ Pas de clé GitHub sur cet appareil : modifs gardées ici seulement');return;}
+ if(ghEnCours){ghRelance=true;return;}ghEnCours=true;ghEtat('Envoi vers GitHub…');
+ try{
+  const texte=planExporter();
+  for(let essai=0;essai<2;essai++){
+   const cur=await ghLire();
+   const r=await fetch(ghUrl(),{method:'PUT',headers:{Authorization:'Bearer '+tok,Accept:'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify(Object.assign({message:'Plan modifié depuis l\'éditeur',content:ghB64(texte),branch:GH_BRANCHE},cur?{sha:cur.sha}:{}))});
+   if(r.ok){try{localStorage.removeItem(CLE_ATTENTE);}catch(e){}ghEtat('✅ Enregistré sur GitHub à '+new Date().toLocaleTimeString());break;}
+   if(r.status===401||r.status===403){ghEtat('⚠️ Clé GitHub refusée : vérifie-la dans « Sauvegarde GitHub »');break;}
+   if(essai===1)ghEtat('⚠️ Échec de l\'envoi ('+r.status+')');
+  }
+ }catch(e){ghEtat('⚠️ Pas de connexion : modifs gardées ici, renvoi au prochain changement');}
+ ghEnCours=false;if(ghRelance){ghRelance=false;ghPlanifier();}
+}
+function ghPlanifier(){if(PUBLIC)return;try{localStorage.setItem(CLE_ATTENTE,'1');}catch(e){}if(!ghToken())return;clearTimeout(ghTimer);ghTimer=setTimeout(ghEnvoyer,2500);ghEtat('Modifs à envoyer…');}
+async function ghCharger(force){
+ if(PUBLIC||typeof fetch==='undefined')return;
+ try{
+  let attente=false,local='';try{attente=!!localStorage.getItem(CLE_ATTENTE);local=localStorage.getItem(CLE_PLAN)||'';}catch(e){}
+  if(!force&&attente&&ghToken()){await ghEnvoyer();return;}
+  const cur=await ghLire();
+  if(!cur){if(ghToken()&&local)ghPlanifier();else ghEtat(ghToken()?'Aucun plan sur GitHub pour l\'instant':'Pas de clé GitHub sur cet appareil : ouvre « Sauvegarde GitHub » pour enregistrer');return;}
+  if(!force&&undo.length){return;}
+  if(cur.texte!==planExporter()){planImporter(cur.texte);if(!SC[G.player.scene])allerEd('village');majScenesEd();dessinerFond();try{localStorage.setItem(CLE_PLAN,cur.texte);localStorage.removeItem(CLE_ATTENTE);}catch(e){}}
+  ghEtat(ghToken()?'✅ Plan chargé depuis GitHub':'Plan chargé depuis GitHub (lecture seule : pas de clé sur cet appareil)');
+ }catch(e){ghEtat('⚠️ GitHub injoignable : plan local utilisé');}
+}
+function brancherGh(){if(PUBLIC)return;
+ $('gh-sauver-cle').onclick=()=>{const v=$('gh-token').value.trim();if(!v){ghEtat('Colle ta clé dans le champ avant');return;}try{localStorage.setItem(CLE_GH,v);}catch(e){}$('gh-token').value='';ghEtat('Clé enregistrée sur cet appareil');ghCharger(false);};
+ $('gh-envoyer').onclick=()=>ghEnvoyer();
+ $('gh-recharger').onclick=()=>ghCharger(true);}
+function sauverPlan(){if(PUBLIC)return;try{localStorage.setItem(CLE_PLAN,planExporter());}catch(e){}ghPlanifier();}
 function lirePlan(){try{const t=PUBLIC?PLAN_FIGE:localStorage.getItem(CLE_PLAN);if(t)planImporter(t);}catch(e){}}
 function majTexteEd(){const t=$('ed-txt');if(document.activeElement!==t)t.value=planExporter();}
 function msg(t){const e=$('ed-msg');e.textContent=t;setTimeout(()=>{e.textContent='';},2200);}
@@ -407,7 +448,7 @@ function ajuster(){const etroit=innerWidth<=800,cw=coteVisible&&!etroit?340:0,ch
 addEventListener('resize',ajuster);
 function demarrer(prol){initSon();lancerMusique();VITESSE=+$('vitesse').value||30;$('menu').hidden=true;$('lettre').hidden=true;nouvellePartie(prol);courant=null;pomper();}
 function pret(){
- lirePlan();dessinerFond();construireTest();ajuster();brancherEditeur();construireBiblio();
+ lirePlan();dessinerFond();construireTest();ajuster();brancherEditeur();construireBiblio();brancherGh();ghCharger(false);
  document.querySelectorAll('#outils [data-o]').forEach(b=>b.onclick=()=>{const o=b.dataset.o;if(o==='m1')sauterTemps(1);else if(o==='m5')sauterTemps(5);else if(o==='z-')zoom(-1);else if(o==='z+')zoom(1);else if(o==='guide')$('guide').hidden=!$('guide').hidden;else if(o==='edit')basculerEditeur();else if(o==='coll')VOIR_COLL=!VOIR_COLL;b.blur();});
  $('guide-fermer').onclick=()=>$('guide').hidden=true;
  $('b-prologue').onclick=()=>demarrer(true);$('b-boucle').onclick=()=>demarrer(false);

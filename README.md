@@ -13,3 +13,5 @@ node smoke.js
 python3 build.py
 # puis copier dist/calmland_public.html vers ../index.html
 # et dist/calmland_demo.html vers ../editeur.html
+
+Le plan fait dans l'éditeur est enregistré dans `plan.json` à la racine du dépôt (envoi automatique depuis `editeur.html`, il faut coller une clé GitHub une fois par appareil).
