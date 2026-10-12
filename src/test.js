@@ -80,7 +80,7 @@ L.sauter(5);L.sauter(5);L.sauter(5);vider();ok(G.reveil>=3||G.minute<1,'sauter j
    if(s.cat==='arbre'&&k!=='arbre9'&&k!=='arbre10'&&k!=='arbre11'&&k!=='arbre12'&&!(x+w/2>s.w*0.3&&x+w/2<s.w*0.7))bad.push(k+'(tronc hors centre)');
    if(s.cat==='arbre'&&y+h<s.h*0.5)bad.push(k+'(collision trop haute)');}
  ok(bad.length===0,'sprites : collisions dans leurs limites, tronc centré et bas'+(bad.length?' → '+bad.join(','):''));
- L.nouvellePartie(false);vider();L.planReinit();const rr=L.solids('village').find(r=>r[2]<80&&r[3]<60);G.player.scene='village';G.player.x=rr[0]+rr[2]/2;G.player.y=rr[1]+rr[3]/2;
+ L.nouvellePartie(false);vider();L.planReinit();L.BUISSONS.push([640,1000,'buisson']);L.appliquerPlan();const rr=L.solids('village').find(r=>r[2]<80&&r[3]<60);G.player.scene='village';G.player.x=rr[0]+rr[2]/2;G.player.y=rr[1]+rr[3]/2;
  ok(L.degager(),'le joueur coincé dans un obstacle est dégagé');const S=L.solids('village'),pl=G.player;ok(!S.some(r=>pl.x+6>r[0]&&pl.x-6<r[0]+r[2]&&pl.y>r[1]&&pl.y-3<r[1]+r[3]),'après dégagement : plus dans un obstacle');
  L.nouvellePartie(false);vider();let o=L.objectif();ok(o&&/Reda/.test(o.t)&&/Ensuite/.test(o.t),'consigne : « Maintenant : …Reda… Ensuite : … »');
  G.L.vuReda=true;o=L.objectif();ok(/Benjamin/.test(o.t),'consigne suivante : Benjamin');
@@ -263,5 +263,18 @@ console.log('dialogues joués :',new Set(G.log).size);
  L.MURS.chambre.push([300,40,16,128]);const mv=L.MURS.chambre[L.MURS.chambre.length-1];
  ok(L.etirerMur('chambre',mv,'fin',16)&&mv[3]===144&&L.etirerMur('chambre',mv,'debut',16)&&mv[1]===24&&mv[3]===160,'mur vertical : allonger fin et début');
  ok(!L.etirerMur('village',m,'fin',16),'les murs n\'existent pas dans le village');
+ L.planReinit();
+}
+// ---- Haies d'origine retirées : village = herbe nue
+{
+ L.planReinit();
+ ok(L.BUISSONS.length===0&&L.HAIES_ORIGINE.length===147,'le village d\'origine n\'a plus de haies (147 retirées)');
+ const ancien={b:{},u:[...L.HAIES_ORIGINE,[500,1000,'arbre1'],[10,10,'buisson']]};
+ L.planImporter(JSON.stringify(ancien));
+ ok(L.BUISSONS.length===2&&L.BUISSONS.some(u=>u[2]==='arbre1')&&L.BUISSONS.some(u=>u[0]===10&&u[1]===10),'ancien plan : les haies d\'origine partent, les éléments posés à la main restent');
+ const neuf=L.planExporter();ok(JSON.parse(neuf).bv===1,'le plan enregistré est marqué comme nettoyé');
+ L.planImporter(JSON.stringify({bv:1,u:[...L.HAIES_ORIGINE.slice(0,3)]}));ok(L.BUISSONS.length===3,'plan déjà nettoyé : on ne retire plus rien (haie posée volontairement)');
+ L.planImporter(JSON.stringify({v:{w:3920,h:2700,o:[320,0]},u:L.HAIES_ORIGINE.slice(0,5).map(h=>[h[0]+320,h[1],h[2]]).concat([[77,77,'arbre1']])}));
+ ok(L.BUISSONS.length===1&&L.BUISSONS[0][2]==='arbre1','village décalé : les haies d\'origine sont retrouvées malgré le décalage');
  L.planReinit();
 }

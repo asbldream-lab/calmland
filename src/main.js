@@ -298,7 +298,7 @@ async function ghCharger(force){
   const cur=await ghLire();
   if(!cur){if(ghToken()&&local)ghPlanifier();else ghEtat(ghToken()?'Aucun plan sur GitHub pour l\'instant':'Pas de clé GitHub sur cet appareil : ouvre « Sauvegarde GitHub » pour enregistrer');return;}
   if(!force&&undo.length){return;}
-  if(cur.texte!==planExporter()){planImporter(cur.texte);if(!SC[G.player.scene])allerEd('village');majScenesEd();dessinerFond();try{localStorage.setItem(CLE_PLAN,cur.texte);localStorage.removeItem(CLE_ATTENTE);}catch(e){}}
+  if(cur.texte!==planExporter()){planImporter(cur.texte);if(!SC[G.player.scene])allerEd('village');majScenesEd();dessinerFond();const neuf=planExporter();try{localStorage.setItem(CLE_PLAN,neuf);localStorage.removeItem(CLE_ATTENTE);}catch(e){}if(neuf!==cur.texte)ghPlanifier();}
   ghEtat(ghToken()?'✅ Plan chargé depuis GitHub':'Plan chargé depuis GitHub (lecture seule : pas de clé sur cet appareil)');
  }catch(e){ghEtat('⚠️ GitHub injoignable : plan local utilisé');}
 }
