@@ -136,8 +136,8 @@ body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:syste
 <button id="vg-go">Agrandir le village</button> <span id="vg-info" style="color:var(--muted)"></span></details>
 <details id="ed-agrandir"><summary>Agrandir / réduire cette pièce</summary>
 <select id="ag-cote"><option value="droite">vers la droite</option><option value="gauche">vers la gauche</option><option value="haut">vers le haut</option><option value="bas">vers le bas</option></select>
-<select id="ag-n"><option value="-16">−16 cases</option><option value="-8">−8 cases</option><option value="-4">−4 cases</option><option value="-2">−2 cases</option><option value="-1">−1 case</option><option value="1">+1 case</option><option value="2" selected>+2 cases</option><option value="4">+4 cases</option><option value="6">+6 cases</option><option value="8">+8 cases</option><option value="16">+16 cases</option><option value="32">+32 cases</option><option value="64">+64 cases</option><option value="128">+128 cases</option></select>
-<button id="ag-go">Appliquer</button></details>
+<select id="ag-n"><option value="1">1 case</option><option value="2" selected>2 cases</option><option value="4">4 cases</option><option value="6">6 cases</option><option value="8">8 cases</option><option value="16">16 cases</option><option value="32">32 cases</option><option value="64">64 cases</option><option value="128">128 cases</option></select>
+<button id="ag-go">Agrandir</button> <button id="ag-red">Réduire</button><div id="ag-msg" style="color:var(--accent);margin:.35em 0"></div></details>
 <details id="ed-nouvelle"><summary>Nouvelle pièce</summary>
 <input id="np-nom" placeholder="Nom de la pièce (ex. cuisine)" maxlength="30">
 <select id="np-taille"><option value="10,8">Petite (320 x 256)</option><option value="14,10" selected>Moyenne (448 x 320)</option><option value="20,12">Grande (640 x 384)</option></select>

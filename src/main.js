@@ -471,9 +471,10 @@ function brancherEditeur(){
  $('ed-dest').onchange=e=>{if(selEd&&selEd.kind==='i'&&(selEd.ref[2]==='porte'||selEd.ref[2]==='passage')){pushUndo();selEd.ref[4]=e.target.value;sauverPlan();majTexteEd();msg('Destination changée');}};
  $('np-creer').onclick=()=>{const sc=G.player.scene;if(!INTS[sc]){msg('Entre d\'abord dans une maison (boutons de scène), puis crée la pièce');return;}
   const [tw,th]=$('np-taille').value.split(',').map(Number);pushUndo();const id=creerPiece($('np-nom').value.trim(),tw,th,NP.fl,NP.wl,sc,$('np-passage').checked?'passage':'porte');sauverPlan();majScenesEd();allerEd(id);majTexteEd();msg('Pièce créée : '+INTS[id].nom);$('np-nom').value='';};
- $('ag-go').onclick=()=>{const sc=G.player.scene;if(!INTS[sc]){msg('Entre d\'abord dans une pièce (boutons de scène)');return;}pushUndo();
-  if(!agrandir(sc,$('ag-cote').value,+$('ag-n').value)){undo.pop();msg('Impossible : pièce entre 6 x 6 et 40 x 25 cases (et la porte doit rester dedans)');return;}
-  {const e=+$('ag-n').value*32,c=$('ag-cote').value;if(c==='gauche')EC.x+=e;if(c==='haut')EC.y+=e;}selEd=null;sauverPlan();majTexteEd();msg('Pièce modifiée');};
+ function agPiece(sg){const sc=G.player.scene,am=t=>{msg(t);$('ag-msg').textContent=t;};if(!INTS[sc]){am('Tu es dans le village : va d\'abord dans une pièce (liste « Pièce » en haut du panneau)');return;}
+ const v=sg*Math.abs(+$('ag-n').value);pushUndo();if(!agrandir(sc,$('ag-cote').value,v)){undo.pop();am('Impossible : '+AG_ERR);return;}
+ {const e=v*32,c=$('ag-cote').value;if(c==='gauche')EC.x+=e;if(c==='haut')EC.y+=e;}selEd=null;sauverPlan();majTexteEd();am(sg>0?'Pièce agrandie : '+SC[sc].w/32+' x '+SC[sc].h/32+' cases':'Pièce réduite : '+SC[sc].w/32+' x '+SC[sc].h/32+' cases');}
+ $('ag-go').onclick=()=>agPiece(1);$('ag-red').onclick=()=>agPiece(-1);
  $('np-suppr').onclick=()=>{const id=G.player.scene,I=INTS[id];if(!I||!I.user)return;const dep=Object.keys(ITEMS).find(k=>k!==id&&ITEMS[k].some(i=>i[2]==='porte'&&i[4]===id));pushUndo();supprimerPiece(id);sauverPlan();majScenesEd();allerEd(dep&&INTS[dep]?dep:'village');majTexteEd();msg('Pièce supprimée');};$('ed-coll').onclick=()=>basculerColl();
  const pasEd=()=>+$('ed-pas').value||16;
  const et=(cote,sg)=>()=>{if(!selEd||(selEd.kind!=='r'&&selEd.kind!=='m')){msg('Sélectionne une route ou un mur');return;}pushUndo();if(!etirerSel(cote,sg*pasEd())){undo.pop();msg('Limite atteinte');}};

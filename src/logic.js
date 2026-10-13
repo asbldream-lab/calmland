@@ -175,9 +175,9 @@ const BASE_GEOM={};for(const k in INTS)BASE_GEOM[k]={w:SC[k].w,h:SC[k].h,gap:INT
 const PBASE={chambreDepart:{...P.chambreDepart},salonBen:{...P.salonBen},salonNat:{...P.salonNat},chienBlanc:{...P.chienBlanc},soussolChien:{...P.soussolChien},soussolLoulou:{...P.soussolLoulou}};
 const PSCENE={chambreDepart:'chambre',salonBen:'salon',salonNat:'salon',chienBlanc:'salon',soussolChien:'soussol',soussolLoulou:'soussol'};
 function majPointsFixes(){for(const k in PBASE){const d=INTS[PSCENE[k]].dec;P[k].x=PBASE[k].x+d[0];P[k].y=PBASE[k].y+d[1];}}
-function agrandir(sc,cote,n){const R=SC[sc],I=INTS[sc];if(!R||!I)return false;n=Math.max(-400,Math.min(400,n|0));if(!n)return false;const e=n*32;let nw=R.w,nh=R.h,sx=0,sy=0;
+var AG_ERR='';function agrandir(sc,cote,n){const R=SC[sc],I=INTS[sc];if(!R||!I)return false;n=Math.max(-400,Math.min(400,n|0));if(!n)return false;const e=n*32;let nw=R.w,nh=R.h,sx=0,sy=0;
  if(cote==='droite')nw+=e;else if(cote==='gauche'){nw+=e;sx=e;}else if(cote==='bas')nh+=e;else if(cote==='haut'){nh+=e;sy=e;}else return false;
- if(nw>IMAX.w||nh>IMAX.h||nw<192||nh<192)return false;if(I.gap&&(I.gap[0]+sx<14||I.gap[1]+sx>nw-14))return false;const hOld=R.h;
+ if(nw>IMAX.w||nh>IMAX.h){AG_ERR='taille maximale atteinte (40 x 25 cases)';return false;}if(nw<192||nh<192){AG_ERR='trop petit, minimum 6 x 6 cases';return false;}if(I.gap&&(I.gap[0]+sx<14||I.gap[1]+sx>nw-14)){AG_ERR='la porte sortirait de la pièce, réduis plutôt de l\'autre côté';return false;}const hOld=R.h;
  for(const it of ITEMS[sc]){if(cote==='gauche')it[0]+=e;else if(cote==='haut'){if(it[1]>80)it[1]+=e;}else if(cote==='bas'){if(it[1]>=hOld-14)it[1]+=e;}}
  for(const r of MURS[sc]){if(cote==='gauche')r[0]+=e;else if(cote==='haut')r[1]+=e;}
  R.w=nw;R.h=nh;if(I.gap)I.gap=[I.gap[0]+sx,I.gap[1]+sx];
