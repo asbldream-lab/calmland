@@ -1219,7 +1219,7 @@ function frame(now){majCote();
   if(!G.prologue&&G.minute>=8&&G.minute<10&&!G.L.cleReprise&&G.queue.length===0){mur+=dt;if(mur>0.7){mur=0;const pr=G.player;const d=pr.scene==='salon'?0:Math.hypot(pr.x-P.porteBen.x,pr.y-P.porteBen.y-8);if(pr.scene==='salon'||(pr.scene==='village'&&d<260))sonMarteau();}}
   if(pluieNode&&ac)pluieNode.gain.value=son?(G.player.scene==='village'?0.05:0.015):0;
   const box=$('dialogue');if(!box.hidden&&courant&&courant.text){if(ecriture<1){ecriture=Math.min(1,ecriture+dt*2.2*Math.max(1,40/courant.text.length));}$('texte').textContent=courant.text.slice(0,Math.ceil(courant.text.length*ecriture));}
-  {const o=objectif();$('obj').textContent=o?(objPlie?'➜':'➜ '+o.t):'';$('obj').hidden=EDIT||coteVisible;}
+  {const o=objectif();$('obj').textContent=o?(objPlie?'➜':'➜ '+o.t):'';{const aut=!PUBLIC&&!(document.body&&document.body.className==='mob');$('obj').hidden=EDIT||coteVisible||aut;if(aut){const t=o?'➜ '+o.t:'Calm Land';if(document.title!==t)document.title=t;}}}
   $('hud').textContent=G.prologue?'Prologue':`Boucle ${numeroBoucle()} · ${String(Math.floor(G.minute)).padStart(2,'0')}:${String(Math.floor(G.minute%1*60)).padStart(2,'0')} / 20:00`;
   $('inv').textContent=(G.L.cleEnMain?'🔑 clé  ':'')+(G.L.aLaViande?'🥩 viande  ':'')+(G.mem.codeAppris?'🔢 code connu':'');
   majPave();if(Math.floor(tReel*4)%2===0)majTest();
