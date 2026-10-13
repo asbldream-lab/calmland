@@ -31,7 +31,7 @@ const LBL={Maison_Aaron:'Maison d\'Aaron',Maison_Benjamin:'Maison de Benjamin et
 function dessinerFondSur(f,vx,vy,vw,vh){
  const R=SC.village,x0=Math.max(0,vx),y0=Math.max(0,vy),x1=Math.min(R.w,vx+vw),y1=Math.min(R.h,vy+vh);if(x1<=x0||y1<=y0)return;
  f.fillStyle=motif(f,'herbe',IMG.t_herbe);f.fillRect(x0,y0,x1-x0,y1-y0);
- for(const r of ROUTES){if(r.off||r[0]>x1||r[1]>y1||r[0]+r[2]<x0||r[1]+r[3]<y0)continue;const t=r[4]==='t';f.save();f.translate(r[0],r[1]);f.fillStyle=motif(f,t?'terre':'pave',t?IMG.t_terre:IMG.t_pave);f.fillRect(0,0,r[2],r[3]);f.restore();}
+ dessinerRC(f,x0,y0,x1,y1);for(const r of ROUTES){if(r.off||r[0]>x1||r[1]>y1||r[0]+r[2]<x0||r[1]+r[3]<y0)continue;const t=r[4]==='t';f.save();f.translate(r[0],r[1]);f.fillStyle=motif(f,t?'terre':'pave',t?IMG.t_terre:IMG.t_pave);f.fillRect(0,0,r[2],r[3]);f.restore();}
  for(const b of BAT){if(b.off||b[1]>x1||b[2]>y1||b[1]+b[3]<x0||b[2]+b[4]<y0)continue;f.drawImage(IMG['b_'+b[0]],b[1],b[2]);}
  f.font='bold 12px system-ui';f.textAlign='center';
  for(const b of BAT){if(b.off||b[1]>x1||b[2]>y1+20||b[1]+b[3]<x0||b[2]<y0-20)continue;const t=LBL[b[0]];if(!LW[t])LW[t]=f.measureText(t).width;const w=LW[t]+14,cxp=b[1]+b[3]/2,y=b[2]-14;f.fillStyle='#3a2a1c';f.fillRect(cxp-w/2-2,y-14,w+4,22);f.fillStyle='#8a6a42';f.fillRect(cxp-w/2,y-12,w,18);f.fillStyle='#f4ead2';f.fillText(t,cxp,y+1);}
@@ -466,7 +466,8 @@ function brancherEditeur(){
   try{navigator.clipboard.writeText(t.value).then(()=>msg('Plan copié'),fin);}catch(x){fin();}};
  $('ed-appliquer').onclick=()=>{try{pushUndo();planImporter($('ed-txt').value);if(!SC[G.player.scene])allerEd('village');majScenesEd();dessinerFond();sauverPlan();msg('Plan appliqué');}catch(x){msg('Texte invalide');}};
  $('ed-reinit').onclick=()=>{planReinit();dessinerFond();sauverPlan();majTexteEd();msg('Plan d\'origine remis');};
- $('ed-quitter').onclick=()=>basculerEditeur();
+ $('ed-croquis').onclick=()=>{if(!PLAN_CROQUIS){msg('Plan du croquis indisponible dans cette version');return;}pushUndo();planImporter(PLAN_CROQUIS);if(G.player.scene==='village'){G.player.x=PORTES_V[0].x;G.player.y=PORTES_V[0].y+24;}dessinerFond();sauverPlan();majTexteEd();msg('Plan du croquis chargé (Ctrl+Z pour annuler)');};
+  $('ed-quitter').onclick=()=>basculerEditeur();
  majScenesEd();construireStyles();
  $('ed-dest').onchange=e=>{if(selEd&&selEd.kind==='i'&&(selEd.ref[2]==='porte'||selEd.ref[2]==='passage')){pushUndo();selEd.ref[4]=e.target.value;sauverPlan();majTexteEd();msg('Destination changée');}};
  $('np-creer').onclick=()=>{const sc=G.player.scene;if(!INTS[sc]){msg('Entre d\'abord dans une maison (boutons de scène), puis crée la pièce');return;}
@@ -542,3 +543,21 @@ let objPlie=false;{const o=document.getElementById('obj');if(o)o.onclick=()=>{ob
 {const sp=document.getElementById('sep'),ed=document.getElementById('editeur'),c=document.getElementById('cote');if(sp&&sp.addEventListener){let d=false;sp.addEventListener('pointerdown',e=>{d=true;sp.classList.add('on');if(sp.setPointerCapture)sp.setPointerCapture(e.pointerId);e.preventDefault();});
  sp.addEventListener('pointermove',e=>{if(!d)return;const r=c.getBoundingClientRect();ed.style.height=Math.max(60,Math.min(r.height-120,e.clientY-r.top-ed.offsetTop+c.scrollTop))+'px';});
  const f=()=>{d=false;sp.classList.remove('on');};sp.addEventListener('pointerup',f);sp.addEventListener('pointercancel',f);}}
+
+const PLAN_CROQUIS=null;
+function dessinerRC(f,x0,y0,x1,y1){
+ if(!(RC.r.length||RC.c.length||RC.e.length))return;
+ const trace=p=>{f.beginPath();f.moveTo(p[0][0],p[0][1]);for(let i=1;i<p.length;i++)f.lineTo(p[i][0],p[i][1]);};
+ const dedans=(p,m)=>{for(const q of p)if(q[0]>x0-m&&q[0]<x1+m&&q[1]>y0-m&&q[1]<y1+m)return true;return false;};
+ f.lineCap='round';f.lineJoin='round';
+ for(const pass of ['t','p']){const t=pass==='t';for(const s of RC.r){if(s.t!==pass||!dedans(s.p,s.w+200))continue;
+  trace(s.p);f.strokeStyle=t?'rgba(70,50,28,.5)':'#55565e';f.lineWidth=s.w+(t?10:14);f.stroke();
+  trace(s.p);f.strokeStyle=motif(f,t?'terre':'pave',t?IMG.t_terre:IMG.t_pave);f.lineWidth=s.w;f.stroke();}}
+ for(const c of RC.c){if(c[0]+c[2]<x0||c[0]-c[2]>x1||c[1]+c[2]<y0||c[1]-c[2]>y1)continue;const t=c[3]==='t';
+  f.beginPath();f.arc(c[0],c[1],c[2]+10,0,Math.PI*2);f.fillStyle=t?'rgba(70,50,28,.5)':'#55565e';f.fill();
+  f.beginPath();f.arc(c[0],c[1],c[2],0,Math.PI*2);f.fillStyle=motif(f,t?'terre':'pave',t?IMG.t_terre:IMG.t_pave);f.fill();}
+ for(const e of RC.e){if(e[0]+e[2]<x0||e[0]-e[2]>x1||e[1]+e[3]<y0||e[1]-e[3]>y1)continue;
+  f.beginPath();f.ellipse(e[0],e[1],e[2]+12,e[3]+12,0,0,Math.PI*2);f.fillStyle='#5f6b3a';f.fill();
+  f.beginPath();f.ellipse(e[0],e[1],e[2],e[3],0,0,Math.PI*2);f.fillStyle='#2d6482';f.fill();
+  f.beginPath();f.ellipse(e[0]-e[2]*.12,e[1]-e[3]*.18,e[2]*.7,e[3]*.55,0,0,Math.PI*2);f.fillStyle='rgba(130,195,220,.32)';f.fill();}
+}

@@ -1,3 +1,4 @@
+var RC={r:[],c:[],e:[],pb:null},RG=null,RGC=new Map(); // réseau de routes courbes (plan du croquis)
 // ===== CALM LAND - LOGIQUE (sans affichage, testable) =====
 const NOMS={A:'Aaron',N:'Nathalie',B:'Benjamin',R:'Reda',P:'Paul',C:'Cédric',L:'Lilya',M:'Marc',Mi:'Mami',Z:'Zoé',ZM:'Mère de Zoé',ZP:'Père de Zoé',Lo:'Loulou',V:'Voix de Loulou',_:''};
 
@@ -215,10 +216,10 @@ const PORTE_GEO={};for(const n in PORTE_DEF){const [cxs,hw,db]=PORTE_DEF[n],o=BO
 for(const e of LIENS){if(PORTES_V.indexOf(e[0])>=0){const g=PORTE_GEO[e[1]];e[2]=g.sx;e[3]=g.sy;}}
 function zonesPorte(p){const b=BATM[p.own],g=PORTE_GEO[p.own];return g.zones.map(z=>[b[1]+z[0],b[2]+z[1],b[1]+z[2],b[2]+z[3]]);}
 function majCollisions(){const v=[];for(const b of BAT){if(b.off)continue;const o=BOX[b[0]];v.push([b[1]+o[0],b[2]+o[1],o[2],o[3]]);}
- for(const u of BUISSONS){const sp=SPR[u[2]];if(sp&&sp.sol)v.push([u[0]+sp.sol[0],u[1]-sp.h+sp.sol[1],sp.sol[2],sp.sol[3]]);}COLL.village=v;}
+ for(const u of BUISSONS){const sp=SPR[u[2]];if(sp&&sp.sol)v.push([u[0]+sp.sol[0],u[1]-sp.h+sp.sol[1],sp.sol[2],sp.sol[3]]);}for(const e of RC.e){for(let yy=e[1]-e[3];yy<e[1]+e[3];yy+=24){const k=(yy+12-e[1])/e[3],h=e[2]*Math.sqrt(Math.max(0,1-k*k));if(h>8)v.push([e[0]-h,yy,2*h,24]);}}COLL.village=v;}
 function majTrajets(){const n=ROUTES[0],sr=ROUTES[1],v=ROUTES[2],ny=n[1]+n[3]/2,sy=sr[1]+sr[3]/2,vx=v[0]+v[2]/2,my=(ny+sy)/2;ROUTE_Y=ny;
  const ox=VOFF[0];RECHERCHE=[{x:1850+ox,y:ny},{x:350+ox,y:ny},{x:vx,y:ny},{x:vx,y:sy},{x:2600+ox,y:sy},{x:vx,y:sy},{x:vx,y:ny},{x:3000+ox,y:ny}];
- BALADE_PAUL=[{x:1400+ox,y:ny},{x:2300+ox,y:ny},{x:3200+ox,y:ny},{x:vx,y:ny},{x:vx,y:my},{x:vx,y:ny}];}
+ BALADE_PAUL=[{x:1400+ox,y:ny},{x:2300+ox,y:ny},{x:3200+ox,y:ny},{x:vx,y:ny},{x:vx,y:my},{x:vx,y:ny}];RG=null;RGC.clear();if(RC.r.length)rcTrajets();}
 function routesImport(a){if(!Array.isArray(a)||a.length<3)return;const ok=Number.isFinite,out=[];
  for(const v of a){if(!Array.isArray(v)||!v.slice(0,4).every(ok))continue;const r=[Math.round(v[0]),Math.round(v[1]),Math.max(32,Math.min(SC.village.w,Math.round(v[2]))),Math.max(32,Math.min(SC.village.h,Math.round(v[3]))),v[4]==='t'?'t':'p'];if(v[5])r.off=true;out.push(r);}
  if(out.length<3)return;ROUTES.length=0;for(const r of out)ROUTES.push(r);}
@@ -241,7 +242,7 @@ function etirerMur(sc,r,cote,d){return sc!=='village'&&etirer(r,sc,cote,d);}
 function agrandirVillage(cote,n){n=Math.max(1,Math.min(400,n|0));const e=n*32,R=SC.village;let nw=R.w,nh=R.h,sx=0,sy=0;
  if(cote==='droite')nw+=e;else if(cote==='gauche'){nw+=e;sx=e;}else if(cote==='bas')nh+=e;else if(cote==='haut'){nh+=e;sy=e;}else return false;
  if(nw>VMAX.w||nh>VMAX.h)return false;
- if(sx||sy){for(const b of BAT){b[1]+=sx;b[2]+=sy;}for(const u of BUISSONS){u[0]+=sx;u[1]+=sy;}for(const r of ROUTES){r[0]+=sx;r[1]+=sy;}
+ if(sx||sy){for(const b of BAT){b[1]+=sx;b[2]+=sy;}for(const u of BUISSONS){u[0]+=sx;u[1]+=sy;}for(const r of ROUTES){r[0]+=sx;r[1]+=sy;}for(const s of RC.r)for(const q of s.p){q[0]+=sx;q[1]+=sy;}for(const c of RC.c){c[0]+=sx;c[1]+=sy;}for(const e of RC.e){e[0]+=sx;e[1]+=sy;}
   const dec=o=>{if(o&&o.scene==='village'){o.x+=sx;o.y+=sy;}};dec(G.player);dec(G.suiveur);if(G.trail)for(const t of G.trail)dec(t);
   VOFF[0]+=sx;VOFF[1]+=sy;}
  R.w=nw;R.h=nh;appliquerPlan();return true;}
@@ -251,20 +252,38 @@ function villageImport(v){villageReinit();if(!v||typeof v!=='object')return;cons
  if(ok(v.w)&&ok(v.h)){const w=Math.round(v.w),h=Math.round(v.h);if(w>=VBASE.w&&h>=VBASE.h&&w<=VMAX.w&&h<=VMAX.h){SC.village.w=w;SC.village.h=h;}}
  if(Array.isArray(v.o)&&ok(v.o[0])&&ok(v.o[1])){VOFF[0]=Math.max(0,Math.round(v.o[0]));VOFF[1]=Math.max(0,Math.round(v.o[1]));}}
 function appliquerPlan(){for(const [o,own,dx,dy,kx,ky] of LIENS){const b=BATM[own];o[kx]=b[1]+dx;o[ky]=b[2]+dy;}majCollisions();majTrajets();}
-function planExporter(){const b={};for(const x of BAT)b[x[0]]=x.off?[x[1],x[2],1]:[x[1],x[2]];return JSON.stringify({b,bv:1,v:villageExport(),u:BUISSONS.map(u=>[u[0],u[1],u[2]]),i:ITEMS,m:MURS,g:geomExport(),ro:ROUTES.map(r=>r.off?[r[0],r[1],r[2],r[3],r[4],1]:[r[0],r[1],r[2],r[3],r[4]]),r:Object.entries(INTS).filter(([k,v])=>v.user).map(([k,v])=>({id:k,nom:v.nom,tw:v.tw,th:v.th,fl:v.fl,wl:v.wl,own:v.own,dec:v.dec}))});}
+function planExporter(){const b={};for(const x of BAT)b[x[0]]=x.off?[x[1],x[2],1]:[x[1],x[2]];return JSON.stringify({b,bv:1,v:villageExport(),u:BUISSONS.map(u=>[u[0],u[1],u[2]]),i:ITEMS,m:MURS,g:geomExport(),rc:(RC.r.length||RC.c.length||RC.e.length)?RC:undefined,ro:ROUTES.map(r=>r.off?[r[0],r[1],r[2],r[3],r[4],1]:[r[0],r[1],r[2],r[3],r[4]]),r:Object.entries(INTS).filter(([k,v])=>v.user).map(([k,v])=>({id:k,nom:v.nom,tw:v.tw,th:v.th,fl:v.fl,wl:v.wl,own:v.own,dec:v.dec}))});}
 function planImporter(txt){const p=JSON.parse(txt);for(const x of BAT){const v=p.b&&p.b[x[0]];if(v&&isFinite(v[0])&&isFinite(v[1])){x[1]=Math.round(v[0]);x[2]=Math.round(v[1]);x.off=!!v[2];}}
  if(Array.isArray(p.u)){BUISSONS.length=0;for(const v of p.u){if(v&&isFinite(v[0])&&isFinite(v[1]))BUISSONS.push([Math.round(v[0]),Math.round(v[1]),SPR[v[2]]?v[2]:'buisson']);}}
  if(!p.bv&&Array.isArray(p.u)){const o=(p.v&&Array.isArray(p.v.o)&&isFinite(p.v.o[0])&&isFinite(p.v.o[1]))?p.v.o:[0,0],orig=new Set(HAIES_ORIGINE.map(h=>(h[0]+o[0])+','+(h[1]+o[1])+','+h[2]));for(let i=BUISSONS.length-1;i>=0;i--){const u=BUISSONS[i];if(orig.has(u[0]+','+u[1]+','+u[2]))BUISSONS.splice(i,1);}}
- retirerPiecesUser();geomImport(p.g);villageImport(p.v);routesImport(p.ro);if(Array.isArray(p.r)){for(const r of p.r)recreerPiece(r);}mursImport(p.m);
+ retirerPiecesUser();geomImport(p.g);villageImport(p.v);routesImport(p.ro);rcImport(p.rc);if(Array.isArray(p.r)){for(const r of p.r)recreerPiece(r);}mursImport(p.m);
  if(p.i&&typeof p.i==='object'){for(const sc of Object.keys(ITEMS)){if(!Array.isArray(p.i[sc]))continue;ITEMS[sc].length=0;for(const v of p.i[sc]){if(v&&isFinite(v[0])&&isFinite(v[1])&&SPRI[v[2]]){const it=[Math.round(v[0]),Math.round(v[1]),v[2]];if(v[3])it.push(1);if(v[2]==='porte'||v[2]==='passage'){it.length=0;it.push(Math.round(v[0]),Math.round(v[1]),v[2],0,typeof v[4]==='string'?v[4]:'');}ITEMS[sc].push(it);}}}}
  appliquerPlan();}
-function planReinit(){villageReinit();for(const x of BAT){x[1]=BASE_BAT[x[0]][0];x[2]=BASE_BAT[x[0]][1];x.off=false;}BUISSONS.length=0;for(const u of BASE_BUI)BUISSONS.push([u[0],u[1],u[2]]);retirerPiecesUser();geomReinit();routesReinit();mursReinit();for(const sc in BASE_ITEMS){ITEMS[sc].length=0;for(const v of BASE_ITEMS[sc])ITEMS[sc].push([...v]);}appliquerPlan();}
+function planReinit(){rcReinit();villageReinit();for(const x of BAT){x[1]=BASE_BAT[x[0]][0];x[2]=BASE_BAT[x[0]][1];x.off=false;}BUISSONS.length=0;for(const u of BASE_BUI)BUISSONS.push([u[0],u[1],u[2]]);retirerPiecesUser();geomReinit();routesReinit();mursReinit();for(const sc in BASE_ITEMS){ITEMS[sc].length=0;for(const v of BASE_ITEMS[sc])ITEMS[sc].push([...v]);}appliquerPlan();}
 {const L2={Maison_Aaron:[200,364],Maison_Benjamin:[658,300],Maison_Paul:[1212,76],Pharmacie:[1766,396],Boulangerie:[2160,492],Poste_Police:[2554,364],Maison_Mami:[150,1488],Maison_Zoe:[900,1552],Maison_Marc:[1800,1488],Ecole:[2560,1264]};
  for(const n in L2){BATM[n][1]=L2[n][0];BATM[n][2]=L2[n][1];}
  appliquerPlan();for(const b of BAT)BASE_BAT[b[0]]=[b[1],b[2]];}
 // ---------- OUTILS ----------
 function lerp(a,b,t){return a+(b-a)*t;}
-function chemin(a,b,yRoute=ROUTE_Y){return [a,{x:a.x,y:yRoute},{x:b.x,y:yRoute},b];}
+function chemin(a,b,yRoute=ROUTE_Y){if(RC.r.length)return rgChemin(a,b);return [a,{x:a.x,y:yRoute},{x:b.x,y:yRoute},b];}
+function rgGraphe(){if(RG)return RG;const N=[];for(const s of RC.r)for(let i=0;i<s.p.length;i++){const n={x:s.p[i][0],y:s.p[i][1],v:[]};if(i>0){const q=N[N.length-1],d=Math.hypot(n.x-q.x,n.y-q.y);n.v.push([q,d]);q.v.push([n,d]);}N.push(n);}
+ for(let i=0;i<N.length;i++)for(let j=i+1;j<N.length;j++){const a=N[i],b=N[j];if(Math.abs(a.x-b.x)>70||Math.abs(a.y-b.y)>70)continue;const d=Math.hypot(a.x-b.x,a.y-b.y);if(d<=70&&!a.v.some(e=>e[0]===b)){a.v.push([b,d+40]);b.v.push([a,d+40]);}}
+ return RG=N;}
+function rgChemin(a,b){const k=a.x+','+a.y+','+b.x+','+b.y;if(RGC.has(k))return RGC.get(k);const N=rgGraphe();
+ const proche=p=>{let m=null,md=1e18;for(const n of N){const d=(n.x-p.x)*(n.x-p.x)+(n.y-p.y)*(n.y-p.y);if(d<md){md=d;m=n;}}return m;};
+ const A=proche(a),B=proche(b);let res=[a,b];
+ if(A&&B){if(A===B)res=[a,{x:A.x,y:A.y},b];else{const dist=new Map([[A,0]]),prev=new Map(),done=new Set();let fr=[A];
+  while(fr.length){let bi=0;for(let i=1;i<fr.length;i++)if(dist.get(fr[i])<dist.get(fr[bi]))bi=i;const u=fr.splice(bi,1)[0];if(done.has(u))continue;done.add(u);if(u===B)break;for(const [v,w] of u.v){const nd=dist.get(u)+w;if(!dist.has(v)||nd<dist.get(v)){dist.set(v,nd);prev.set(v,u);fr.push(v);}}}
+  if(done.has(B)){const out=[];for(let n=B;n;n=prev.get(n)){out.push({x:n.x,y:n.y});if(n===A)break;}out.reverse();res=[a,...out,b];}}}
+ RGC.set(k,res);return res;}
+function rcTrajets(){const m=RC.r[0].p,s=Math.max(1,Math.round(m.length/40));const pts=m.filter((q,i)=>i%s===0||i===m.length-1).map(q=>({x:q[0],y:q[1]}));RECHERCHE=pts.concat(pts.slice(1,-1).reverse());
+ const pb=RC.pb||[0,m.length-1],seg=m.slice(Math.max(0,pb[0]),Math.min(m.length-1,pb[1])+1).filter((q,i)=>i%3===0).map(q=>({x:q[0],y:q[1]}));BALADE_PAUL=seg.length>1?seg.concat(seg.slice(1,-1).reverse()):BALADE_PAUL;}
+function rcReinit(){RC.r.length=0;RC.c.length=0;RC.e.length=0;RC.pb=null;RG=null;RGC.clear();}
+function rcImport(rc){rcReinit();if(!rc||typeof rc!=='object')return;const ok=Number.isFinite;
+ for(const s of (Array.isArray(rc.r)?rc.r:[]).slice(0,80)){if(!s||!Array.isArray(s.p))continue;const p=s.p.filter(q=>Array.isArray(q)&&ok(q[0])&&ok(q[1])).slice(0,4000).map(q=>[Math.round(q[0]),Math.round(q[1])]);if(p.length>=2)RC.r.push({p,w:Math.max(16,Math.min(400,(s.w|0)||64)),t:s.t==='t'?'t':'p'});}
+ for(const c of (Array.isArray(rc.c)?rc.c:[]).slice(0,40))if(Array.isArray(c)&&c.slice(0,3).every(ok))RC.c.push([Math.round(c[0]),Math.round(c[1]),Math.max(16,Math.round(c[2])),c[3]==='t'?'t':'p']);
+ for(const e of (Array.isArray(rc.e)?rc.e:[]).slice(0,40))if(Array.isArray(e)&&e.slice(0,4).every(ok))RC.e.push([Math.round(e[0]),Math.round(e[1]),Math.max(16,Math.round(e[2])),Math.max(16,Math.round(e[3]))]);
+ if(Array.isArray(rc.pb)&&rc.pb.length===2&&rc.pb.every(ok))RC.pb=[rc.pb[0]|0,rc.pb[1]|0];}
 function surChemin(pts,t){ // t 0..1
  let L=0;const seg=[];for(let i=1;i<pts.length;i++){const d=Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y);seg.push(d);L+=d;}
  let r=Math.max(0,Math.min(1,t))*L;
@@ -550,4 +569,4 @@ function bouger(dx,dy,dt){
  if(G.prologue&&G.pro&&G.pro.etape==='matin'&&pl.scene==='village'&&Math.hypot(pl.x-ECOLE.x,pl.y-ECOLE.y)<64)deposerLoulou();
  return true;
 }
-if(typeof module!=='undefined') module.exports={PORTE_GEO,zonesPorte,HAIES_ORIGINE,etirerRoute,etirerMur,agrandirVillage,villageExport,VOFF,MURS,redimMur,ROUTES,redimRoute,majTrajets,trajets:()=>({ROUTE_Y,RECHERCHE,BALADE_PAUL}),setPublic:v=>{MODE_PUBLIC=v;},pub,agrandir,geomExport,geomImport,passageInt,PBASE,BASE_GEOM,STYLES,creerPiece,supprimerPiece,porteInt,libreIn,recreerPiece,INTS,ENTREES,arriveeVillage,DOOR,ITEMS,SPRI,itemDe,collItem,machineBase,echellePos,coupe,degager,consigne,etapes,SPR,BATM,P,planExporter,planImporter,planReinit,appliquerPlan,BUISSONS,FIXES,sauter,objectif,porte,suivre,sieste,deposerLoulou,PORTES_V,ECOLE,G,D,NOMS,LETTRE,MESSAGE_FINAL,AJOUTS_DEMO,nouvellePartie,demarrerBoucle,avancer,regler,interagir,parler,objet,code,positions,bouger,cible,changerScene,nathalie,benjamin,tempsActif,numeroBoucle,solids,machinePos,SC,BAT};
+if(typeof module!=='undefined') module.exports={RC,chemin,rcImport,PORTE_GEO,zonesPorte,HAIES_ORIGINE,etirerRoute,etirerMur,agrandirVillage,villageExport,VOFF,MURS,redimMur,ROUTES,redimRoute,majTrajets,trajets:()=>({ROUTE_Y,RECHERCHE,BALADE_PAUL}),setPublic:v=>{MODE_PUBLIC=v;},pub,agrandir,geomExport,geomImport,passageInt,PBASE,BASE_GEOM,STYLES,creerPiece,supprimerPiece,porteInt,libreIn,recreerPiece,INTS,ENTREES,arriveeVillage,DOOR,ITEMS,SPRI,itemDe,collItem,machineBase,echellePos,coupe,degager,consigne,etapes,SPR,BATM,P,planExporter,planImporter,planReinit,appliquerPlan,BUISSONS,FIXES,sauter,objectif,porte,suivre,sieste,deposerLoulou,PORTES_V,ECOLE,G,D,NOMS,LETTRE,MESSAGE_FINAL,AJOUTS_DEMO,nouvellePartie,demarrerBoucle,avancer,regler,interagir,parler,objet,code,positions,bouger,cible,changerScene,nathalie,benjamin,tempsActif,numeroBoucle,solids,machinePos,SC,BAT};

@@ -316,3 +316,15 @@ console.log('dialogues joués :',new Set(G.log).size);
  L.planReinit();
 }
 
+
+// ---- plan du croquis : routes courbes, marche des personnages ----
+{const fs=require('fs');const txt=fs.readFileSync(__dirname+'/plan_croquis.json','utf8');
+ L.nouvellePartie(false);vider();L.planImporter(txt);
+ ok(L.RC.r.length>=10&&L.RC.c.length===1&&L.RC.e.length===1,'croquis : routes courbes, place ronde et étang chargés');
+ ok(L.BAT.every(b=>!b.off)&&L.SC.village.w===4800&&L.SC.village.h===3200,'croquis : 10 bâtiments placés, village 4800 x 3200');
+ const c=L.chemin(L.P.fenetreNat,L.P.porteDevantPharma);ok(c.length>3&&c[c.length-1]===L.P.porteDevantPharma&&c.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)),'croquis : Nathalie rejoint la pharmacie par les chemins');
+ const tr=L.trajets();ok(tr.RECHERCHE.length>10&&tr.BALADE_PAUL.length>5,'croquis : trajets de recherche et de balade suivent les routes');
+ let bloc=0;for(const p of L.PORTES_V){const z=L.zonesPorte(p)[0];if(!L.libreIn('village',(z[0]+z[2])/2,(z[1]+z[3])/2))bloc++;}ok(bloc===0,'croquis : devant chaque porte, rien ne gêne (arbres, étang)');
+ const e1=L.planExporter();L.planImporter(e1);ok(L.RC.r.length>=10&&L.planExporter()===e1,'croquis : le plan se réexporte et se recharge à l\'identique');
+ L.planReinit();ok(L.RC.r.length===0&&L.trajets().ROUTE_Y===918&&L.chemin({x:0,y:0},{x:100,y:0}).length===4,'plan d\'origine : routes droites remises, anciens trajets');
+}
