@@ -537,3 +537,7 @@ function pret(){
  const f=()=>{d=false;p.classList.remove('on');};p.addEventListener('pointerup',f);p.addEventListener('pointercancel',f);}}
 
 let objPlie=false;{const o=document.getElementById('obj');if(o)o.onclick=()=>{objPlie=!objPlie;};}
+
+{const sp=document.getElementById('sep'),ed=document.getElementById('editeur'),c=document.getElementById('cote');if(sp&&sp.addEventListener){let d=false;sp.addEventListener('pointerdown',e=>{d=true;sp.classList.add('on');if(sp.setPointerCapture)sp.setPointerCapture(e.pointerId);e.preventDefault();});
+ sp.addEventListener('pointermove',e=>{if(!d)return;const r=c.getBoundingClientRect();ed.style.height=Math.max(60,Math.min(r.height-120,e.clientY-r.top-ed.offsetTop+c.scrollTop))+'px';});
+ const f=()=>{d=false;sp.classList.remove('on');};sp.addEventListener('pointerup',f);sp.addEventListener('pointercancel',f);}}
