@@ -22,7 +22,7 @@ body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:syste
 #b-son{position:absolute;top:.35em;right:.5em;width:2.2em;height:2.2em;border-radius:.4em;border:1px solid var(--line);background:rgba(20,20,32,.75);color:var(--fg);font-size:.85em;cursor:pointer;padding:0;z-index:5;}
 #outils{position:absolute;top:2em;left:.5em;display:flex;gap:.3em;flex-wrap:wrap;font-size:.72em;}
 #outils button{font:inherit;background:rgba(20,20,32,.75);color:var(--fg);border:1px solid var(--line);border-radius:.3em;padding:.2em .5em;cursor:pointer;}
-#obj{position:absolute;top:4.1em;left:.7em;right:.7em;font-size:.82em;line-height:1.35;background:rgba(10,10,18,.55);padding:.15em .5em;border-radius:.3em;color:#ffe9a8;text-shadow:0 1px 2px #000;max-width:70%;}
+#obj{cursor:pointer;position:absolute;top:4.1em;left:.7em;right:.7em;font-size:.82em;line-height:1.35;background:rgba(10,10,18,.55);padding:.15em .5em;border-radius:.3em;color:#ffe9a8;text-shadow:0 1px 2px #000;max-width:70%;}
 #guide{position:absolute;inset:3%;background:rgba(10,10,18,.97);border:1px solid var(--line);border-radius:.5em;overflow:auto;padding:1em 1.4em;font-size:.78em;line-height:1.45;}
 #guide h3{color:var(--accent);margin:.9em 0 .3em;}#guide li{margin:.25em 0;}#guide kbd{background:#2a2a3c;border:1px solid var(--line);border-radius:.25em;padding:0 .35em;}
 #dialogue #nom{color:var(--accent);font-weight:700;margin-bottom:.25em;min-height:1.1em;}
@@ -70,7 +70,7 @@ body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:syste
 #poignee{width:7px;flex:none;cursor:col-resize;background:#2a2a40;touch-action:none;}#poignee:hover,#poignee.on{background:#e0b45a;}
 #cote{display:flex;flex-direction:column;gap:.6em;width:340px;height:100%;box-sizing:border-box;padding:.6em;overflow:auto;background:#0f0f18;border-left:1px solid var(--line);font-size:13px;flex:none;}
 #cote #editeur,#cote #biblio,#cote #test{position:static;inset:auto;width:auto;border:1px solid var(--line);border-radius:.4em;padding:.5em .6em;font-size:1em;background:rgba(20,20,32,.9);}
-#cote #biblio{flex:1 1 auto;min-height:12em;overflow:auto;}
+#cote #biblio{flex:0 0 auto;height:24em;min-height:8em;overflow:auto;resize:vertical;}
 #cote #test{overflow:visible;}
 @media (max-width:800px){body{flex-direction:column;}#poignee{display:none!important;}#cote{width:100%!important;height:42vh;border-left:0;border-top:1px solid var(--line);}}
 [hidden]{display:none !important;}
@@ -131,10 +131,10 @@ body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:syste
 <select id="vg-cote"><option value="tout" selected>tout autour</option><option value="haut">en haut</option><option value="bas">en bas</option><option value="gauche">à gauche</option><option value="droite">à droite</option></select>
 <select id="vg-n"><option value="5">+160 px</option><option value="10">+320 px</option><option value="20" selected>+640 px</option><option value="40">+1280 px</option><option value="80">+2560 px</option><option value="160">+5120 px</option><option value="400">+12800 px</option></select>
 <button id="vg-go">Agrandir le village</button> <span id="vg-info" style="color:var(--muted)"></span></details>
-<details id="ed-agrandir"><summary>Agrandir cette pièce</summary>
+<details id="ed-agrandir"><summary>Agrandir / réduire cette pièce</summary>
 <select id="ag-cote"><option value="droite">vers la droite</option><option value="gauche">vers la gauche</option><option value="haut">vers le haut</option><option value="bas">vers le bas</option></select>
-<select id="ag-n"><option value="1">+1 case</option><option value="2" selected>+2 cases</option><option value="4">+4 cases</option><option value="6">+6 cases</option><option value="8">+8 cases</option><option value="16">+16 cases</option><option value="32">+32 cases</option><option value="64">+64 cases</option><option value="128">+128 cases</option></select>
-<button id="ag-go">Agrandir</button></details>
+<select id="ag-n"><option value="-16">−16 cases</option><option value="-8">−8 cases</option><option value="-4">−4 cases</option><option value="-2">−2 cases</option><option value="-1">−1 case</option><option value="1">+1 case</option><option value="2" selected>+2 cases</option><option value="4">+4 cases</option><option value="6">+6 cases</option><option value="8">+8 cases</option><option value="16">+16 cases</option><option value="32">+32 cases</option><option value="64">+64 cases</option><option value="128">+128 cases</option></select>
+<button id="ag-go">Appliquer</button></details>
 <details id="ed-nouvelle"><summary>Nouvelle pièce</summary>
 <input id="np-nom" placeholder="Nom de la pièce (ex. cuisine)" maxlength="30">
 <select id="np-taille"><option value="10,8">Petite (320 x 256)</option><option value="14,10" selected>Moyenne (448 x 320)</option><option value="20,12">Grande (640 x 384)</option></select>

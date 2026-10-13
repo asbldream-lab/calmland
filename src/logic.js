@@ -175,14 +175,15 @@ const BASE_GEOM={};for(const k in INTS)BASE_GEOM[k]={w:SC[k].w,h:SC[k].h,gap:INT
 const PBASE={chambreDepart:{...P.chambreDepart},salonBen:{...P.salonBen},salonNat:{...P.salonNat},chienBlanc:{...P.chienBlanc},soussolChien:{...P.soussolChien},soussolLoulou:{...P.soussolLoulou}};
 const PSCENE={chambreDepart:'chambre',salonBen:'salon',salonNat:'salon',chienBlanc:'salon',soussolChien:'soussol',soussolLoulou:'soussol'};
 function majPointsFixes(){for(const k in PBASE){const d=INTS[PSCENE[k]].dec;P[k].x=PBASE[k].x+d[0];P[k].y=PBASE[k].y+d[1];}}
-function agrandir(sc,cote,n){const R=SC[sc],I=INTS[sc];if(!R||!I)return false;n=Math.max(1,Math.min(400,n|0));const e=n*32;let nw=R.w,nh=R.h,sx=0,sy=0;
+function agrandir(sc,cote,n){const R=SC[sc],I=INTS[sc];if(!R||!I)return false;n=Math.max(-400,Math.min(400,n|0));if(!n)return false;const e=n*32;let nw=R.w,nh=R.h,sx=0,sy=0;
  if(cote==='droite')nw+=e;else if(cote==='gauche'){nw+=e;sx=e;}else if(cote==='bas')nh+=e;else if(cote==='haut'){nh+=e;sy=e;}else return false;
- if(nw>IMAX.w||nh>IMAX.h)return false;const hOld=R.h;
+ if(nw>IMAX.w||nh>IMAX.h||nw<192||nh<192)return false;if(I.gap&&(I.gap[0]+sx<14||I.gap[1]+sx>nw-14))return false;const hOld=R.h;
  for(const it of ITEMS[sc]){if(cote==='gauche')it[0]+=e;else if(cote==='haut'){if(it[1]>80)it[1]+=e;}else if(cote==='bas'){if(it[1]>=hOld-14)it[1]+=e;}}
  for(const r of MURS[sc]){if(cote==='gauche')r[0]+=e;else if(cote==='haut')r[1]+=e;}
  R.w=nw;R.h=nh;if(I.gap)I.gap=[I.gap[0]+sx,I.gap[1]+sx];
  I.cloisons=(I.cloisons||[]).map(c=>{let [x,y,w,h,a]=c;x+=sx;if(cote==='haut'){if(a==='t')h+=e;else y+=e;}if(cote==='bas'&&a==='b')h+=e;return [x,y,w,h,a];});
- I.dec=[I.dec[0]+sx,I.dec[1]+sy];if(I.user){I.tw=nw/32;I.th=nh/32;}if(G.player&&G.player.scene===sc){G.player.x+=sx;G.player.y+=sy;}majPointsFixes();return true;}
+ if(n<0){ITEMS[sc]=ITEMS[sc].filter(it=>it[0]>=0&&it[0]<=nw&&it[1]>=0&&it[1]<=nh+14);MURS[sc]=MURS[sc].filter(r=>r[0]<nw&&r[1]<nh&&r[0]+r[2]>0&&r[1]+r[3]>0);}
+ I.dec=[I.dec[0]+sx,I.dec[1]+sy];if(I.user){I.tw=nw/32;I.th=nh/32;}if(G.player&&G.player.scene===sc){G.player.x=Math.max(20,Math.min(nw-20,G.player.x+sx));G.player.y=Math.max(80,Math.min(nh-14,G.player.y+sy));}majPointsFixes();return true;}
 function geomExport(){const g={};for(const k in INTS){if(INTS[k].user)continue;g[k]={w:SC[k].w,h:SC[k].h,dec:INTS[k].dec,gap:INTS[k].gap,cl:INTS[k].cloisons};}return g;}
 function geomImport(g){if(!g||typeof g!=='object')return;const ok=v=>Number.isFinite(v);for(const k in g){const I=INTS[k],v=g[k];if(!I||I.user||!v||!ok(v.w)||!ok(v.h))continue;
  SC[k].w=Math.max(192,Math.min(IMAX.w,Math.round(v.w)));SC[k].h=Math.max(192,Math.min(IMAX.h,Math.round(v.h)));

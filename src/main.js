@@ -472,8 +472,8 @@ function brancherEditeur(){
  $('np-creer').onclick=()=>{const sc=G.player.scene;if(!INTS[sc]){msg('Entre d\'abord dans une maison (boutons de scène), puis crée la pièce');return;}
   const [tw,th]=$('np-taille').value.split(',').map(Number);pushUndo();const id=creerPiece($('np-nom').value.trim(),tw,th,NP.fl,NP.wl,sc,$('np-passage').checked?'passage':'porte');sauverPlan();majScenesEd();allerEd(id);majTexteEd();msg('Pièce créée : '+INTS[id].nom);$('np-nom').value='';};
  $('ag-go').onclick=()=>{const sc=G.player.scene;if(!INTS[sc]){msg('Entre d\'abord dans une pièce (boutons de scène)');return;}pushUndo();
-  if(!agrandir(sc,$('ag-cote').value,+$('ag-n').value)){undo.pop();msg('Impossible : taille maximale 40 x 25 cases');return;}
-  {const e=+$('ag-n').value*32,c=$('ag-cote').value;if(c==='gauche')EC.x+=e;if(c==='haut')EC.y+=e;}selEd=null;sauverPlan();majTexteEd();msg('Pièce agrandie');};
+  if(!agrandir(sc,$('ag-cote').value,+$('ag-n').value)){undo.pop();msg('Impossible : pièce entre 6 x 6 et 40 x 25 cases (et la porte doit rester dedans)');return;}
+  {const e=+$('ag-n').value*32,c=$('ag-cote').value;if(c==='gauche')EC.x+=e;if(c==='haut')EC.y+=e;}selEd=null;sauverPlan();majTexteEd();msg('Pièce modifiée');};
  $('np-suppr').onclick=()=>{const id=G.player.scene,I=INTS[id];if(!I||!I.user)return;const dep=Object.keys(ITEMS).find(k=>k!==id&&ITEMS[k].some(i=>i[2]==='porte'&&i[4]===id));pushUndo();supprimerPiece(id);sauverPlan();majScenesEd();allerEd(dep&&INTS[dep]?dep:'village');majTexteEd();msg('Pièce supprimée');};$('ed-coll').onclick=()=>basculerColl();
  const pasEd=()=>+$('ed-pas').value||16;
  const et=(cote,sg)=>()=>{if(!selEd||(selEd.kind!=='r'&&selEd.kind!=='m')){msg('Sélectionne une route ou un mur');return;}pushUndo();if(!etirerSel(cote,sg*pasEd())){undo.pop();msg('Limite atteinte');}};
@@ -505,7 +505,7 @@ function frame(now){majCote();
   if(!G.prologue&&G.minute>=8&&G.minute<10&&!G.L.cleReprise&&G.queue.length===0){mur+=dt;if(mur>0.7){mur=0;const pr=G.player;const d=pr.scene==='salon'?0:Math.hypot(pr.x-P.porteBen.x,pr.y-P.porteBen.y-8);if(pr.scene==='salon'||(pr.scene==='village'&&d<260))sonMarteau();}}
   if(pluieNode&&ac)pluieNode.gain.value=son?(G.player.scene==='village'?0.05:0.015):0;
   const box=$('dialogue');if(!box.hidden&&courant&&courant.text){if(ecriture<1){ecriture=Math.min(1,ecriture+dt*2.2*Math.max(1,40/courant.text.length));}$('texte').textContent=courant.text.slice(0,Math.ceil(courant.text.length*ecriture));}
-  {const o=objectif();$('obj').textContent=(o&&!EDIT)?'➜ '+o.t:'';$('obj').hidden=EDIT;}
+  {const o=objectif();$('obj').textContent=o?(objPlie?'➜':'➜ '+o.t):'';$('obj').hidden=EDIT||coteVisible;}
   $('hud').textContent=G.prologue?'Prologue':`Boucle ${numeroBoucle()} · ${String(Math.floor(G.minute)).padStart(2,'0')}:${String(Math.floor(G.minute%1*60)).padStart(2,'0')} / 20:00`;
   $('inv').textContent=(G.L.cleEnMain?'🔑 clé  ':'')+(G.L.aLaViande?'🥩 viande  ':'')+(G.mem.codeAppris?'🔢 code connu':'');
   majPave();if(Math.floor(tReel*4)%2===0)majTest();
@@ -535,3 +535,5 @@ function pret(){
 {const p=document.getElementById('poignee'),c=document.getElementById('cote');if(p&&p.addEventListener){let d=false;p.addEventListener('pointerdown',e=>{d=true;p.classList.add('on');if(p.setPointerCapture)p.setPointerCapture(e.pointerId);e.preventDefault();});
  p.addEventListener('pointermove',e=>{if(!d)return;c.style.width=Math.max(240,Math.min(innerWidth*0.8,innerWidth-e.clientX))+'px';ajuster();});
  const f=()=>{d=false;p.classList.remove('on');};p.addEventListener('pointerup',f);p.addEventListener('pointercancel',f);}}
+
+let objPlie=false;{const o=document.getElementById('obj');if(o)o.onclick=()=>{objPlie=!objPlie;};}
