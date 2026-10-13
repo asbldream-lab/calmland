@@ -2,6 +2,7 @@ const L=require('./logic.js');const G=L.G;
 let CH=0;function vider(){let n=0;while(G.queue.length&&n<500){const it=G.queue.shift();if(it.call)it.call();if(it.choice){it.choice[CH].fn();}n++;}}
 function ok(c,msg){if(!c){console.log('ECHEC:',msg);process.exitCode=1;}else console.log('ok  ',msg);}
 function aller(scene,x,y){L.changerScene(scene,x,y,3);}
+function vers(k){const p=L.positions()[k];aller(p.scene,p.x,p.y+12);}
 function avance(m){for(let i=0;i<m*20;i++){vider();L.avancer(0.05);}vider();}
 function prologue(){L.nouvellePartie(true);vider();
  ok(G.prologue&&G.pro.etape==='matin'&&G.suiveur,'prologue : matin, Loulou suit');
@@ -13,13 +14,13 @@ function prologue(){L.nouvellePartie(true);vider();
 // ---- Partie 1 : chemin parfait
 L.nouvellePartie(false);vider();
 ok(L.numeroBoucle()===1,'boucle 1');ok(G.log.includes('reveil_nathalie'),'Nathalie à la fenêtre');
-aller('village',L.FIXES.reda.x,L.FIXES.reda.y+10);L.interagir();vider();ok(G.L.vuReda,'Reda parlé');
+vers('reda');L.interagir();vider();ok(G.L.vuReda,'Reda parlé');
 aller('salon',300,240);L.interagir();vider();ok(G.mem.codeAppris,'code appris chez Benjamin après Reda');
-aller('village',L.FIXES.cedric.x,L.FIXES.cedric.y+10);L.interagir();vider();ok(G.L.aLaViande,'viande de Cédric');
+vers('cedric');L.interagir();vider();ok(G.L.aLaViande,'viande de Cédric');
 avance(4.1-G.minute);ok(G.L.cleAuSol,'clé tombée à 4');
 aller('village',L.P.cleSol.x,L.P.cleSol.y+4);L.interagir();vider();ok(G.L.cleEnMain&&!G.L.cleAuSol,'clé ramassée');
-aller('village',L.FIXES.lilya.x,L.FIXES.lilya.y+10);L.interagir();vider();ok(G.log.includes('lilya_cle'),'Lilya parle de Mami');
-aller('village',L.FIXES.mami.x,L.FIXES.mami.y+14);L.interagir();vider();ok(G.mem.mamiPhraseConnue&&G.L.cleEnMain,'Mami parle et rend la clé');
+vers('lilya');L.interagir();vider();ok(G.log.includes('lilya_cle'),'Lilya parle de Mami');
+vers('mami');L.interagir();vider();ok(G.mem.mamiPhraseConnue&&G.L.cleEnMain,'Mami parle et rend la clé');
 avance(7.2-G.minute);ok(!G.L.cleReprise,'Nathalie ne reprend pas la clé');
 avance(8.2-G.minute);aller('salon',300,240);L.interagir();vider();ok(G.log.includes('ben_seul'),'Benjamin seul à 8');
 aller('salon',380,226);L.interagir();vider();ok(G.log.includes('ben_quoi')||G.log.includes('ben_machine'),'machine bloquée si Benjamin là');
@@ -34,8 +35,8 @@ avance(8.5-G.minute);ok(L.benjamin(G.minute).scene==='salon'&&!L.benjamin(G.minu
 avance(11-G.minute);ok(L.benjamin(G.minute).scene==='salon','Benjamin ne va pas chez Paul');
 const r=G.reveil;avance(20-G.minute);ok(G.reveil===r+1&&G.minute===0,'mort à 20 et nouvelle boucle');ok(G.mem.codeAppris===false,'mémoire : code non appris dans cette partie');
 // ---- Partie 3 : code faux, rendre la clé, prologue
-prologue();aller('village',L.FIXES.marc.x,L.FIXES.marc.y+14);L.interagir();vider();ok(!G.prologue&&L.numeroBoucle()===1,'prologue -> boucle 1');
-avance(4.1);aller('village',L.P.cleSol.x,L.P.cleSol.y+4);L.interagir();vider();aller('village',L.FIXES.reda.x,L.FIXES.reda.y+10);L.interagir();vider();aller('salon',300,240);L.interagir();vider();
+prologue();vers('marc');L.interagir();vider();ok(!G.prologue&&L.numeroBoucle()===1,'prologue -> boucle 1');
+avance(4.1);aller('village',L.P.cleSol.x,L.P.cleSol.y+4);L.interagir();vider();vers('reda');L.interagir();vider();aller('salon',300,240);L.interagir();vider();
 avance(10.3-G.minute);aller('salon',360,226);L.interagir();vider();L.code('123456');vider();ok(G.L.cadenasBloque&&G.L.perdu,'code faux : cadenas bloqué');
 const g2=G.reveil;avance(20-G.minute);ok(G.mem.codeAppris,'code gardé en mémoire boucle suivante');
 avance(4.1);aller('village',L.P.cleSol.x,L.P.cleSol.y+4);L.interagir();vider();const n=L.nathalie(G.minute);console.log('nat',n.scene);
@@ -44,7 +45,7 @@ aller('village',n.x,n.y);CH=1;L.interagir();vider();CH=0;ok(G.L.cleReprise,'rend
 L.nouvellePartie(false);vider();G.mem.codeAppris=true;avance(4.1);aller('village',L.P.cleSol.x,L.P.cleSol.y+4);L.interagir();vider();avance(10.2-G.minute);aller('salon',360,226);L.interagir();vider();ok(!!G.keypad,'pavé ouvert');avance(1.2);ok(G.L.cadenasBloque,'temps dépassé : cadenas bloqué');
 avance(12.1-G.minute);ok(G.L.surpris||G.L.cadenasBloque,'retour de Benjamin géré');
 // portes, collisions serrées, temps
-L.nouvellePartie(false);vider();aller('village',L.PORTES_V[1].x,L.PORTES_V[1].y+24);let c=L.cible();ok(c&&c.type==='porte'&&c.id==='p_benjamin','E devant la porte de Benjamin');L.interagir();vider();ok(G.player.scene==='salon','on entre chez Benjamin avec E');
+L.nouvellePartie(false);vider();aller('village',L.PORTES_V[1].x,L.PORTES_V[1].y+2);let c=L.cible();ok(c&&c.type==='porte'&&c.id==='p_benjamin','E devant la porte de Benjamin');L.interagir();vider();ok(G.player.scene==='salon','on entre chez Benjamin avec E');
 aller('village',L.PORTES_V[2].x,L.PORTES_V[2].y);L.interagir();vider();ok(G.player.scene==='int_paul','porte de Paul : on entre chez Paul');
 aller('village',L.PORTES_V[0].x,L.PORTES_V[0].y+30);for(let i=0;i<60;i++)L.bouger(0,-1,0.016);ok(G.player.scene==='village'&&G.player.y<L.BAT[0][2]+L.BAT[0][4]-8,'on monte sur le palier, devant la porte (plus de mur invisible)');L.interagir();vider();ok(G.player.scene==='chambre','E sur le palier : on entre');
 aller('village',L.BAT[0][1]+60,L.BAT[0][2]+L.BAT[0][4]+40);for(let i=0;i<400;i++)L.bouger(0,-1,0.016);ok(!L.solids('village').some(r=>G.player.x+6>r[0]&&G.player.x-6<r[0]+r[2]&&G.player.y>r[1]&&G.player.y-3<r[1]+r[3]),'collision : on s\'arrête contre la maison, jamais dedans');

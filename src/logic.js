@@ -210,7 +210,7 @@ lier(ECOLE,'Ecole');
 const GEOM_OLD={"Maison_Aaron":[130,416],"Maison_Benjamin":[130,416],"Maison_Paul":[130,416],"Pharmacie":[128,288],"Boulangerie":[128,288],"Poste_Police":[112,416],"Maison_Mami":[270,512],"Maison_Zoe":[144,416],"Maison_Marc":[144,416],"Ecole":[385,736]},DOOR={"Maison_Aaron":130,"Maison_Benjamin":263,"Maison_Paul":191,"Pharmacie":112,"Boulangerie":112,"Poste_Police":112,"Maison_Mami":270,"Maison_Zoe":335,"Maison_Marc":350,"Ecole":385};
 for(const e of LIENS){const o=GEOM_OLD[e[1]],h=BATM[e[1]][4];e[2]=e[2]-o[0]+DOOR[e[1]];e[3]=e[3]-o[1]+h;}
 const PORTE_DEF={Maison_Aaron:[[80],26,347],Maison_Benjamin:[[259],30,448],Maison_Paul:[[191],28,645],Pharmacie:[[112],26,380],Boulangerie:[[112],26,284],Poste_Police:[[110],30,412],Maison_Mami:[[270],28,445],Maison_Zoe:[[334],24,415],Maison_Marc:[[354],26,450],Ecole:[[288,480],48,650]}; // [centres des portes, demi-largeur, bas de la porte] dans le dessin de la maison
-const PORTE_GEO={};for(const n in PORTE_DEF){const [cxs,hw,db]=PORTE_DEF[n],o=BOX[n],cb=o[1]+o[3],y1=Math.max(cb+24,db+26);PORTE_GEO[n]={zones:cxs.map(cx=>[cx-hw,cb,cx+hw,y1]),sx:cxs[0],sy:Math.round((cb+y1)/2)};}
+const PORTE_GEO={};for(const n in PORTE_DEF){const [cxs,hw,db]=PORTE_DEF[n],o=BOX[n];o[3]=Math.max(o[3],db-o[1]);const cb=o[1]+o[3],y1=Math.max(cb+30,db+30);PORTE_GEO[n]={zones:cxs.map(cx=>[cx-hw,cb,cx+hw,y1]),sx:cxs[0],sy:Math.round((cb+y1)/2)};}
 for(const e of LIENS){if(PORTES_V.indexOf(e[0])>=0){const g=PORTE_GEO[e[1]];e[2]=g.sx;e[3]=g.sy;}}
 function zonesPorte(p){const b=BATM[p.own],g=PORTE_GEO[p.own];return g.zones.map(z=>[b[1]+z[0],b[2]+z[1],b[1]+z[2],b[2]+z[3]]);}
 function majCollisions(){const v=[];for(const b of BAT){if(b.off)continue;const o=BOX[b[0]];v.push([b[1]+o[0],b[2]+o[1],o[2],o[3]]);}
@@ -398,7 +398,8 @@ function chienNoir(){return G.L.dogFed?{scene:'soussol',x:150,y:262,dir:2}:{scen
 function positions(){
  const m=G.minute,o={};
  o.nathalie={who:'N',sheet:'Nathalie',...nathalie(m)};o.benjamin={who:'B',sheet:'Benjamin',...benjamin(m)};o.paul={who:'P',sheet:'Paul',...paul(m)};
- for(const k in FIXES) o[k]={scene:'village',dir:3,...FIXES[k]};
+ {const IN={reda:['int_poste',0],cedric:['int_boulangerie',0],lilya:['int_pharmacie',0],marc:['int_marc',0],mami:['int_mami',0],zm:['int_zoe',-70],zoe:['int_zoe',0],zp:['int_zoe',70]};
+ for(const k in FIXES){const [sc,dx]=IN[k];o[k]={...FIXES[k],scene:sc,dir:3,x:SC[sc].w/2+dx+(INTS[sc].dec?INTS[sc].dec[0]:0),y:180+(INTS[sc].dec?INTS[sc].dec[1]:0)};}}
  o.loulou=(G.prologue&&G.pro&&G.pro.etape==='matin'&&G.suiveur)?{who:'Lo',sheet:'Loulou',scene:G.suiveur.scene,x:G.suiveur.x,y:G.suiveur.y,dir:G.suiveur.dir,bouge:G.suiveur.marche,suiveur:true}:{who:'Lo',sheet:'Loulou',scene:'soussol',...P.soussolLoulou,dir:3};
  return o;
 }

@@ -67,11 +67,12 @@ body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:syste
 #liste p{margin:.15em 0;}#liste b{color:var(--muted);margin-right:.4em;}
 #tactile{position:absolute;inset:0;pointer-events:none;}
 #tactile button{pointer-events:auto;position:absolute;width:3em;height:3em;border-radius:50%;border:1px solid var(--line);background:rgba(30,30,45,.55);color:var(--fg);font:inherit;font-size:1em;touch-action:none;}
+#poignee{width:7px;flex:none;cursor:col-resize;background:#2a2a40;touch-action:none;}#poignee:hover,#poignee.on{background:#e0b45a;}
 #cote{display:flex;flex-direction:column;gap:.6em;width:340px;height:100%;box-sizing:border-box;padding:.6em;overflow:auto;background:#0f0f18;border-left:1px solid var(--line);font-size:13px;flex:none;}
 #cote #editeur,#cote #biblio,#cote #test{position:static;inset:auto;width:auto;border:1px solid var(--line);border-radius:.4em;padding:.5em .6em;font-size:1em;background:rgba(20,20,32,.9);}
 #cote #biblio{flex:1 1 auto;min-height:12em;overflow:auto;}
 #cote #test{overflow:visible;}
-@media (max-width:800px){body{flex-direction:column;}#cote{width:100%;height:42vh;border-left:0;border-top:1px solid var(--line);}}
+@media (max-width:800px){body{flex-direction:column;}#poignee{display:none!important;}#cote{width:100%!important;height:42vh;border-left:0;border-top:1px solid var(--line);}}
 [hidden]{display:none !important;}
 #outils,#cote,#guide,#b-test,#b-editeur,#b-guide{display:none!important}
 </style>
@@ -122,6 +123,7 @@ body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:syste
  </div>
  <div id="chargement"><p>Chargement…</p></div>
 </div>
+<div id="poignee" hidden title="Glisse pour agrandir / réduire le panneau"></div>
 <div id="cote" hidden>
  <div id="editeur" hidden><b>Éditeur de plan</b> <span id="ed-msg" style="color:var(--accent)"></span><p>Clique un élément pour le sélectionner, glisse-le pour le déplacer, Suppr pour le supprimer, Ctrl+Z pour annuler (grille de 32 px). Glisse le fond ou utilise les flèches pour déplacer la vue, O / P pour le zoom. Les portes, collisions, plaques et personnages suivent le bâtiment. Sauvegarde automatique dans ce navigateur.</p><div class="b"><label>Pièce : <select id="ed-scenes"></select></label></div>
 <div id="gh-etat" style="color:var(--accent);margin:.2em 0"></div><details id="ed-gh"><summary>Sauvegarde GitHub</summary><label>Clé GitHub : <input id="gh-token" type="password" placeholder="colle ta clé ici" size="26" autocomplete="off"></label><div class="b"><button id="gh-sauver-cle">Enregistrer la clé</button><button id="gh-envoyer">Envoyer maintenant</button><button id="gh-recharger">Recharger depuis GitHub</button><button id="gh-lien">Copier mon lien de connexion</button></div></details>
@@ -368,7 +370,7 @@ lier(ECOLE,'Ecole');
 const GEOM_OLD={"Maison_Aaron":[130,416],"Maison_Benjamin":[130,416],"Maison_Paul":[130,416],"Pharmacie":[128,288],"Boulangerie":[128,288],"Poste_Police":[112,416],"Maison_Mami":[270,512],"Maison_Zoe":[144,416],"Maison_Marc":[144,416],"Ecole":[385,736]},DOOR={"Maison_Aaron":130,"Maison_Benjamin":263,"Maison_Paul":191,"Pharmacie":112,"Boulangerie":112,"Poste_Police":112,"Maison_Mami":270,"Maison_Zoe":335,"Maison_Marc":350,"Ecole":385};
 for(const e of LIENS){const o=GEOM_OLD[e[1]],h=BATM[e[1]][4];e[2]=e[2]-o[0]+DOOR[e[1]];e[3]=e[3]-o[1]+h;}
 const PORTE_DEF={Maison_Aaron:[[80],26,347],Maison_Benjamin:[[259],30,448],Maison_Paul:[[191],28,645],Pharmacie:[[112],26,380],Boulangerie:[[112],26,284],Poste_Police:[[110],30,412],Maison_Mami:[[270],28,445],Maison_Zoe:[[334],24,415],Maison_Marc:[[354],26,450],Ecole:[[288,480],48,650]}; // [centres des portes, demi-largeur, bas de la porte] dans le dessin de la maison
-const PORTE_GEO={};for(const n in PORTE_DEF){const [cxs,hw,db]=PORTE_DEF[n],o=BOX[n],cb=o[1]+o[3],y1=Math.max(cb+24,db+26);PORTE_GEO[n]={zones:cxs.map(cx=>[cx-hw,cb,cx+hw,y1]),sx:cxs[0],sy:Math.round((cb+y1)/2)};}
+const PORTE_GEO={};for(const n in PORTE_DEF){const [cxs,hw,db]=PORTE_DEF[n],o=BOX[n];o[3]=Math.max(o[3],db-o[1]);const cb=o[1]+o[3],y1=Math.max(cb+30,db+30);PORTE_GEO[n]={zones:cxs.map(cx=>[cx-hw,cb,cx+hw,y1]),sx:cxs[0],sy:Math.round((cb+y1)/2)};}
 for(const e of LIENS){if(PORTES_V.indexOf(e[0])>=0){const g=PORTE_GEO[e[1]];e[2]=g.sx;e[3]=g.sy;}}
 function zonesPorte(p){const b=BATM[p.own],g=PORTE_GEO[p.own];return g.zones.map(z=>[b[1]+z[0],b[2]+z[1],b[1]+z[2],b[2]+z[3]]);}
 function majCollisions(){const v=[];for(const b of BAT){if(b.off)continue;const o=BOX[b[0]];v.push([b[1]+o[0],b[2]+o[1],o[2],o[3]]);}
@@ -556,7 +558,8 @@ function chienNoir(){return G.L.dogFed?{scene:'soussol',x:150,y:262,dir:2}:{scen
 function positions(){
  const m=G.minute,o={};
  o.nathalie={who:'N',sheet:'Nathalie',...nathalie(m)};o.benjamin={who:'B',sheet:'Benjamin',...benjamin(m)};o.paul={who:'P',sheet:'Paul',...paul(m)};
- for(const k in FIXES) o[k]={scene:'village',dir:3,...FIXES[k]};
+ {const IN={reda:['int_poste',0],cedric:['int_boulangerie',0],lilya:['int_pharmacie',0],marc:['int_marc',0],mami:['int_mami',0],zm:['int_zoe',-70],zoe:['int_zoe',0],zp:['int_zoe',70]};
+ for(const k in FIXES){const [sc,dx]=IN[k];o[k]={...FIXES[k],scene:sc,dir:3,x:SC[sc].w/2+dx+(INTS[sc].dec?INTS[sc].dec[0]:0),y:180+(INTS[sc].dec?INTS[sc].dec[1]:0)};}}
  o.loulou=(G.prologue&&G.pro&&G.pro.etape==='matin'&&G.suiveur)?{who:'Lo',sheet:'Loulou',scene:G.suiveur.scene,x:G.suiveur.x,y:G.suiveur.y,dir:G.suiveur.dir,bouge:G.suiveur.marche,suiveur:true}:{who:'Lo',sheet:'Loulou',scene:'soussol',...P.soussolLoulou,dir:3};
  return o;
 }
@@ -1215,7 +1218,7 @@ function frame(now){majCote();
   if(!G.prologue&&G.minute>=8&&G.minute<10&&!G.L.cleReprise&&G.queue.length===0){mur+=dt;if(mur>0.7){mur=0;const pr=G.player;const d=pr.scene==='salon'?0:Math.hypot(pr.x-P.porteBen.x,pr.y-P.porteBen.y-8);if(pr.scene==='salon'||(pr.scene==='village'&&d<260))sonMarteau();}}
   if(pluieNode&&ac)pluieNode.gain.value=son?(G.player.scene==='village'?0.05:0.015):0;
   const box=$('dialogue');if(!box.hidden&&courant&&courant.text){if(ecriture<1){ecriture=Math.min(1,ecriture+dt*2.2*Math.max(1,40/courant.text.length));}$('texte').textContent=courant.text.slice(0,Math.ceil(courant.text.length*ecriture));}
-  {const o=objectif();$('obj').textContent=o?'➜ '+o.t:'';}
+  {const o=objectif();$('obj').textContent=(o&&!EDIT)?'➜ '+o.t:'';$('obj').hidden=EDIT;}
   $('hud').textContent=G.prologue?'Prologue':`Boucle ${numeroBoucle()} · ${String(Math.floor(G.minute)).padStart(2,'0')}:${String(Math.floor(G.minute%1*60)).padStart(2,'0')} / 20:00`;
   $('inv').textContent=(G.L.cleEnMain?'🔑 clé  ':'')+(G.L.aLaViande?'🥩 viande  ':'')+(G.mem.codeAppris?'🔢 code connu':'');
   majPave();if(Math.floor(tReel*4)%2===0)majTest();
@@ -1224,7 +1227,7 @@ function frame(now){majCote();
  dessiner(tReel);requestAnimationFrame(frame);
 }
 let coteVisible=false;
-function majCote(){const v=!panneauMasque&&!($('editeur').hidden&&$('biblio').hidden&&$('test').hidden);if(v!==coteVisible){coteVisible=v;$('cote').hidden=!v;ajuster();}}
+function majCote(){const v=!panneauMasque&&!($('editeur').hidden&&$('biblio').hidden&&$('test').hidden);if(v!==coteVisible){coteVisible=v;$('cote').hidden=!v;$('poignee').hidden=!v;ajuster();}}
 function ajuster(){const bh=(MOBILE&&EDIT)?56:0,etroit=MOBILE?innerHeight>innerWidth:innerWidth<=800,cw=coteVisible&&!etroit?(MOBILE?Math.min(340,Math.round(innerWidth*0.42)):340):0,ch=coteVisible&&etroit&&!MOBILE?Math.round(innerHeight*0.42):0;derBh=bh;if(MOBILE&&document.body.style){document.body.style.paddingBottom=bh+'px';if(document.body.style.setProperty)document.body.style.setProperty('--cw',cw+'px');}const s=Math.min((innerWidth-cw)/VW,(innerHeight-bh-ch)/VH);const w=Math.floor(VW*s),h=Math.floor(VH*s);if(MOBILE&&document.body.style&&document.body.style.setProperty)document.body.style.setProperty('--eh',h+'px');const z=$('ecran');z.style.width=w+'px';z.style.height=h+'px';z.style.fontSize=Math.max(MOBILE?14:11,Math.round(h/30))+'px';}
 addEventListener('resize',ajuster);
 function demarrer(prol){initSon();lancerMusique();VITESSE=+$('vitesse').value||30;$('menu').hidden=true;$('lettre').hidden=true;nouvellePartie(prol);courant=null;pomper();}
@@ -1241,6 +1244,10 @@ function pret(){
  document.querySelectorAll('#tactile [data-t]').forEach(b=>{const k=b.dataset.t;b.addEventListener('pointerdown',e=>{e.preventDefault();if(k==='e')action();else touches[k]=true;});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>touches[k]=false));});
  $('chargement').hidden=true;$('menu').hidden=false;requestAnimationFrame(frame);
 }
+
+{const p=document.getElementById('poignee'),c=document.getElementById('cote');if(p&&p.addEventListener){let d=false;p.addEventListener('pointerdown',e=>{d=true;p.classList.add('on');if(p.setPointerCapture)p.setPointerCapture(e.pointerId);e.preventDefault();});
+ p.addEventListener('pointermove',e=>{if(!d)return;c.style.width=Math.max(240,Math.min(innerWidth*0.8,innerWidth-e.clientX))+'px';ajuster();});
+ const f=()=>{d=false;p.classList.remove('on');};p.addEventListener('pointerup',f);p.addEventListener('pointercancel',f);}}
 </script>
 </body>
 </html>

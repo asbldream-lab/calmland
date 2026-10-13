@@ -67,11 +67,12 @@ body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:syste
 #liste p{margin:.15em 0;}#liste b{color:var(--muted);margin-right:.4em;}
 #tactile{position:absolute;inset:0;pointer-events:none;}
 #tactile button{pointer-events:auto;position:absolute;width:3em;height:3em;border-radius:50%;border:1px solid var(--line);background:rgba(30,30,45,.55);color:var(--fg);font:inherit;font-size:1em;touch-action:none;}
+#poignee{width:7px;flex:none;cursor:col-resize;background:#2a2a40;touch-action:none;}#poignee:hover,#poignee.on{background:#e0b45a;}
 #cote{display:flex;flex-direction:column;gap:.6em;width:340px;height:100%;box-sizing:border-box;padding:.6em;overflow:auto;background:#0f0f18;border-left:1px solid var(--line);font-size:13px;flex:none;}
 #cote #editeur,#cote #biblio,#cote #test{position:static;inset:auto;width:auto;border:1px solid var(--line);border-radius:.4em;padding:.5em .6em;font-size:1em;background:rgba(20,20,32,.9);}
 #cote #biblio{flex:1 1 auto;min-height:12em;overflow:auto;}
 #cote #test{overflow:visible;}
-@media (max-width:800px){body{flex-direction:column;}#cote{width:100%;height:42vh;border-left:0;border-top:1px solid var(--line);}}
+@media (max-width:800px){body{flex-direction:column;}#poignee{display:none!important;}#cote{width:100%!important;height:42vh;border-left:0;border-top:1px solid var(--line);}}
 [hidden]{display:none !important;}
 </style>
 </head>
@@ -121,6 +122,7 @@ body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:syste
  </div>
  <div id="chargement"><p>Chargement…</p></div>
 </div>
+<div id="poignee" hidden title="Glisse pour agrandir / réduire le panneau"></div>
 <div id="cote" hidden>
  <div id="editeur" hidden><b>Éditeur de plan</b> <span id="ed-msg" style="color:var(--accent)"></span><p>Clique un élément pour le sélectionner, glisse-le pour le déplacer, Suppr pour le supprimer, Ctrl+Z pour annuler (grille de 32 px). Glisse le fond ou utilise les flèches pour déplacer la vue, O / P pour le zoom. Les portes, collisions, plaques et personnages suivent le bâtiment. Sauvegarde automatique dans ce navigateur.</p><div class="b"><label>Pièce : <select id="ed-scenes"></select></label></div>
 <div id="gh-etat" style="color:var(--accent);margin:.2em 0"></div><details id="ed-gh"><summary>Sauvegarde GitHub</summary><label>Clé GitHub : <input id="gh-token" type="password" placeholder="colle ta clé ici" size="26" autocomplete="off"></label><div class="b"><button id="gh-sauver-cle">Enregistrer la clé</button><button id="gh-envoyer">Envoyer maintenant</button><button id="gh-recharger">Recharger depuis GitHub</button><button id="gh-lien">Copier mon lien de connexion</button></div></details>
