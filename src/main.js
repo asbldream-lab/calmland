@@ -1,3 +1,4 @@
+const ATL=sp=>IMG[sp.a||'atlas'];
 // ===== CALM LAND - AFFICHAGE ET INTERFACE =====
 const PUBLIC=false,PLAN_FIGE='';MODE_PUBLIC=PUBLIC;
 const MOBILE=typeof document!=='undefined'&&!!document.body&&!!document.body.classList&&document.body.classList.contains('mob');
@@ -31,11 +32,12 @@ const LBL={Maison_Aaron:'Maison d\'Aaron',Maison_Benjamin:'Maison de Benjamin et
 function dessinerFondSur(f,vx,vy,vw,vh){
  const R=SC.village,x0=Math.max(0,vx),y0=Math.max(0,vy),x1=Math.min(R.w,vx+vw),y1=Math.min(R.h,vy+vh);if(x1<=x0||y1<=y0)return;
  f.fillStyle=motif(f,'herbe',IMG.t_herbe);f.fillRect(x0,y0,x1-x0,y1-y0);
- dessinerRC(f,x0,y0,x1,y1);for(const r of ROUTES){if(r.off||r[0]>x1||r[1]>y1||r[0]+r[2]<x0||r[1]+r[3]<y0)continue;const t=r[4]==='t';f.save();f.translate(r[0],r[1]);f.fillStyle=motif(f,t?'terre':'pave',t?IMG.t_terre:IMG.t_pave);f.fillRect(0,0,r[2],r[3]);f.restore();}
+  if(VSOL&&IMG.sol){const iw=IMG.sol.width,ih=IMG.sol.height,sx=Math.max(0,Math.floor(x0)),sy=Math.max(0,Math.floor(y0)),ex=Math.min(iw,Math.ceil(x1)),ey=Math.min(ih,Math.ceil(y1));if(ex>sx&&ey>sy){f.imageSmoothingEnabled=false;f.drawImage(IMG.sol,sx,sy,ex-sx,ey-sy,sx,sy,ex-sx,ey-sy);}}else dessinerRC(f,x0,y0,x1,y1);
+  for(const r of ROUTES){if(VSOL||r.off||r[0]>x1||r[1]>y1||r[0]+r[2]<x0||r[1]+r[3]<y0)continue;const t=r[4]==='t';f.save();f.translate(r[0],r[1]);f.fillStyle=motif(f,t?'terre':'pave',t?IMG.t_terre:IMG.t_pave);f.fillRect(0,0,r[2],r[3]);f.restore();}
  for(const b of BAT){if(b.off||b[1]>x1||b[2]>y1||b[1]+b[3]<x0||b[2]+b[4]<y0)continue;f.drawImage(IMG['b_'+b[0]],b[1],b[2]);}
  f.font='bold 12px system-ui';f.textAlign='center';
  for(const b of BAT){if(b.off||b[1]>x1||b[2]>y1+20||b[1]+b[3]<x0||b[2]<y0-20)continue;const t=LBL[b[0]];if(!LW[t])LW[t]=f.measureText(t).width;const w=LW[t]+14,cxp=b[1]+b[3]/2,y=b[2]-14;f.fillStyle='#3a2a1c';f.fillRect(cxp-w/2-2,y-14,w+4,22);f.fillStyle='#8a6a42';f.fillRect(cxp-w/2,y-12,w,18);f.fillStyle='#f4ead2';f.fillText(t,cxp,y+1);}
- for(const b of BUI_TRIES){const sp=SPR[b[2]];if(!sp)continue;if(b[0]>x1||b[0]+sp.w<x0||b[1]-sp.h>y1||b[1]<y0)continue;if(sp.h>=96){const c=coupe(sp);if(sp.h-c>0)f.drawImage(IMG.atlas,sp.x,sp.y+c,sp.w,sp.h-c,b[0],b[1]-sp.h+c,sp.w,sp.h-c);continue;}f.drawImage(IMG.atlas,sp.x,sp.y,sp.w,sp.h,b[0],b[1]-sp.h,sp.w,sp.h);}
+ for(const b of BUI_TRIES){const sp=SPR[b[2]];if(!sp)continue;if(b[0]>x1||b[0]+sp.w<x0||b[1]-sp.h>y1||b[1]<y0)continue;if(sp.h>=96){const c=coupe(sp);if(sp.h-c>0)f.drawImage(ATL(sp),sp.x,sp.y+c,sp.w,sp.h-c,b[0],b[1]-sp.h+c,sp.w,sp.h-c);continue;}f.drawImage(ATL(sp),sp.x,sp.y,sp.w,sp.h,b[0],b[1]-sp.h,sp.w,sp.h);}
 }
 
 // ---------- SONS (générés, aucun fichier) ----------
@@ -71,7 +73,7 @@ function dessiner(t){
  const labels=[];
  if(pl.scene==='village')dessinerFondSur(cx,Math.floor(cam.x)-2,Math.floor(cam.y)-2,VW/ZOOM+4,VH/ZOOM+4);else{const I=INTS[pl.scene],R=SC[pl.scene];dessinerBase(cx,R.w,R.h,I.fl,I.wc,I.gap,I.cloisons,I.dec,Math.floor(cam.x)-2,Math.floor(cam.y)-2,VW/ZOOM+4,VH/ZOOM+4);}
  const objs=[];
- if(pl.scene==='village')for(const u of BUISSONS){const sp=SPR[u[2]];if(sp.h>=96){const ux=u[0],uy=u[1],c=coupe(sp),yb=sp.sol?sp.sol[1]+sp.sol[3]:sp.h;if(c>0)objs.push({y:uy-sp.h+yb,d:()=>cx.drawImage(IMG.atlas,sp.x,sp.y,sp.w,c,ux,uy-sp.h,sp.w,c)});}}
+ if(pl.scene==='village')for(const u of BUISSONS){const sp=SPR[u[2]];if(sp.h>=96){const ux=u[0],uy=u[1],c=coupe(sp),yb=sp.sol?sp.sol[1]+sp.sol[3]:sp.h;if(c>0)objs.push({y:uy-sp.h+yb,d:()=>cx.drawImage(ATL(sp),sp.x,sp.y,sp.w,c,ux,uy-sp.h,sp.w,c)});}}
  // objets
  if(pl.scene==='village'){
   if(L.cleAuSol){const b=Math.sin(t*4)*1.5;objs.push({y:646,d:()=>{cx.drawImage(IMG.cle,P.cleSol.x-16,P.cleSol.y-26+b);}});}
@@ -337,10 +339,10 @@ function poserDecor(key,wx,wy){if(G.player.scene!=='village'){const sp=SPRI[key]
  const sp=SPR[key];pushUndo();const it=[Math.round((wx-sp.w/2)/32)*32,Math.round((wy+sp.h/2)/32)*32,key];BUISSONS.push(it);selEd={kind:'u',ref:it,w:sp.w,h:sp.h};majApres();}
 function construireBiblio(){majBiblio();}
 function majBiblio(){const L=$('biblio-liste');L.innerHTML='';const inter=G.player.scene!=='village',S=inter?SPRI:SPR,IM=inter?IMG.atlas_int:IMG.atlas;
- const cats=inter?[['base','Mobilier de base'],['chambre','Chambre'],['salon','Salon'],['cuisine','Cuisine'],['bain','Salle de bain'],['divers','Divers']]:[['arbre','Arbres'],['buisson','Buissons et haies'],['fleur','Fleurs et pots']];
+ const cats=inter?[['base','Mobilier de base'],['chambre','Chambre'],['salon','Salon'],['cuisine','Cuisine'],['bain','Salle de bain'],['divers','Divers']]:[['arbre','Arbres'],['buisson','Buissons et haies'],['fleur','Fleurs et pots'],['deco','Décors de ville']];
  for(const [cat,titre] of cats){const h=document.createElement('h4');h.textContent=titre;L.appendChild(h);const g=document.createElement('div');g.className='grille';L.appendChild(g);
   for(const k in S){const sp=S[k];if(sp.cat!==cat||k==='machine')continue;const c=document.createElement('canvas');c.width=44;c.height=44;c.title=sp.nom;
-   const x=c.getContext('2d');x.imageSmoothingEnabled=false;const s=Math.min(1,40/sp.w,40/sp.h),dw=Math.max(1,Math.round(sp.w*s)),dh=Math.max(1,Math.round(sp.h*s));x.drawImage(IM,sp.x,sp.y,sp.w,sp.h,Math.round((44-dw)/2),Math.round((44-dh)/2),dw,dh);
+   const x=c.getContext('2d');x.imageSmoothingEnabled=false;const s=Math.min(1,40/sp.w,40/sp.h),dw=Math.max(1,Math.round(sp.w*s)),dh=Math.max(1,Math.round(sp.h*s));x.drawImage(inter?IM:ATL(sp),sp.x,sp.y,sp.w,sp.h,Math.round((44-dw)/2),Math.round((44-dh)/2),dw,dh);
    c.addEventListener('pointerdown',e=>{e.preventDefault();demarrerGlisse(k,c,e);});g.appendChild(c);}}
  if(!inter)ajouterRoutesBiblio(L);else ajouterMursBiblio(L);}
 const RT=[{nom:'Route horizontale (20 cases)',w:640,h:96,t:'p'},{nom:'Route horizontale (10 cases)',w:320,h:96,t:'p'},{nom:'Route verticale (20 cases)',w:64,h:640,t:'p'},{nom:'Route verticale (10 cases)',w:64,h:320,t:'p'},{nom:'Chemin de terre horizontal',w:320,h:64,t:'t'},{nom:'Chemin de terre vertical',w:64,h:320,t:'t'}];
@@ -354,7 +356,7 @@ function glisserRoute(rt,e){const r0=cv.getBoundingClientRect(),f=document.creat
   if(ev.clientX>=r.left&&ev.clientX<=r.right&&ev.clientY>=r.top&&ev.clientY<=r.bottom&&document.elementFromPoint(ev.clientX,ev.clientY)===cv)w=mondeDe(ev);else{const c=camera();w={x:c.x+VW/ZOOM/2,y:c.y+VH/ZOOM/2};}
   pushUndo();const q=[Math.max(0,Math.min(SC.village.w-rt.w,Math.round((w.x-rt.w/2)/32)*32)),Math.max(0,Math.min(SC.village.h-rt.h,Math.round((w.y-rt.h/2)/32)*32)),rt.w,rt.h,rt.t];ROUTES.push(q);selEd={kind:'r',ref:q,w:q[2],h:q[3]};majApres();msg('Posé : '+rt.nom);};
  document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);}
-function demarrerGlisse(key,thumb,e){const inter=G.player.scene!=='village',sp=inter?SPRI[key]:SPR[key],IM=inter?IMG.atlas_int:IMG.atlas;const f=document.createElement('canvas');f.width=sp.w;f.height=sp.h;f.style.cssText='position:fixed;pointer-events:none;z-index:99;opacity:.85;image-rendering:pixelated;';
+function demarrerGlisse(key,thumb,e){const inter=G.player.scene!=='village',sp=inter?SPRI[key]:SPR[key],IM=inter?IMG.atlas_int:ATL(sp);const f=document.createElement('canvas');f.width=sp.w;f.height=sp.h;f.style.cssText='position:fixed;pointer-events:none;z-index:99;opacity:.85;image-rendering:pixelated;';
  f.style.width=Math.round(sp.w*ZOOM*cv.getBoundingClientRect().width/VW)+'px';f.style.height=Math.round(sp.h*ZOOM*cv.getBoundingClientRect().height/VH)+'px';
  const fx=f.getContext('2d');fx.imageSmoothingEnabled=false;fx.drawImage(IM,sp.x,sp.y,sp.w,sp.h,0,0,sp.w,sp.h);document.body.appendChild(f);
  const place=ev=>{f.style.left=(ev.clientX-f.offsetWidth/2)+'px';f.style.top=(ev.clientY-f.offsetHeight/2)+'px';};place(e);

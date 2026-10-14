@@ -317,14 +317,17 @@ console.log('dialogues joués :',new Set(G.log).size);
 }
 
 
-// ---- plan du croquis : routes courbes, marche des personnages ----
+// ---- nouveau village en tuiles : sol en image, objets avec collisions, marche sur les rues ----
 {const fs=require('fs');const txt=fs.readFileSync(__dirname+'/plan_croquis.json','utf8');
  L.nouvellePartie(false);vider();L.planImporter(txt);
- ok(L.RC.r.length>=10&&L.RC.c.length===1&&L.RC.e.length===1,'croquis : routes courbes, place ronde et étang chargés');
- ok(L.BAT.every(b=>!b.off)&&L.SC.village.w===4800&&L.SC.village.h===3200,'croquis : 10 bâtiments placés, village 4800 x 3200');
- const c=L.chemin(L.P.fenetreNat,L.P.porteDevantPharma);ok(c.length>3&&c[c.length-1]===L.P.porteDevantPharma&&c.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)),'croquis : Nathalie rejoint la pharmacie par les chemins');
- const tr=L.trajets();ok(tr.RECHERCHE.length>10&&tr.BALADE_PAUL.length>5,'croquis : trajets de recherche et de balade suivent les routes');
- let bloc=0;for(const p of L.PORTES_V){const z=L.zonesPorte(p)[0];if(!L.libreIn('village',(z[0]+z[2])/2,(z[1]+z[3])/2))bloc++;}ok(bloc===0,'croquis : devant chaque porte, rien ne gêne (arbres, étang)');
- const e1=L.planExporter();L.planImporter(e1);ok(L.RC.r.length>=10&&L.planExporter()===e1,'croquis : le plan se réexporte et se recharge à l\'identique');
- L.planReinit();ok(L.RC.r.length===0&&L.trajets().ROUTE_Y===918&&L.chemin({x:0,y:0},{x:100,y:0}).length===4,'plan d\'origine : routes droites remises, anciens trajets');
+ ok(L.vsol()&&L.RC.r.length>=8,'village en tuiles : sol en image et réseau de rues chargés');
+ ok(L.BAT.every(b=>!b.off)&&L.SC.village.w===4800&&L.SC.village.h===3584,'village en tuiles : 10 bâtiments placés, village 4800 x 3584');
+ const c=L.chemin(L.P.fenetreNat,L.P.porteDevantPharma);ok(c.length>3&&c[c.length-1]===L.P.porteDevantPharma&&c.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)),'village en tuiles : Nathalie rejoint la pharmacie par les rues');
+ const tr=L.trajets();ok(tr.RECHERCHE.length>10&&tr.BALADE_PAUL.length>5,'village en tuiles : trajets de recherche et de balade suivent les rues');
+ let bloc=0;for(const p of L.PORTES_V){const z=L.zonesPorte(p)[0];if(!L.libreIn('village',(z[0]+z[2])/2,(z[1]+z[3])/2))bloc++;}ok(bloc===0,'village en tuiles : devant chaque porte, rien ne gêne');
+ {const st=16,gw=Math.ceil(L.SC.village.w/st),gh=Math.ceil(L.SC.village.h/st),seen=new Uint8Array(gw*gh),p0=L.PORTES_V[0],q=[[Math.round(p0.x/st),Math.round((p0.y+10)/st)]];seen[q[0][1]*gw+q[0][0]]=1;
+  while(q.length){const [x,y]=q.pop();for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=gw||ny>=gh||seen[ny*gw+nx])continue;if(!L.libreIn('village',nx*st,ny*st))continue;seen[ny*gw+nx]=1;q.push([nx,ny]);}}
+  let ko=0;for(const p of L.PORTES_V){const z=L.zonesPorte(p)[0];if(!seen[Math.round(((z[1]+z[3])/2)/st)*gw+Math.round(((z[0]+z[2])/2)/st)])ko++;}ok(ko===0,'village en tuiles : les 10 portes sont atteignables à pied depuis la maison d\'Aaron');}
+ const e1=L.planExporter();L.planImporter(e1);ok(L.vsol()&&L.planExporter()===e1,'village en tuiles : le plan se réexporte et se recharge à l\'identique');
+ L.planReinit();ok(!L.vsol()&&L.RC.r.length===0&&L.trajets().ROUTE_Y===918&&L.chemin({x:0,y:0},{x:100,y:0}).length===4,'plan d\'origine : sol et routes d\'origine remis');
 }

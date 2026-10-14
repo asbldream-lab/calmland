@@ -28,3 +28,10 @@ Musique d'ambiance (touche M / bouton 🔊) · menu déroulant des pièces · sa
 - Tester avant de livrer (tests + vrai navigateur), dire ce qui n'a pas pu être testé (téléphone réel).
 - Livraison : un `calmland-site.zip` à glisser sur https://github.com/asbldream-lab/calmland/upload/main (Cmd+A dans le dossier dézippé, Commit changes).
 - Ne pas remettre ce qu'il a enlevé (haies, chemin brun). Économiser les tokens.
+
+## Village en tuiles (14 oct)
+- Le village public/éditeur utilise un SOL EN IMAGE (src/tuiles/sol.png, clé `sol` dans assets.js, drapeau `sl:1` dans le plan) + des objets (clé `atlas2`, ids `me_pNN`, avec collisions) posés comme les arbres.
+- Le bouton éditeur « Nouveau village » charge ce plan (src/plan_croquis.json). src/plan_defaut.json = même plan, figé dans la version publique.
+- Réseau de marche des personnages : `RC.r` (rues + liaisons porte-rue) ; routes et sentiers dessinés par le sol, pas modifiables à la souris.
+- Régénérer : `node gen_tuiles.js` (plan) ; `python3 inject_tuiles.py` (assets + objets) ; `python3 build.py`.
+- Les images viennent du pack Modern Exteriors 32x32 (fichiers sources non inclus dans le zip).
